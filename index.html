@@ -45,13 +45,13 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         .accordion-content {
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
             max-height: 0;
             opacity: 0;
             overflow: hidden;
         }
         .accordion-content.open {
-            max-height: 5000px;
+            max-height: 8000px;
             opacity: 1;
         }
 
@@ -99,7 +99,6 @@
             const [lastUpdated, setLastUpdated] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
             
-            // Mantık Düzeltmesi: Sadece biri değil, çoklu kart açılabilmesi için Object State kullanıyoruz
             const [expandedPersons, setExpandedPersons] = useState({});
 
             // Para Birimi Başlıkları
@@ -361,7 +360,13 @@
             };
 
             const handleRateChange = (currency, value) => { setRates(prev => ({ ...prev, [currency]: parseFloat(value) || 0 })); };
-            const safeParseNum = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+            
+            // NaN (Not a Number) ve boşluk çökmesini engelleyen sağlamlaştırılmış yapı
+            const safeParseNum = (val) => { 
+                if (val === "" || val === null || val === undefined) return 0;
+                const num = parseFloat(val); 
+                return isNaN(num) ? 0 : num; 
+            };
             
             const calculateAssetValue = (asset) => {
                 if (asset.subItems && asset.subItems.length > 0) {
@@ -392,9 +397,8 @@
                     const subItems = [...(asset.subItems || [])];
                     let currentAmount = asset.amount;
                     
-                    // Eğer ilk alt kalem ekleniyorsa, mevcut tutarı ana bakiye olarak aşağı kaydır, anayı 0'la
                     if (subItems.length === 0 && safeParseNum(asset.amount) > 0) {
-                        subItems.push({ id: `sub-main-${Date.now()}`, name: 'Nakit / Bakiye', type: asset.type, amount: asset.amount });
+                        subItems.push({ id: `sub-main-${Date.now()}`, name: 'Ana Bakiye', type: asset.type, amount: asset.amount });
                         currentAmount = ""; 
                     }
                     subItems.push({ id: `sub-${Date.now() + 1}`, name: 'Yeni Kalem', type: 'TRY', amount: '' });
@@ -410,7 +414,6 @@
             const removePerson = (personId) => { 
                 if(window.confirm("Bu kişiyi ve tüm varlıklarını silmek istediğine emin misin?")) {
                     setPortfolio(prev => prev.filter(p => p.id !== personId)); 
-                    // Silinen kişinin akordeon state'ini de temizliyoruz
                     setExpandedPersons(prev => {
                         const newState = {...prev};
                         delete newState[personId];
@@ -510,8 +513,7 @@
             // ANA UYGULAMA EKRANI (KASA AÇIK)
             // ==========================================
             return (
-                // Tasarım Düzeltmesi: max-w-md (mobil) -> md:max-w-3xl (tablet) -> lg:max-w-7xl (PC) ile tam genişleyen duyarlı grid yapısı
-                <div className="max-w-md mx-auto md:max-w-3xl lg:max-w-7xl pt-6 pb-20 relative px-4 transition-all duration-300">
+                <div className="mx-auto w-full max-w-[95%] xl:max-w-7xl pt-6 pb-20 relative">
                     
                     {/* Header Bölümü */}
                     <header className="flex justify-between items-center pb-6 border-b border-zinc-900/80 mb-8">
@@ -554,7 +556,6 @@
                                 <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin text-primary" : ""}`}></i> Güncelle
                             </button>
                         </div>
-                        {/* 4'lü Grid (Mobilde 2'ye 2, PC'de yan yana 4) */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 px-2 pb-2">
                             {['USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
                                 <div key={currency} className="bg-black/40 p-4 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col items-center shadow-sm">
@@ -570,16 +571,16 @@
                         </div>
                     </div>
 
-                    {/* Portföyler (Duyarlı Grid - PC'de yan yana) */}
+                    {/* Portföyler (Duyarlı Grid - PC'de yan yana 3 kolon) */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                         {portfolio.map((person) => {
                             const personTotal = calculatePersonTotal(person.assets);
-                            // Mantık Düzeltmesi: Her kartın kendi bağımsız açık/kapalı durumu var
-                            const isOpen = expandedPersons[person.id] !== false; // Varsayılan olarak açık, kullanıcı isterse kapatır
+                            const isOpen = expandedPersons[person.id] !== false; 
 
                             return (
                                 <div key={person.id} className={`glass-panel rounded-[2.5rem] overflow-hidden transition-all ${isOpen ? 'border-zinc-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] bg-zinc-900/40' : 'hover:border-zinc-700'}`}>
                                     
+                                    {/* Kişi Başlığı */}
                                     <div onClick={() => togglePersonAccordion(person.id)} className="p-6 md:p-8 flex justify-between items-center cursor-pointer group">
                                         <div className="flex flex-col w-[60%]">
                                             <input 
@@ -602,96 +603,110 @@
                                     </div>
 
                                     <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
-                                        <div className="px-6 md:px-8 pb-8 pt-2 space-y-4 border-t border-white/5">
+                                        <div className="px-5 sm:px-8 pb-8 pt-2 space-y-5 border-t border-white/5">
                                             {person.assets.map((asset) => {
                                                 const hasSubItems = asset.subItems && asset.subItems.length > 0;
                                                 const assetValue = calculateAssetValue(asset);
                                                 
                                                 return (
-                                                    <div key={asset.id} className="bg-black/30 rounded-3xl p-4 sm:p-5 border border-zinc-800/80 hover:border-zinc-700 transition-colors shadow-inner">
+                                                    <div key={asset.id} className="bg-black/30 rounded-[2rem] p-5 sm:p-6 border border-zinc-800/80 hover:border-zinc-700 transition-all shadow-inner">
                                                         
-                                                        {/* Üst Kısım: İsim ve Tutar */}
-                                                        <div className="flex justify-between items-center mb-4">
+                                                        {/* Ana Varlık: İsim ve Tutar */}
+                                                        <div className="flex justify-between items-center mb-6">
                                                             <input 
                                                                 type="text" 
                                                                 value={asset.name} 
                                                                 onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: e.target.value }))} 
-                                                                className="bg-transparent font-bold text-zinc-100 text-sm sm:text-base outline-none stealth-input w-full text-left"
+                                                                className="bg-transparent font-black text-zinc-100 text-sm sm:text-base outline-none stealth-input w-full text-left uppercase tracking-wide focus:border-primary/50"
                                                                 placeholder="Varlık Adı"
                                                             />
                                                             <div className="flex items-center gap-3 shrink-0 ml-2">
                                                                 <span className="text-sm sm:text-base font-black text-white text-right">{formatMoney(assetValue)}</span>
-                                                                <button onClick={() => removeAsset(person.id, asset.id)} className="text-zinc-600 hover:text-red-500 bg-zinc-900 w-7 h-7 rounded-full flex items-center justify-center transition-all"><i className="fa-solid fa-xmark text-xs"></i></button>
+                                                                <button onClick={() => removeAsset(person.id, asset.id)} className="text-zinc-600 hover:text-red-500 bg-zinc-900 w-8 h-8 rounded-full flex items-center justify-center transition-all border border-zinc-800"><i className="fa-solid fa-xmark text-xs"></i></button>
                                                             </div>
                                                         </div>
 
-                                                        {/* Alt Kısım: Miktar Girişi */}
-                                                        <div className="flex justify-between items-center">
-                                                            {!hasSubItems ? (
-                                                                <div className="flex items-center gap-2">
-                                                                    <input 
-                                                                        type="number" 
-                                                                        value={asset.amount} 
-                                                                        onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, amount: e.target.value}))} 
-                                                                        placeholder="0" 
-                                                                        className="bg-zinc-900/80 text-primary font-black text-sm sm:text-base w-24 sm:w-28 py-1.5 px-3 rounded-xl outline-none border border-zinc-800 focus:border-primary transition-all text-left shadow-inner"
-                                                                    />
-                                                                    <select 
-                                                                        value={asset.type} 
-                                                                        onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, type: e.target.value}))} 
-                                                                        className="bg-zinc-800 text-[10px] sm:text-xs font-bold text-zinc-300 outline-none px-3 py-2 rounded-xl uppercase cursor-pointer hover:bg-zinc-700 transition-colors"
-                                                                    >
-                                                                        <option value="TRY">TL</option>
-                                                                        <option value="USD">Dolar</option>
-                                                                        <option value="EUR">Euro</option>
-                                                                        <option value="GRAM">Gram</option>
-                                                                        <option value="ATA">Ata</option>
-                                                                    </select>
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-[9px] sm:text-[10px] text-primary font-black uppercase tracking-[0.2em] bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 text-center shadow-sm">Alt Kalemler</span>
-                                                            )}
+                                                        {/* TASARIM İYİLEŞTİRMESİ: Miktar Girişi ve Alt Kalem Butonu İzolasyonu */}
+                                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 bg-zinc-900/30 p-2 sm:p-0 sm:bg-transparent rounded-2xl">
+                                                            <div className="w-full sm:w-auto">
+                                                                {!hasSubItems ? (
+                                                                    <div className="flex items-center bg-black/60 rounded-xl border border-zinc-800 focus-within:border-primary/50 transition-all p-1 shadow-inner">
+                                                                        <input 
+                                                                            type="number" 
+                                                                            value={asset.amount} 
+                                                                            onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, amount: e.target.value}))} 
+                                                                            placeholder="0.00" 
+                                                                            className="bg-transparent text-primary font-black text-sm sm:text-base w-full sm:w-32 py-1.5 px-3 outline-none text-left"
+                                                                        />
+                                                                        <div className="w-[1px] h-6 bg-zinc-800 mx-1 shrink-0"></div>
+                                                                        <select 
+                                                                            value={asset.type} 
+                                                                            onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, type: e.target.value}))} 
+                                                                            className="bg-transparent text-[10px] sm:text-xs font-bold text-zinc-300 outline-none px-3 py-2 uppercase cursor-pointer hover:text-white transition-colors"
+                                                                        >
+                                                                            <option value="TRY">TL</option>
+                                                                            <option value="USD">DOLAR</option>
+                                                                            <option value="EUR">EURO</option>
+                                                                            <option value="GRAM">GRAM</option>
+                                                                            <option value="ATA">ATA</option>
+                                                                        </select>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2.5 rounded-xl shadow-sm w-full sm:w-auto justify-center">
+                                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                                                                        <span className="text-[9px] sm:text-[10px] text-primary font-black uppercase tracking-[0.2em]">Alt Kalemler Aktif</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
 
-                                                            <button onClick={() => addSubItem(person.id, asset.id)} className="text-[9px] sm:text-[10px] text-zinc-400 hover:text-white font-bold uppercase tracking-widest flex items-center gap-1.5 bg-zinc-900 px-3 py-2 rounded-xl transition-all border border-zinc-800 hover:border-zinc-600">
-                                                                <i className="fa-solid fa-plus text-[10px]"></i> Alt Kalem
+                                                            <button onClick={() => addSubItem(person.id, asset.id)} className="w-full sm:w-auto text-[9px] sm:text-[10px] text-zinc-400 hover:text-primary font-bold uppercase tracking-widest flex items-center justify-center gap-2 bg-zinc-900 px-4 py-2.5 rounded-xl transition-all border border-zinc-800 hover:border-primary/40">
+                                                                <i className="fa-solid fa-layer-group text-sm"></i> Alt Kalem
                                                             </button>
                                                         </div>
 
-                                                        {/* Alt Kalemler (Detay) */}
+                                                        {/* Alt Kalemler (Ağaç Hiyerarşisi Görünümü) */}
                                                         {hasSubItems && (
-                                                            <div className="mt-5 space-y-2 border-l-2 border-primary/30 pl-3 sm:pl-4 ml-1">
+                                                            <div className="mt-6 space-y-3 border-l-2 border-primary/20 pl-3 sm:pl-5 ml-2">
                                                                 {asset.subItems.map((sub) => (
-                                                                    <div key={sub.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
-                                                                        <div className="flex justify-between items-center w-full sm:w-auto flex-grow">
+                                                                    <div key={sub.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-black/50 p-4 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all relative">
+                                                                        
+                                                                        <div className="flex items-center gap-3 w-full sm:w-[45%]">
+                                                                            <div className="w-6 h-6 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
+                                                                                <i className="fa-solid fa-level-down-alt text-zinc-600 text-[10px]"></i>
+                                                                            </div>
                                                                             <input 
                                                                                 type="text" 
                                                                                 value={sub.name} 
                                                                                 onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'name', e.target.value)} 
-                                                                                className="bg-transparent text-xs font-semibold text-zinc-300 outline-none stealth-input w-full text-left"
+                                                                                className="bg-transparent text-xs sm:text-sm font-semibold text-zinc-300 outline-none stealth-input w-full text-left uppercase"
                                                                                 placeholder="Kalem Adı"
                                                                             />
-                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="text-zinc-600 hover:text-red-500 ml-2 px-2 py-1 block sm:hidden"><i className="fa-solid fa-trash text-[10px]"></i></button>
+                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="sm:hidden text-zinc-600 hover:text-red-500 ml-2 px-3 py-2 transition-colors bg-zinc-900 rounded-xl"><i className="fa-solid fa-trash text-[10px]"></i></button>
                                                                         </div>
-                                                                        <div className="flex items-center gap-2 justify-between w-full sm:w-auto shrink-0">
-                                                                            <input 
-                                                                                type="number" 
-                                                                                value={sub.amount} 
-                                                                                onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'amount', e.target.value)} 
-                                                                                placeholder="0" 
-                                                                                className="bg-black/40 text-zinc-100 text-xs font-bold w-20 sm:w-24 py-1.5 px-2 rounded-lg outline-none border border-zinc-800 focus:border-primary transition-all text-left"
-                                                                            />
-                                                                            <select 
-                                                                                value={sub.type} 
-                                                                                onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'type', e.target.value)} 
-                                                                                className="bg-zinc-800 text-[9px] sm:text-[10px] font-black text-zinc-400 outline-none px-2 py-1.5 rounded-lg cursor-pointer"
-                                                                            >
-                                                                                <option value="TRY">TL</option>
-                                                                                <option value="USD">DOLAR</option>
-                                                                                <option value="EUR">EURO</option>
-                                                                                <option value="GRAM">GRAM</option>
-                                                                                <option value="ATA">ATA</option>
-                                                                            </select>
-                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="text-zinc-600 hover:text-red-500 ml-1 px-1 hidden sm:block"><i className="fa-solid fa-trash text-[10px]"></i></button>
+                                                                        
+                                                                        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-[55%]">
+                                                                            <div className="flex flex-1 sm:flex-none items-center bg-zinc-900/80 p-1 rounded-xl border border-zinc-700/50 focus-within:border-primary/50 transition-colors shadow-inner">
+                                                                                <input 
+                                                                                    type="number" 
+                                                                                    value={sub.amount} 
+                                                                                    onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'amount', e.target.value)} 
+                                                                                    placeholder="0.00" 
+                                                                                    className="bg-transparent text-zinc-100 text-xs sm:text-sm font-bold w-full sm:w-24 py-1.5 px-3 outline-none text-left"
+                                                                                />
+                                                                                <div className="w-[1px] h-6 bg-zinc-700 mx-1 shrink-0"></div>
+                                                                                <select 
+                                                                                    value={sub.type} 
+                                                                                    onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'type', e.target.value)} 
+                                                                                    className="bg-black/50 text-zinc-300 text-[9px] sm:text-[10px] font-black outline-none px-2 py-1.5 rounded-lg cursor-pointer hover:bg-zinc-800"
+                                                                                >
+                                                                                    <option value="TRY">TL</option>
+                                                                                    <option value="USD">DOLAR</option>
+                                                                                    <option value="EUR">EURO</option>
+                                                                                    <option value="GRAM">GRAM</option>
+                                                                                    <option value="ATA">ATA</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="hidden sm:flex text-zinc-600 hover:text-red-500 w-9 h-9 items-center justify-center rounded-xl bg-zinc-900 hover:bg-red-500/10 transition-colors shrink-0"><i className="fa-solid fa-trash text-[10px]"></i></button>
                                                                         </div>
                                                                     </div>
                                                                 ))}
@@ -701,11 +716,11 @@
                                                 );
                                             })}
 
-                                            <div className="pt-4 flex justify-between items-center gap-4">
-                                                <button onClick={() => removePerson(person.id)} className="text-[10px] text-zinc-600 hover:text-red-500 font-black uppercase tracking-widest px-4 py-3.5 bg-red-500/5 rounded-2xl transition-all border border-transparent hover:border-red-500/20 text-center">
+                                            <div className="pt-6 flex justify-between items-center gap-4">
+                                                <button onClick={() => removePerson(person.id)} className="text-[10px] text-zinc-500 hover:text-red-500 font-black uppercase tracking-widest px-5 py-4 bg-zinc-900/50 rounded-2xl transition-all border border-zinc-800 hover:border-red-500/30 hover:bg-red-500/10 text-center">
                                                     KİŞİYİ SİL
                                                 </button>
-                                                <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-primary bg-primary/10 border border-primary/20 font-black uppercase tracking-[0.2em] py-3.5 rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5">
+                                                <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-primary bg-primary/10 border border-primary/20 font-black uppercase tracking-[0.2em] py-4 rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5">
                                                     + YENİ VARLIK EKLE
                                                 </button>
                                             </div>
@@ -716,10 +731,10 @@
                         })}
 
                         {/* Yeni Portföy Ekleme Butonu (Tam Genişlikte) */}
-                        <div className="lg:col-span-3">
-                            <button onClick={addNewPerson} className="w-full py-8 border-2 border-dashed border-zinc-800 hover:border-primary/50 bg-card/30 rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-primary transition-all flex flex-col items-center gap-3 group shadow-inner">
-                                <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all shadow-xl">
-                                    <i className="fa-solid fa-plus text-xl"></i>
+                        <div className="lg:col-span-3 pt-4">
+                            <button onClick={addNewPerson} className="w-full py-10 border-2 border-dashed border-zinc-800 hover:border-primary/50 bg-card/20 rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] text-zinc-600 hover:text-primary transition-all flex flex-col items-center gap-4 group shadow-inner">
+                                <div className="w-14 h-14 rounded-full bg-zinc-900 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all shadow-xl">
+                                    <i className="fa-solid fa-plus text-2xl"></i>
                                 </div>
                                 YENİ PORTFÖY EKLE
                             </button>
