@@ -68,7 +68,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, useRef } = React;
+        const { useState, useEffect, useMemo } = React;
 
         const PortfolioApp = () => {
             const [appState, setAppState] = useState('loading_vault');
@@ -89,12 +89,7 @@
             const [isSaving, setIsSaving] = useState(false);
             const [openPersonId, setOpenPersonId] = useState(null); 
 
-            // IP ve Güvenlik States
-            const [currentIp, setCurrentIp] = useState("");
-            const [trustedIPs, setTrustedIPs] = useState([]);
-            const [showIpSettings, setShowIpSettings] = useState(false);
-            const [newIpName, setNewIpName] = useState("");
-
+            // Başlangıç Verisi (Kasa sıfırlandığında kurtarma paketi)
             const defaultData = [
                 { id: 'eray', person: 'Eray', assets: [
                     { id: 'e1', name: 'Yapı Kredi', type: 'TRY', amount: "", icon: 'Landmark', subItems: [{ id: 'sub-e1-1', name: 'Altın Fonu', type: 'TRY', amount: "330000" }] },
@@ -115,22 +110,19 @@
                 ]}
             ];
 
-            const [portfolio, setPortfolio] = useState([]);
+            const [portfolio, setPortfolio] = useState(defaultData);
 
             // ==========================================
-            // OTURUM (SESSION) YÖNETİMİ
+            // OTURUM (SESSION) YÖNETİMİ (30 DAKİKA)
             // ==========================================
-            const setVaultSession = (pass, isTrusted = false) => {
-                // Eğer IP güveniliyorsa 10 yıllık (süresiz) session, değilse 30 dakika.
-                const expiry = isTrusted 
-                    ? new Date().getTime() + (10 * 365 * 24 * 60 * 60 * 1000) 
-                    : new Date().getTime() + (30 * 60 * 1000); 
-                localStorage.setItem('vault_session_v3', JSON.stringify({ password: pass, expiry, isTrusted }));
+            const setVaultSession = (pass) => {
+                const expiry = new Date().getTime() + (30 * 60 * 1000); 
+                localStorage.setItem('vault_session_v4', JSON.stringify({ password: pass, expiry }));
             };
-            const clearVaultSession = () => localStorage.removeItem('vault_session_v3');
+            const clearVaultSession = () => localStorage.removeItem('vault_session_v4');
 
             // ==========================================
-            // KASA BAŞLATMA, IP TESPİTİ VE GITHUB OKUMA
+            // KASA BAŞLATMA VE GITHUB OKUMA
             // ==========================================
             useEffect(() => {
                 if (!githubConfig.token || !githubConfig.username || !githubConfig.repo) {
@@ -140,17 +132,7 @@
 
                 const initializeApp = async () => {
                     setAppState('loading_vault');
-                    let fetchedIp = "";
-                    
-                    // 1. Kullanıcının Public IP'sini Bul
-                    try {
-                        const ipRes = await fetch('https://api.ipify.org?format=json');
-                        const ipData = await ipRes.json();
-                        fetchedIp = ipData.ip;
-                        setCurrentIp(fetchedIp);
-                    } catch (e) { console.error("IP Tespit Edilemedi", e); }
 
-                    // 2. GitHub Kasasını Çek
                     try {
                         const cleanUser = githubConfig.username.trim();
                         const cleanRepo = githubConfig.repo.trim();
@@ -189,20 +171,13 @@
                             }
 
                             const vaultData = JSON.parse(decodedContent);
-                            
-                            // GitHub'dan Güvenilen IP'leri Oku (Açık Veri)
-                            const savedTrustedIPs = vaultData.trustedIPs || [];
-                            setTrustedIPs(savedTrustedIPs);
-                            
-                            const isCurrentIpTrusted = savedTrustedIPs.some(t => t.ip === fetchedIp);
 
                             if (vaultData.isEncrypted) {
-                                const sessionStr = localStorage.getItem('vault_session_v3');
+                                const sessionStr = localStorage.getItem('vault_session_v4');
                                 if (sessionStr) {
                                     try {
                                         const session = JSON.parse(sessionStr);
-                                        // Eğer oturumun süresi geçmemişse VEYA bu cihazın IP'si güvenilirler listesindeyse devam et
-                                        if (session.expiry > new Date().getTime() || isCurrentIpTrusted) {
+                                        if (session.expiry > new Date().getTime()) {
                                             
                                             const bytes = CryptoJS.AES.decrypt(vaultData.payload, session.password);
                                             const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
@@ -210,25 +185,25 @@
                                             if (decryptedString) {
                                                 let parsedData = JSON.parse(decryptedString);
                                                 
-                                                const totalAssets = parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0);
-                                                if (totalAssets === 0) parsedData = defaultData;
+                                                // KURTARMA: Eğer kasa boşaltılmışsa default veriyi doldur
+                                                if (!Array.isArray(parsedData) || parsedData.length === 0 || parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0) === 0) {
+                                                    parsedData = defaultData;
+                                                }
 
                                                 setPortfolio(parsedData);
                                                 setVaultPassword(session.password);
-                                                // Eğer IP güvenilirse süresiz yap, değilse 30 dakika uzat
-                                                setVaultSession(session.password, isCurrentIpTrusted); 
+                                                setVaultSession(session.password); 
                                                 setAppState('app');
                                                 return; 
                                             }
                                         } else {
-                                            clearVaultSession(); // Süre dolmuş ve IP güvenli değil
+                                            clearVaultSession(); 
                                         }
                                     } catch(e) {
-                                        clearVaultSession(); // Şifre bozuk
+                                        clearVaultSession(); 
                                     }
                                 }
 
-                                // Oturum yoksa, şifre sor
                                 setAppState('enter_password');
                                 sessionStorage.setItem('locked_vault', vaultData.payload);
                             } else {
@@ -267,14 +242,14 @@
 
                     let parsedData = JSON.parse(decryptedString);
                     
-                    const totalAssets = parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0);
-                    if (totalAssets === 0) parsedData = defaultData;
-
-                    const isCurrentIpTrusted = trustedIPs.some(t => t.ip === currentIp);
+                    // KURTARMA: Eğer kasa boşaltılmışsa default veriyi doldur
+                    if (!Array.isArray(parsedData) || parsedData.length === 0 || parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0) === 0) {
+                        parsedData = defaultData;
+                    }
 
                     setPortfolio(parsedData);
                     setVaultPassword(passwordInput); 
-                    setVaultSession(passwordInput, isCurrentIpTrusted); 
+                    setVaultSession(passwordInput); 
                     sessionStorage.removeItem('locked_vault');
                     setAppState('app');
                 } catch (error) {
@@ -293,7 +268,7 @@
                     return;
                 }
                 setVaultPassword(passwordInput);
-                setVaultSession(passwordInput, false); 
+                setVaultSession(passwordInput); 
                 setPortfolio(defaultData); 
                 setAppState('app'); 
             };
@@ -310,14 +285,13 @@
                     const vaultPackage = {
                         isEncrypted: true,
                         lastUpdate: new Date().toISOString(),
-                        payload: encryptedPayload,
-                        trustedIPs: trustedIPs // IP listesini açık yolluyoruz ki şifreyi sormadan önce kontrol edebilelim
+                        payload: encryptedPayload
                     };
 
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(vaultPackage, null, 2))));
                     
                     const body = {
-                        message: "🔒 Kasa güncellendi",
+                        message: "🔒 Kasa kilitlendi ve güncellendi",
                         content: contentBase64,
                         ...(fileSha ? { sha: fileSha } : {}) 
                     };
@@ -338,8 +312,7 @@
                     if (response.ok) {
                         const data = await response.json();
                         setFileSha(data.content.sha);
-                        const isCurrentIpTrusted = trustedIPs.some(t => t.ip === currentIp);
-                        setVaultSession(vaultPassword, isCurrentIpTrusted); 
+                        setVaultSession(vaultPassword); 
                         setTimeout(() => setIsSaving(false), 800); 
                     } else {
                         throw new Error("Kayıt işlemi GitHub tarafından reddedildi.");
@@ -368,27 +341,6 @@
                 clearVaultSession(); 
                 setAppState('enter_password');
                 window.location.reload();
-            };
-
-            // ==========================================
-            // GÜVENİLİR IP YÖNETİMİ
-            // ==========================================
-            const addTrustedIp = () => {
-                if(!newIpName.trim()) { alert("Lütfen bu IP/Cihaz için bir isim girin (Örn: Eray Ev)"); return; }
-                if(!currentIp) { alert("IP adresiniz tespit edilemedi!"); return; }
-                
-                const exists = trustedIPs.some(t => t.ip === currentIp);
-                if (exists) { alert("Bu IP zaten kayıtlı!"); return; }
-
-                const updatedIps = [...trustedIPs, { ip: currentIp, name: newIpName, date: new Date().toLocaleDateString('tr-TR') }];
-                setTrustedIPs(updatedIps);
-                setNewIpName("");
-                
-                alert("IP Listeye Eklendi.\n\nNOT: Değişikliklerin kalıcı olması için sağ üstteki 'KAYDET' butonuna basarak kasanızı güncellemelisiniz.");
-            };
-
-            const removeTrustedIp = (ipToRemove) => {
-                setTrustedIPs(prev => prev.filter(t => t.ip !== ipToRemove));
             };
 
             // ==========================================
@@ -532,14 +484,10 @@
                             <h3 className="text-xl font-bold text-white mb-6">Kasaya Giriş</h3>
                             
                             {authError && <div className="bg-red-900/30 text-red-400 text-xs p-3 rounded-xl mb-4 border border-red-900/50">{authError}</div>}
-                            
-                            {currentIp && (
-                                <p className="text-[10px] text-zinc-500 mb-4 font-bold tracking-widest uppercase">Mevcut IP: <span className="text-zinc-300">{currentIp}</span></p>
-                            )}
 
                             <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifrenizi Girin" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all mb-4 text-lg tracking-widest"/>
                             <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700 transition-colors">Kilidi Aç</button>
-                            <p className="text-[10px] text-zinc-500 mt-4">* Farklı bir IP/Cihaz kullanıyorsunuz. Güvenlik için şifre giriniz.</p>
+                            <p className="text-[10px] text-zinc-500 mt-4">* 30 dakikalık aktif oturum başlar.</p>
                         </form>
                     </div>
                 );
@@ -551,62 +499,11 @@
             return (
                 <div className="max-w-md mx-auto md:max-w-4xl pt-6 pb-12 relative">
                     
-                    {/* IP Settings Modal */}
-                    {showIpSettings && (
-                        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                            <div className="bg-card border border-zinc-700 p-6 rounded-3xl w-full max-w-sm shadow-2xl">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-lg font-bold text-white flex items-center gap-2"><i className="fa-solid fa-shield-halved text-primary"></i> Güvenlik / IP Yönetimi</h3>
-                                    <button onClick={() => setShowIpSettings(false)} className="text-zinc-500 hover:text-white"><i className="fa-solid fa-xmark"></i></button>
-                                </div>
-                                
-                                <div className="mb-6 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Mevcut IP Adresiniz</p>
-                                    <p className="text-lg font-black text-white mb-3">{currentIp || "Yükleniyor..."}</p>
-                                    
-                                    <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            value={newIpName} 
-                                            onChange={e => setNewIpName(e.target.value)} 
-                                            placeholder="Örn: Eray İş" 
-                                            className="flex-1 bg-black border border-zinc-700 rounded-lg px-3 py-2 text-white outline-none focus:border-primary text-sm"
-                                        />
-                                        <button onClick={addTrustedIp} className="bg-primary text-background font-bold px-4 py-2 rounded-lg text-sm hover:bg-primary/90 transition-colors shrink-0">Kaydet</button>
-                                    </div>
-                                    <p className="text-[9px] text-zinc-500 mt-2">* Kaydedilen IP'ler ile girildiğinde şifre sormaz ve direkt kasayı açar.</p>
-                                </div>
-
-                                <div>
-                                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-3">Güvenilen IP'ler ({trustedIPs.length})</p>
-                                    {trustedIPs.length === 0 ? (
-                                        <p className="text-xs text-zinc-600 text-center py-4">Kayıtlı IP yok.</p>
-                                    ) : (
-                                        <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
-                                            {trustedIPs.map(t => (
-                                                <div key={t.ip} className="flex justify-between items-center bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-                                                    <div>
-                                                        <p className="text-xs font-bold text-white">{t.name}</p>
-                                                        <p className="text-[10px] text-zinc-500">{t.ip}</p>
-                                                    </div>
-                                                    <button onClick={() => removeTrustedIp(t.ip)} className="text-zinc-600 hover:text-red-400 p-2"><i className="fa-solid fa-trash-can text-sm"></i></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Premium Header */}
                     <header className="flex justify-between items-center px-6 pb-6 border-b border-zinc-900/50 mb-6">
                         <div className="w-1/3 flex justify-start gap-3">
                              <button onClick={lockVault} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Kasayı Kilitle ve Çık">
                                 <i className="fa-solid fa-lock text-sm sm:text-base"></i>
-                            </button>
-                             <button onClick={() => setShowIpSettings(true)} className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-900 flex items-center justify-center transition-colors ${trustedIPs.some(t => t.ip === currentIp) ? 'text-primary' : 'text-zinc-500 hover:text-white'}`} title="Güvenlik ve IP Yönetimi">
-                                <i className="fa-solid fa-shield-halved text-sm sm:text-base"></i>
                             </button>
                         </div>
                         
