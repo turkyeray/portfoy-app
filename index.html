@@ -21,8 +21,8 @@
             theme: {
                 extend: {
                     colors: {
-                        background: '#09090b',
-                        card: '#18181b',
+                        background: '#050505',
+                        card: '#111111',
                         primary: '#10b981',
                     },
                     fontFamily: {
@@ -36,7 +36,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
-        body { font-family: '-apple-system', 'Inter', sans-serif; background-color: #000000; color: #ffffff; -webkit-font-smoothing: antialiased; }
+        body { font-family: '-apple-system', 'Inter', sans-serif; background-color: #050505; color: #ffffff; -webkit-font-smoothing: antialiased; }
         
         input[type="number"], input[type="text"], input[type="password"], select { font-size: 16px !important; background: transparent; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -51,7 +51,7 @@
             overflow: hidden;
         }
         .accordion-content.open {
-            max-height: 2000px;
+            max-height: 5000px;
             opacity: 1;
         }
 
@@ -62,6 +62,13 @@
         .stealth-input:focus {
             border-bottom: 1px solid #10b981;
             outline: none;
+        }
+
+        .glass-panel {
+            background: rgba(17, 17, 17, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
     </style>
 </head>
@@ -79,7 +86,7 @@
             // Güvenlik & GitHub Konfigürasyonu
             const [githubConfig, setGithubConfig] = useState(() => {
                 const saved = localStorage.getItem('gh_config_v3');
-                return saved ? JSON.parse(saved) : { token: 'hp_2IKC1s9CUaieaeBhsOEiG3r4LCUC4L2y14nq', username: 'turkyeray', repo: 'portfoy-kasa' };
+                return saved ? JSON.parse(saved) : { token: '', username: 'turkyeray', repo: 'portfoy-kasa' };
             });
             const [fileSha, setFileSha] = useState(null);
             const [vaultPassword, setVaultPassword] = useState(""); 
@@ -91,11 +98,15 @@
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [lastUpdated, setLastUpdated] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
-            const [openPersonId, setOpenPersonId] = useState(null); 
+            
+            // Mantık Düzeltmesi: Sadece biri değil, çoklu kart açılabilmesi için Object State kullanıyoruz
+            const [expandedPersons, setExpandedPersons] = useState({});
 
-            // Temiz Başlangıç Verisi (Eski rakamlar kaldırıldı)
+            // Para Birimi Başlıkları
+            const currencyLabels = { USD: 'Dolar', EUR: 'Euro', TRY: 'TL', GRAM: 'Gram', ATA: 'Ata' };
+
+            // Temiz Başlangıç Verisi
             const defaultData = [];
-
             const [portfolio, setPortfolio] = useState([]);
 
             // ==========================================
@@ -159,7 +170,6 @@
                             const vaultData = JSON.parse(decodedContent);
 
                             if (vaultData.isEncrypted) {
-                                // 30 Dakikalık Oturum Kontrolü
                                 const sessionStr = localStorage.getItem('vault_session_v4');
                                 if (sessionStr) {
                                     try {
@@ -352,15 +362,27 @@
 
             const handleRateChange = (currency, value) => { setRates(prev => ({ ...prev, [currency]: parseFloat(value) || 0 })); };
             const safeParseNum = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+            
             const calculateAssetValue = (asset) => {
                 if (asset.subItems && asset.subItems.length > 0) {
                     return asset.subItems.reduce((total, sub) => total + (safeParseNum(sub.amount) * (rates[sub.type] || 1)), 0);
                 }
                 return safeParseNum(asset.amount) * (rates[asset.type] || 1);
             };
+            
             const calculatePersonTotal = (assets) => assets.reduce((total, asset) => total + calculateAssetValue(asset), 0);
             const grandTotal = useMemo(() => portfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [portfolio, rates]);
             const formatMoney = (value) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value) + " ₺";
+
+            // ==========================================
+            // KİŞİ VE VARLIK YÖNETİMİ
+            // ==========================================
+            const togglePersonAccordion = (personId) => {
+                setExpandedPersons(prev => ({
+                    ...prev,
+                    [personId]: !prev[personId]
+                }));
+            };
 
             const updatePersonName = (personId, newName) => setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, person: newName } : p));
             const updatePortfolioAsset = (personId, assetId, updater) => setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.map(asset => asset.id === assetId ? updater(asset) : asset) } : person));
@@ -369,6 +391,8 @@
                 updatePortfolioAsset(personId, assetId, asset => {
                     const subItems = [...(asset.subItems || [])];
                     let currentAmount = asset.amount;
+                    
+                    // Eğer ilk alt kalem ekleniyorsa, mevcut tutarı ana bakiye olarak aşağı kaydır, anayı 0'la
                     if (subItems.length === 0 && safeParseNum(asset.amount) > 0) {
                         subItems.push({ id: `sub-main-${Date.now()}`, name: 'Nakit / Bakiye', type: asset.type, amount: asset.amount });
                         currentAmount = ""; 
@@ -380,21 +404,36 @@
 
             const removeSubItem = (personId, assetId, subItemId) => updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.filter(s => s.id !== subItemId) }));
             const updateSubItem = (personId, assetId, subItemId, field, value) => updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.map(sub => sub.id === subItemId ? { ...sub, [field]: value } : sub) }));
-            const addAsset = (personId) => setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: [...person.assets, { id: `asset-${Date.now()}`, name: 'Yeni Varlık', type: 'TRY', amount: '', icon: 'Landmark', subItems: [] }] } : person));
+            const addAsset = (personId) => setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: [...person.assets, { id: `asset-${Date.now()}`, name: 'Yeni Varlık', type: 'TRY', amount: '', subItems: [] }] } : person));
             const removeAsset = (personId, assetId) => setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.filter(a => a.id !== assetId) } : person));
-            const removePerson = (personId) => { if(confirm("Tüm portföy silinecek. Emin misin?")) setPortfolio(prev => prev.filter(p => p.id !== personId)); };
-            const addNewPerson = () => setPortfolio(prev => [...prev, { id: `person-${Date.now()}`, person: 'YENİ KİŞİ', assets: [] }]);
-
+            
+            const removePerson = (personId) => { 
+                if(window.confirm("Bu kişiyi ve tüm varlıklarını silmek istediğine emin misin?")) {
+                    setPortfolio(prev => prev.filter(p => p.id !== personId)); 
+                    // Silinen kişinin akordeon state'ini de temizliyoruz
+                    setExpandedPersons(prev => {
+                        const newState = {...prev};
+                        delete newState[personId];
+                        return newState;
+                    });
+                }
+            };
+            
+            const addNewPerson = () => {
+                const newId = `person-${Date.now()}`;
+                setPortfolio(prev => [...prev, { id: newId, person: 'YENİ KİŞİ', assets: [] }]);
+                setExpandedPersons(prev => ({...prev, [newId]: true}));
+            };
 
             // ==========================================
-            // GÜVENLİK EKRANLARI
+            // GÜVENLİK EKRANLARI (UI)
             // ==========================================
 
             if (appState === 'loading_vault') {
                 return (
                     <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
-                        <i className="fa-solid fa-vault text-primary text-5xl fa-bounce"></i>
-                        <p className="text-zinc-500 font-bold tracking-widest uppercase text-sm animate-pulse text-center">Kasa Bağlantısı Kuruluyor...</p>
+                        <i className="fa-solid fa-vault text-primary text-6xl fa-bounce drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]"></i>
+                        <p className="text-zinc-500 font-black tracking-[0.3em] uppercase text-xs animate-pulse text-center mt-4">Kasa Bağlanıyor...</p>
                     </div>
                 );
             }
@@ -402,31 +441,31 @@
             if (appState === 'setup_github') {
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-                        <form onSubmit={saveGithubConfig} className="bg-card border border-zinc-800 p-8 rounded-3xl w-full max-w-sm shadow-2xl relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                            <div className="text-center mb-8">
-                                <i className="fa-brands fa-github text-4xl text-white mb-3"></i>
-                                <h3 className="text-xl font-bold text-white">GitHub Kasası</h3>
-                                <p className="text-xs text-zinc-500 mt-2">Private Repository bilgilerinizi giriniz. Bu bilgiler cihazınızda güvenle tutulur.</p>
+                        <form onSubmit={saveGithubConfig} className="glass-panel p-8 md:p-10 rounded-[2.5rem] w-full max-w-sm shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                            <div className="text-center mb-10 mt-2">
+                                <i className="fa-brands fa-github text-5xl text-white mb-4"></i>
+                                <h3 className="text-2xl font-black text-white tracking-tight">GitHub Kasası</h3>
+                                <p className="text-xs text-zinc-500 mt-2 font-medium">Verilerini şifreleyerek kaydedeceğimiz Private Repository (Gizli Kasa) bilgilerini gir.</p>
                             </div>
                             
-                            {authError && <div className="bg-red-900/30 text-red-400 text-[11px] p-3 rounded-xl mb-6 text-center border border-red-900/50">{authError}</div>}
+                            {authError && <div className="bg-red-500/10 text-red-400 text-xs font-semibold p-4 rounded-2xl mb-6 text-center border border-red-500/20">{authError}</div>}
 
                             <div className="space-y-5">
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">GitHub Kullanıcı Adı</label>
-                                    <input required type="text" value={githubConfig.username} onChange={e => setGithubConfig({...githubConfig, username: e.target.value})} placeholder="Örn: turkyeray" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 text-center">GitHub Kullanıcı Adı</label>
+                                    <input required type="text" value={githubConfig.username} onChange={e => setGithubConfig({...githubConfig, username: e.target.value})} placeholder="Örn: turkyeray" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-4 py-4 text-center text-white outline-none focus:border-primary transition-all text-sm font-semibold"/>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Depo Adı</label>
-                                    <input required type="text" value={githubConfig.repo} onChange={e => setGithubConfig({...githubConfig, repo: e.target.value})} placeholder="Örn: portfoy-kasa" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 text-center">Depo Adı</label>
+                                    <input required type="text" value={githubConfig.repo} onChange={e => setGithubConfig({...githubConfig, repo: e.target.value})} placeholder="Örn: portfoy-kasa" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-4 py-4 text-center text-white outline-none focus:border-primary transition-all text-sm font-semibold"/>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Token (PAT)</label>
-                                    <input required type="password" value={githubConfig.token} onChange={e => setGithubConfig({...githubConfig, token: e.target.value})} placeholder="ghp_..." className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2 text-center">Token (PAT)</label>
+                                    <input required type="password" value={githubConfig.token} onChange={e => setGithubConfig({...githubConfig, token: e.target.value})} placeholder="ghp_..." className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-4 py-4 text-center text-white outline-none focus:border-primary transition-all text-sm font-semibold"/>
                                 </div>
                             </div>
-                            <button type="submit" className="w-full mt-8 py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)]">Kasayı Bağla</button>
+                            <button type="submit" className="w-full mt-10 py-4 rounded-2xl font-black text-sm bg-primary text-black hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">KASAYI BAĞLA</button>
                         </form>
                     </div>
                 );
@@ -435,15 +474,16 @@
             if (appState === 'set_password') {
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-                        <form onSubmit={setupNewVault} className="bg-card border border-primary/30 p-8 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(16,185,129,0.1)] text-center">
-                            <i className="fa-solid fa-shield-check text-5xl text-primary mb-4"></i>
-                            <h3 className="text-xl font-bold text-white">Kasa Şifresi Oluştur</h3>
-                            <p className="text-xs text-zinc-400 mt-2 mb-6">Kasanız hazır. Verileriniz şifrelenerek saklanacaktır. Lütfen güçlü bir şifre belirleyin.</p>
+                        <form onSubmit={setupNewVault} className="glass-panel border border-primary/20 p-8 md:p-10 rounded-[2.5rem] w-full max-w-sm shadow-[0_0_50px_rgba(16,185,129,0.15)] text-center relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-full h-1.5 bg-primary"></div>
+                            <i className="fa-solid fa-shield-check text-6xl text-primary mb-6 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]"></i>
+                            <h3 className="text-2xl font-black text-white tracking-tight mb-2">Kasa Şifresi Oluştur</h3>
+                            <p className="text-xs text-zinc-400 mb-8 font-medium leading-relaxed">Kasanız hazır. Verileriniz bu şifre ile kriptolanarak GitHub'a gönderilecektir.</p>
                             
-                            {authError && <p className="text-red-400 text-xs mb-4">{authError}</p>}
+                            {authError && <p className="text-red-400 text-xs font-bold mb-4">{authError}</p>}
 
-                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifre Belirle" className="w-full bg-background border border-zinc-700 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary mb-4 text-lg tracking-widest"/>
-                            <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors">Başlat</button>
+                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifre Belirle" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-4 py-5 text-center text-white outline-none focus:border-primary mb-6 text-xl tracking-[0.5em] font-black transition-all"/>
+                            <button type="submit" className="w-full py-4 rounded-2xl font-black text-sm bg-primary text-black hover:bg-emerald-400 transition-all shadow-lg shadow-primary/20">BAŞLAT</button>
                         </form>
                     </div>
                 );
@@ -452,15 +492,15 @@
             if (appState === 'enter_password') {
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-                        <form onSubmit={unlockVault} className="bg-card border border-zinc-800 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center">
-                            <i className="fa-solid fa-lock text-5xl text-zinc-600 mb-4 drop-shadow-md"></i>
-                            <h3 className="text-xl font-bold text-white mb-6">Kasaya Giriş</h3>
+                        <form onSubmit={unlockVault} className="glass-panel border border-zinc-800 p-8 md:p-10 rounded-[2.5rem] w-full max-w-sm shadow-2xl text-center">
+                            <i className="fa-solid fa-lock text-6xl text-zinc-600 mb-6 drop-shadow-md"></i>
+                            <h3 className="text-2xl font-black text-white mb-8 tracking-tight">Kasaya Giriş</h3>
                             
-                            {authError && <div className="bg-red-900/30 text-red-400 text-xs p-3 rounded-xl mb-4 border border-red-900/50">{authError}</div>}
+                            {authError && <div className="bg-red-500/10 text-red-400 text-xs font-semibold p-4 rounded-2xl mb-6 border border-red-500/20">{authError}</div>}
 
-                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifrenizi Girin" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all mb-4 text-lg tracking-widest"/>
-                            <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700 transition-colors">Kilidi Aç</button>
-                            <p className="text-[10px] text-zinc-500 mt-4">* Oturum 30 dakika boyunca aktif kalacaktır.</p>
+                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifrenizi Girin" className="w-full bg-black/50 border border-zinc-800 rounded-2xl px-4 py-5 text-center text-white outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all mb-6 text-xl tracking-[0.5em] font-black"/>
+                            <button type="submit" className="w-full py-4 rounded-2xl font-black text-sm bg-zinc-100 text-black hover:bg-white transition-all">KİLİDİ AÇ</button>
+                            <p className="text-[10px] text-zinc-500 mt-6 font-medium">* Oturumunuz 30 dakika boyunca aktif kalacaktır.</p>
                         </form>
                     </div>
                 );
@@ -470,115 +510,122 @@
             // ANA UYGULAMA EKRANI (KASA AÇIK)
             // ==========================================
             return (
-                <div className="max-w-md mx-auto md:max-w-4xl pt-6 pb-12 relative">
+                // Tasarım Düzeltmesi: max-w-md (mobil) -> md:max-w-3xl (tablet) -> lg:max-w-7xl (PC) ile tam genişleyen duyarlı grid yapısı
+                <div className="max-w-md mx-auto md:max-w-3xl lg:max-w-7xl pt-6 pb-20 relative px-4 transition-all duration-300">
                     
                     {/* Header Bölümü */}
-                    <header className="flex justify-between items-center px-6 pb-6 border-b border-zinc-900/50 mb-6">
-                        <div className="w-1/3 flex justify-start gap-3">
-                             <button onClick={lockVault} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Kasayı Kilitle">
-                                <i className="fa-solid fa-lock text-sm sm:text-base"></i>
+                    <header className="flex justify-between items-center pb-6 border-b border-zinc-900/80 mb-8">
+                        <div className="w-1/3 flex justify-start">
+                             <button onClick={lockVault} className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all border border-zinc-800 shadow-sm" title="Kasayı Kilitle">
+                                <i className="fa-solid fa-lock text-sm"></i>
                             </button>
                         </div>
                         
                         <div className="w-1/3 flex flex-col items-center justify-center">
-                            <i className="fa-solid fa-building-columns text-primary text-2xl sm:text-3xl mb-1 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]"></i>
-                            <h1 className="text-[9px] sm:text-[10px] font-black tracking-[0.3em] text-zinc-500 uppercase text-center">Aile Portföyü</h1>
+                            <i className="fa-solid fa-building-columns text-primary text-3xl mb-1.5 drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]"></i>
+                            <h1 className="text-[9px] font-black tracking-[0.4em] text-zinc-500 uppercase text-center">Aile Portföyü</h1>
                         </div>
 
                         <div className="w-1/3 flex justify-end">
                             <button 
                                 onClick={handleSaveToGithub} 
                                 disabled={isSaving}
-                                className={`flex items-center gap-2 font-bold text-xs px-3 py-2 sm:text-sm sm:px-5 sm:py-2.5 rounded-xl transition-all border ${isSaving ? 'bg-primary text-background border-primary shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-background'}`}
+                                className={`flex items-center gap-2 font-black text-[10px] sm:text-xs px-4 py-3 rounded-xl transition-all border ${isSaving ? 'bg-primary text-black border-primary shadow-[0_0_20px_rgba(16,185,129,0.5)]' : 'bg-primary/10 text-primary border-primary/30 hover:bg-primary hover:text-black shadow-lg shadow-primary/5'}`}
                             >
-                                <i className={`fa-solid ${isSaving ? 'fa-check' : 'fa-cloud-arrow-up'} text-sm sm:text-lg`}></i>
-                                <span className="hidden sm:inline">{isSaving ? 'Kaydedildi' : 'Kaydet'}</span>
+                                <i className={`fa-solid ${isSaving ? 'fa-check' : 'fa-cloud-arrow-up'} text-sm`}></i>
+                                <span className="hidden sm:inline">{isSaving ? 'KAYDEDİLDİ' : 'KAYDET'}</span>
                             </button>
                         </div>
                     </header>
 
-                    {/* Toplam Bakiye Göstergesi */}
-                    <div className="text-center px-4 py-4 mb-4 flex flex-col items-center">
-                        <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-2 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 text-center">Toplam Net Varlık</p>
-                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white drop-shadow-md text-center">
+                    {/* Toplam Bakiye */}
+                    <div className="text-center py-6 mb-10 flex flex-col items-center">
+                        <p className="text-[10px] text-zinc-500 font-bold tracking-[0.3em] uppercase mb-3 bg-zinc-900/80 px-4 py-1.5 inline-block rounded-full border border-zinc-800 shadow-sm">Toplam Net Varlık</p>
+                        <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white drop-shadow-2xl">
                             {formatMoney(grandTotal)}
                         </h2>
                     </div>
 
-                    {/* Piyasa Kurları Grid Sistemi */}
-                    <div className="mb-10">
-                        <div className="flex justify-between items-center px-4 mb-3">
-                            <p className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 text-center">Piyasa Fiyatları</p>
-                            <button onClick={fetchLiveRates} className="text-[9px] sm:text-[10px] text-zinc-400 hover:text-white uppercase font-bold tracking-widest flex items-center gap-1.5 bg-zinc-900 px-3 py-1.5 rounded-lg border border-zinc-800 transition-colors">
+                    {/* Piyasa Kurları Grid Sistemi (Dolar, Euro, Gram, Ata - 4'lü Düzen) */}
+                    <div className="mb-12 glass-panel p-5 rounded-[2.5rem] max-w-4xl mx-auto">
+                        <div className="flex justify-between items-center mb-4 px-2">
+                            <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1 text-center">Piyasa Fiyatları</p>
+                            <button onClick={fetchLiveRates} className="text-[9px] text-zinc-400 hover:text-white uppercase font-bold tracking-widest flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-zinc-800 transition-all hover:bg-black">
                                 <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin text-primary" : ""}`}></i> Güncelle
                             </button>
                         </div>
-                        <div className="grid grid-cols-5 gap-1.5 sm:gap-3 px-4 pb-4">
-                            {Object.keys(rates).filter(k => k !== 'TRY').map(currency => (
-                                <div key={currency} className="bg-card p-2 sm:p-3 rounded-xl border border-zinc-800/80 hover:border-zinc-700 transition-colors flex flex-col items-center">
-                                    <p className="text-[9px] sm:text-[10px] text-zinc-500 font-bold tracking-wider mb-1 sm:mb-1.5 text-center">{currency}</p>
+                        {/* 4'lü Grid (Mobilde 2'ye 2, PC'de yan yana 4) */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 px-2 pb-2">
+                            {['USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
+                                <div key={currency} className="bg-black/40 p-4 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col items-center shadow-sm">
+                                    <p className="text-[9px] sm:text-[10px] text-zinc-500 font-bold tracking-widest mb-2 uppercase text-center">{currencyLabels[currency]}</p>
                                     <input 
                                         type="number" 
                                         value={rates[currency]} 
                                         onChange={(e) => handleRateChange(currency, e.target.value)} 
-                                        className={`w-full text-xs sm:text-base font-bold outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-amber-400' : 'text-zinc-200'}`}
+                                        className={`w-full text-sm sm:text-lg font-black outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-amber-400' : 'text-white'}`}
                                     />
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Portföyler (Akordeon Yapısı) */}
-                    <div className="px-4 space-y-4">
+                    {/* Portföyler (Duyarlı Grid - PC'de yan yana) */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                         {portfolio.map((person) => {
                             const personTotal = calculatePersonTotal(person.assets);
-                            const isOpen = openPersonId === person.id;
+                            // Mantık Düzeltmesi: Her kartın kendi bağımsız açık/kapalı durumu var
+                            const isOpen = expandedPersons[person.id] !== false; // Varsayılan olarak açık, kullanıcı isterse kapatır
 
                             return (
-                                <div key={person.id} className={`bg-card rounded-3xl overflow-hidden transition-all border ${isOpen ? 'border-zinc-700 shadow-xl' : 'border-zinc-800/50 hover:border-zinc-700/80'}`}>
+                                <div key={person.id} className={`glass-panel rounded-[2.5rem] overflow-hidden transition-all ${isOpen ? 'border-zinc-600 shadow-[0_0_30px_rgba(0,0,0,0.8)] bg-zinc-900/40' : 'hover:border-zinc-700'}`}>
                                     
-                                    <div onClick={() => setOpenPersonId(isOpen ? null : person.id)} className="p-4 sm:p-5 flex justify-between items-center cursor-pointer transition-colors">
-                                        <div className="flex flex-col w-1/2">
+                                    <div onClick={() => togglePersonAccordion(person.id)} className="p-6 md:p-8 flex justify-between items-center cursor-pointer group">
+                                        <div className="flex flex-col w-[60%]">
                                             <input 
                                                 type="text" 
                                                 value={person.person} 
                                                 onChange={(e) => updatePersonName(person.id, e.target.value)} 
                                                 onClick={(e) => e.stopPropagation()} 
-                                                className="bg-transparent text-base sm:text-lg font-bold text-white uppercase tracking-wider w-full outline-none stealth-input text-left"
+                                                className="bg-transparent text-xl sm:text-2xl font-black text-white uppercase tracking-wide w-full outline-none stealth-input text-left"
                                             />
-                                            <p className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mt-1 text-left">
+                                            <p className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1 text-left">
                                                 {person.assets.length} Varlık Kalemi
                                             </p>
                                         </div>
-                                        <div className="text-right flex items-center gap-3 sm:gap-4 shrink-0">
-                                            <span className="text-base sm:text-lg font-black text-primary text-right">{formatMoney(personTotal)}</span>
-                                            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-zinc-800/50 flex items-center justify-center shrink-0">
-                                                <i className={`fa-solid fa-chevron-${isOpen ? 'up text-white' : 'down text-zinc-500'} text-[10px] transition-all`}></i>
+                                        <div className="text-right flex items-center gap-4 sm:gap-5 shrink-0">
+                                            <span className="text-lg sm:text-xl font-black text-primary drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">{formatMoney(personTotal)}</span>
+                                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 transition-all ${isOpen ? 'bg-primary text-black' : 'bg-black/50 text-zinc-500 group-hover:bg-zinc-800'}`}>
+                                                <i className={`fa-solid fa-chevron-${isOpen ? 'up' : 'down'} text-[10px] sm:text-xs`}></i>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
-                                        <div className="px-4 sm:px-5 pb-5 pt-1 space-y-3 bg-zinc-950/30">
+                                        <div className="px-6 md:px-8 pb-8 pt-2 space-y-4 border-t border-white/5">
                                             {person.assets.map((asset) => {
                                                 const hasSubItems = asset.subItems && asset.subItems.length > 0;
                                                 const assetValue = calculateAssetValue(asset);
                                                 
                                                 return (
-                                                    <div key={asset.id} className="bg-zinc-900/80 rounded-2xl p-3 sm:p-4 border border-zinc-800/80 hover:border-zinc-700 transition-colors">
-                                                        <div className="flex justify-between items-center mb-3">
+                                                    <div key={asset.id} className="bg-black/30 rounded-3xl p-4 sm:p-5 border border-zinc-800/80 hover:border-zinc-700 transition-colors shadow-inner">
+                                                        
+                                                        {/* Üst Kısım: İsim ve Tutar */}
+                                                        <div className="flex justify-between items-center mb-4">
                                                             <input 
                                                                 type="text" 
                                                                 value={asset.name} 
                                                                 onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: e.target.value }))} 
-                                                                className="bg-transparent font-semibold text-zinc-100 text-xs sm:text-sm outline-none stealth-input w-full text-left"
+                                                                className="bg-transparent font-bold text-zinc-100 text-sm sm:text-base outline-none stealth-input w-full text-left"
+                                                                placeholder="Varlık Adı"
                                                             />
-                                                            <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
-                                                                <span className="text-xs sm:text-sm font-bold text-white text-right">{formatMoney(assetValue)}</span>
-                                                                <button onClick={() => removeAsset(person.id, asset.id)} className="text-zinc-600 hover:text-red-400 bg-zinc-950 w-6 h-6 rounded-md flex items-center justify-center transition-colors"><i className="fa-solid fa-xmark text-xs"></i></button>
+                                                            <div className="flex items-center gap-3 shrink-0 ml-2">
+                                                                <span className="text-sm sm:text-base font-black text-white text-right">{formatMoney(assetValue)}</span>
+                                                                <button onClick={() => removeAsset(person.id, asset.id)} className="text-zinc-600 hover:text-red-500 bg-zinc-900 w-7 h-7 rounded-full flex items-center justify-center transition-all"><i className="fa-solid fa-xmark text-xs"></i></button>
                                                             </div>
                                                         </div>
 
+                                                        {/* Alt Kısım: Miktar Girişi */}
                                                         <div className="flex justify-between items-center">
                                                             {!hasSubItems ? (
                                                                 <div className="flex items-center gap-2">
@@ -587,54 +634,56 @@
                                                                         value={asset.amount} 
                                                                         onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, amount: e.target.value}))} 
                                                                         placeholder="0" 
-                                                                        className="bg-transparent text-primary font-bold text-sm w-20 sm:w-24 outline-none stealth-input text-left"
+                                                                        className="bg-zinc-900/80 text-primary font-black text-sm sm:text-base w-24 sm:w-28 py-1.5 px-3 rounded-xl outline-none border border-zinc-800 focus:border-primary transition-all text-left shadow-inner"
                                                                     />
                                                                     <select 
                                                                         value={asset.type} 
                                                                         onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, type: e.target.value}))} 
-                                                                        className="bg-zinc-800 text-[10px] sm:text-xs font-bold text-zinc-400 outline-none px-2 py-1 rounded"
+                                                                        className="bg-zinc-800 text-[10px] sm:text-xs font-bold text-zinc-300 outline-none px-3 py-2 rounded-xl uppercase cursor-pointer hover:bg-zinc-700 transition-colors"
                                                                     >
                                                                         <option value="TRY">TL</option>
-                                                                        <option value="USD">DOLAR</option>
-                                                                        <option value="EUR">EURO</option>
-                                                                        <option value="GRAM">GRAM</option>
-                                                                        <option value="ATA">ATA</option>
+                                                                        <option value="USD">Dolar</option>
+                                                                        <option value="EUR">Euro</option>
+                                                                        <option value="GRAM">Gram</option>
+                                                                        <option value="ATA">Ata</option>
                                                                     </select>
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-[9px] sm:text-[10px] text-primary font-bold uppercase tracking-wider bg-primary/10 px-2 py-1 rounded border border-primary/20 text-center">Alt Kalemler Kullanımda</span>
+                                                                <span className="text-[9px] sm:text-[10px] text-primary font-black uppercase tracking-[0.2em] bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20 text-center shadow-sm">Alt Kalemler</span>
                                                             )}
 
-                                                            <button onClick={() => addSubItem(person.id, asset.id)} className="text-[9px] sm:text-[10px] text-zinc-400 hover:text-primary font-bold uppercase tracking-wider flex items-center gap-1 bg-zinc-800 px-2 py-1 rounded transition-colors">
-                                                                <i className="fa-solid fa-plus"></i> Alt Kalem
+                                                            <button onClick={() => addSubItem(person.id, asset.id)} className="text-[9px] sm:text-[10px] text-zinc-400 hover:text-white font-bold uppercase tracking-widest flex items-center gap-1.5 bg-zinc-900 px-3 py-2 rounded-xl transition-all border border-zinc-800 hover:border-zinc-600">
+                                                                <i className="fa-solid fa-plus text-[10px]"></i> Alt Kalem
                                                             </button>
                                                         </div>
 
+                                                        {/* Alt Kalemler (Detay) */}
                                                         {hasSubItems && (
-                                                            <div className="mt-4 space-y-2 border-l-2 border-zinc-800 pl-2 sm:pl-3 ml-1">
+                                                            <div className="mt-5 space-y-2 border-l-2 border-primary/30 pl-3 sm:pl-4 ml-1">
                                                                 {asset.subItems.map((sub) => (
-                                                                    <div key={sub.id} className="flex flex-col gap-1.5 bg-black/20 p-2 rounded-xl">
-                                                                        <div className="flex justify-between items-center">
+                                                                    <div key={sub.id} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/80 hover:border-zinc-700 transition-all">
+                                                                        <div className="flex justify-between items-center w-full sm:w-auto flex-grow">
                                                                             <input 
                                                                                 type="text" 
                                                                                 value={sub.name} 
                                                                                 onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'name', e.target.value)} 
-                                                                                className="bg-transparent text-xs font-medium text-zinc-300 outline-none stealth-input w-full text-left"
+                                                                                className="bg-transparent text-xs font-semibold text-zinc-300 outline-none stealth-input w-full text-left"
+                                                                                placeholder="Kalem Adı"
                                                                             />
-                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="text-zinc-600 hover:text-red-400 text-[10px] ml-2 px-2 py-1"><i className="fa-solid fa-trash"></i></button>
+                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="text-zinc-600 hover:text-red-500 ml-2 px-2 py-1 block sm:hidden"><i className="fa-solid fa-trash text-[10px]"></i></button>
                                                                         </div>
-                                                                        <div className="flex items-center gap-1 sm:gap-2">
+                                                                        <div className="flex items-center gap-2 justify-between w-full sm:w-auto shrink-0">
                                                                             <input 
                                                                                 type="number" 
                                                                                 value={sub.amount} 
                                                                                 onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'amount', e.target.value)} 
                                                                                 placeholder="0" 
-                                                                                className="bg-transparent text-zinc-200 text-xs font-semibold w-16 sm:w-20 outline-none stealth-input text-left"
+                                                                                className="bg-black/40 text-zinc-100 text-xs font-bold w-20 sm:w-24 py-1.5 px-2 rounded-lg outline-none border border-zinc-800 focus:border-primary transition-all text-left"
                                                                             />
                                                                             <select 
                                                                                 value={sub.type} 
                                                                                 onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'type', e.target.value)} 
-                                                                                className="bg-zinc-800 text-[9px] sm:text-[10px] font-bold text-zinc-400 outline-none px-1.5 sm:px-2 py-0.5 rounded"
+                                                                                className="bg-zinc-800 text-[9px] sm:text-[10px] font-black text-zinc-400 outline-none px-2 py-1.5 rounded-lg cursor-pointer"
                                                                             >
                                                                                 <option value="TRY">TL</option>
                                                                                 <option value="USD">DOLAR</option>
@@ -642,6 +691,7 @@
                                                                                 <option value="GRAM">GRAM</option>
                                                                                 <option value="ATA">ATA</option>
                                                                             </select>
+                                                                            <button onClick={() => removeSubItem(person.id, asset.id, sub.id)} className="text-zinc-600 hover:text-red-500 ml-1 px-1 hidden sm:block"><i className="fa-solid fa-trash text-[10px]"></i></button>
                                                                         </div>
                                                                     </div>
                                                                 ))}
@@ -651,12 +701,12 @@
                                                 );
                                             })}
 
-                                            <div className="pt-3 flex justify-between items-center">
-                                                <button onClick={() => removePerson(person.id)} className="text-[9px] sm:text-[10px] text-zinc-600 hover:text-red-400 font-bold uppercase tracking-wider px-2 py-2 transition-colors text-center">
-                                                    Kişiyi Sil
+                                            <div className="pt-4 flex justify-between items-center gap-4">
+                                                <button onClick={() => removePerson(person.id)} className="text-[10px] text-zinc-600 hover:text-red-500 font-black uppercase tracking-widest px-4 py-3.5 bg-red-500/5 rounded-2xl transition-all border border-transparent hover:border-red-500/20 text-center">
+                                                    KİŞİYİ SİL
                                                 </button>
-                                                <button onClick={() => addAsset(person.id)} className="text-[9px] sm:text-[10px] text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 font-bold uppercase tracking-wider px-3 sm:px-4 py-2 rounded-xl transition-colors">
-                                                    <i className="fa-solid fa-plus mr-1"></i> Varlık Ekle
+                                                <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-primary bg-primary/10 border border-primary/20 font-black uppercase tracking-[0.2em] py-3.5 rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5">
+                                                    + YENİ VARLIK EKLE
                                                 </button>
                                             </div>
                                         </div>
@@ -665,10 +715,15 @@
                             );
                         })}
 
-                        {/* Yeni Portföy Girişi */}
-                        <button onClick={addNewPerson} className="w-full py-5 border border-dashed border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-zinc-300 bg-card rounded-3xl transition-colors text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm text-center">
-                            <i className="fa-solid fa-plus text-lg"></i> Yeni Portföy Ekle
-                        </button>
+                        {/* Yeni Portföy Ekleme Butonu (Tam Genişlikte) */}
+                        <div className="lg:col-span-3">
+                            <button onClick={addNewPerson} className="w-full py-8 border-2 border-dashed border-zinc-800 hover:border-primary/50 bg-card/30 rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-primary transition-all flex flex-col items-center gap-3 group shadow-inner">
+                                <div className="w-12 h-12 rounded-full bg-zinc-900 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all shadow-xl">
+                                    <i className="fa-solid fa-plus text-xl"></i>
+                                </div>
+                                YENİ PORTFÖY EKLE
+                            </button>
+                        </div>
                     </div>
 
                 </div>
