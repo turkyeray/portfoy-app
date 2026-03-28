@@ -87,7 +87,7 @@
             const [authError, setAuthError] = useState("");
 
             // Finansal ve Kur Bilgileri
-            const [rates, setRates] = useState({ USD: 44.46, EUR: 51.30, GBP: 59.32, GRAM: 6600, ATA: 45400, TRY: 1 });
+            const [rates, setRates] = useState({ USD: 44.46, EUR: 51.30, GRAM: 6600, ATA: 45400, TRY: 1 });
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [lastUpdated, setLastUpdated] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
@@ -343,7 +343,6 @@
                         ...prev, 
                         USD: parseFloat(usdTry.toFixed(2)),
                         EUR: parseFloat((usdTry / data.usd.eur).toFixed(2)),
-                        GBP: parseFloat((usdTry / data.usd.gbp).toFixed(2)),
                         GRAM: parseFloat(grandBazaarGramTry.toFixed(2)),
                         ATA: parseFloat(grandBazaarAtaTry.toFixed(2))
                     }));
@@ -595,10 +594,9 @@
                                                                         onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({...a, type: e.target.value}))} 
                                                                         className="bg-zinc-800 text-[10px] sm:text-xs font-bold text-zinc-400 outline-none px-2 py-1 rounded"
                                                                     >
-                                                                        <option value="TRY">TRY</option>
-                                                                        <option value="USD">USD</option>
-                                                                        <option value="EUR">EUR</option>
-                                                                        <option value="GBP">GBP</option>
+                                                                        <option value="TRY">TL</option>
+                                                                        <option value="USD">DOLAR</option>
+                                                                        <option value="EUR">EURO</option>
                                                                         <option value="GRAM">GRAM</option>
                                                                         <option value="ATA">ATA</option>
                                                                     </select>
@@ -638,10 +636,9 @@
                                                                                 onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'type', e.target.value)} 
                                                                                 className="bg-zinc-800 text-[9px] sm:text-[10px] font-bold text-zinc-400 outline-none px-1.5 sm:px-2 py-0.5 rounded"
                                                                             >
-                                                                                <option value="TRY">TRY</option>
-                                                                                <option value="USD">USD</option>
-                                                                                <option value="EUR">EUR</option>
-                                                                                <option value="GBP">GBP</option>
+                                                                                <option value="TRY">TL</option>
+                                                                                <option value="USD">DOLAR</option>
+                                                                                <option value="EUR">EURO</option>
                                                                                 <option value="GRAM">GRAM</option>
                                                                                 <option value="ATA">ATA</option>
                                                                             </select>
