@@ -79,7 +79,7 @@
             // Güvenlik & GitHub Konfigürasyonu
             const [githubConfig, setGithubConfig] = useState(() => {
                 const saved = localStorage.getItem('gh_config_v3');
-                return saved ? JSON.parse(saved) : { token: '', username: '', repo: 'portfoy-kasa' };
+                return saved ? JSON.parse(saved) : { token: 'ghp_ 2IKC1s9CUaieaeBhsOEiG3r4LCUC4L2y14nq', username: 'turkyeray', repo: 'portfoy-kasa' };
             });
             const [fileSha, setFileSha] = useState(null);
             const [vaultPassword, setVaultPassword] = useState(""); 
@@ -414,11 +414,11 @@
 
                             <div className="space-y-5">
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">GitHub Kullanıcı Adı</label>turkyeray
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">GitHub Kullanıcı Adı</label>
                                     <input required type="text" value={githubConfig.username} onChange={e => setGithubConfig({...githubConfig, username: e.target.value})} placeholder="Örn: turkyeray" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Depo Adı</label>portfoy-kasa
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Depo Adı</label>
                                     <input required type="text" value={githubConfig.repo} onChange={e => setGithubConfig({...githubConfig, repo: e.target.value})} placeholder="Örn: portfoy-kasa" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
                                 </div>
                                 <div>
