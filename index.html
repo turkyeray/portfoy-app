@@ -73,7 +73,7 @@
         const { useState, useEffect, useMemo, useRef } = React;
 
         const PortfolioApp = () => {
-            // App Routing States: 'setup_github' -> 'loading_vault' -> 'set_password' (ilk kez) / 'enter_password' -> 'app'
+            // App Routing States
             const [appState, setAppState] = useState('loading_vault');
             
             // Güvenlik & GitHub States
@@ -135,12 +135,14 @@
                             
                             if (repoCheck.status === 404) {
                                 throw new Error("Depo bulunamadı! 'portfoy-kasa' deponuzun olduğundan ve Token alırken 'repo' kutucuğunu işaretlediğinizden emin olun.");
-                            } else if (!repoResponse.ok) {
-                                throw new Error("GitHub erişim izni vermedi. Token hatalı olabilir.");
+                            } else if (!repoCheck.ok) { // <-- HATA BURADAYDI, DÜZELTİLDİ (repoResponse -> repoCheck)
+                                throw new Error("GitHub erişim izni vermedi. Token hatalı veya süresi dolmuş olabilir.");
                             }
                             
                             // Depo var, ama data.json henüz yok. Yepyeni kasa:
                             setAppState('set_password');
+                            return; // <-- Akışın bozulmaması için eklendi
+                            
                         } else if (response.status === 401) {
                             throw new Error("Token geçersiz! Lütfen boşluk bırakmadan doğru kopyaladığınıza emin olun.");
                         } else if (response.ok) {
