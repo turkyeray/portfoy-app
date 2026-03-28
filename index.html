@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Premium Varlık Yönetimi</title>
+    <title>Portföy Yönetim</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -434,7 +434,7 @@
                                 <form onSubmit={saveGithubConfig} className="flex flex-col gap-5">
                                     <div className="text-center mb-4">
                                         <i className="fa-brands fa-github text-5xl text-white mb-4 opacity-90"></i>
-                                        <h3 className="text-2xl font-bold text-white tracking-tight">Kasa Kurulumu</h3>
+                                        <h3 className="text-2xl font-bold text-white tracking-tight">Kasa Erişimi</h3>
                                         <p className="text-xs text-zinc-400 mt-2">Private Repository bilgilerini girin.</p>
                                     </div>
                                     {authError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">{authError}</div>}
@@ -481,11 +481,11 @@
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
                                 <i className="fa-solid fa-shield-halved text-black text-lg"></i>
                             </div>
-                            <h1 className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">Premium Portföy</h1>
+                            <h1 className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">Portföy Takip</h1>
                         </div>
                         <button onClick={handleSaveToGithub} disabled={isSaving} className={`flex items-center gap-2 font-bold text-[10px] sm:text-xs px-4 py-2.5 rounded-xl transition-all ${isSaving ? 'bg-primary text-black' : 'glass-surface text-primary border border-primary/30 hover:bg-primary/10'}`}>
                             <i className={`fa-solid ${isSaving ? 'fa-check' : 'fa-cloud-arrow-up'} text-sm`}></i>
-                            <span className="hidden sm:inline">{isSaving ? 'KAYDEDİLDİ' : 'GÜNCELLE'}</span>
+                            <span className="hidden sm:inline">{isSaving ? 'KAYDEDİLDİ' : 'KAYDET'}</span>
                         </button>
                     </header>
 
