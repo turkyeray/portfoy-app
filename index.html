@@ -8,10 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
+    <!-- CryptoJS (Şifreleme Motoru - Güvenlik İçin) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <script>
@@ -71,8 +73,10 @@
         const { useState, useEffect, useMemo } = React;
 
         const PortfolioApp = () => {
+            // Uygulama Durumları
             const [appState, setAppState] = useState('loading_vault');
             
+            // Güvenlik & GitHub Konfigürasyonu
             const [githubConfig, setGithubConfig] = useState(() => {
                 const saved = localStorage.getItem('gh_config_v3');
                 return saved ? JSON.parse(saved) : { token: '', username: '', repo: 'portfoy-kasa' };
@@ -82,35 +86,17 @@
             const [passwordInput, setPasswordInput] = useState("");
             const [authError, setAuthError] = useState("");
 
-            // Finansal ve Kur States
+            // Finansal ve Kur Bilgileri
             const [rates, setRates] = useState({ USD: 44.46, EUR: 51.30, GBP: 59.32, GRAM: 6600, ATA: 45400, TRY: 1 });
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [lastUpdated, setLastUpdated] = useState(null);
             const [isSaving, setIsSaving] = useState(false);
             const [openPersonId, setOpenPersonId] = useState(null); 
 
-            // Başlangıç Verisi (Kasa sıfırlandığında kurtarma paketi)
-            const defaultData = [
-                { id: 'eray', person: 'Eray', assets: [
-                    { id: 'e1', name: 'Yapı Kredi', type: 'TRY', amount: "", icon: 'Landmark', subItems: [{ id: 'sub-e1-1', name: 'Altın Fonu', type: 'TRY', amount: "330000" }] },
-                    { id: 'e2', name: 'Midas', type: 'TRY', amount: "782000", icon: 'TrendingUp', subItems: [] },
-                    { id: 'e3', name: 'Banka (Fiziki)', type: 'GRAM', amount: "21.5", icon: 'Coins', subItems: [] },
-                    { id: 'e4', name: 'ATA Altın', type: 'ATA', amount: "8.76", icon: 'Coins', subItems: [] },
-                    { id: 'e5', name: 'Dolar', type: 'USD', amount: "1000", icon: 'DollarSign', subItems: [] }
-                ]},
-                { id: 'gonul', person: 'Gönül', assets: [
-                    { id: 'g1', name: 'Yapı Kredi', type: 'TRY', amount: "1700000", icon: 'Landmark', subItems: [] },
-                    { id: 'g2', name: 'Midas', type: 'TRY', amount: "2140000", icon: 'TrendingUp', subItems: [] },
-                    { id: 'g3', name: 'Arsa Satışı (Nakit)', type: 'USD', amount: "40000", icon: 'DollarSign', subItems: [] },
-                    { id: 'g4', name: 'Dolar', type: 'USD', amount: "8600", icon: 'DollarSign', subItems: [] }
-                ]},
-                { id: 'erkay', person: 'Erkay', assets: [
-                    { id: 'er1', name: 'Midas', type: 'TRY', amount: "125000", icon: 'TrendingUp', subItems: [] },
-                    { id: 'er2', name: 'ATA Altın', type: 'ATA', amount: "8.5", icon: 'Coins', subItems: [] }
-                ]}
-            ];
+            // Temiz Başlangıç Verisi (Eski rakamlar kaldırıldı)
+            const defaultData = [];
 
-            const [portfolio, setPortfolio] = useState(defaultData);
+            const [portfolio, setPortfolio] = useState([]);
 
             // ==========================================
             // OTURUM (SESSION) YÖNETİMİ (30 DAKİKA)
@@ -151,14 +137,14 @@
                                 headers: { 'Authorization': `Bearer ${cleanToken}` }
                             });
                             
-                            if (repoCheck.status === 404) throw new Error("Depo bulunamadı! 'portfoy-kasa' deponuzun olduğundan emin olun.");
+                            if (repoCheck.status === 404) throw new Error("Depo bulunamadı! Ayarlarınızı kontrol edin.");
                             else if (!repoCheck.ok) throw new Error("GitHub erişim izni vermedi. Token hatalı olabilir.");
                             
                             setAppState('set_password');
                             return; 
                             
                         } else if (response.status === 401) {
-                            throw new Error("Token geçersiz! Lütfen baştan girin.");
+                            throw new Error("Token geçersiz veya yetkisiz! Lütfen yeni bir token alın.");
                         } else if (response.ok) {
                             const data = await response.json();
                             setFileSha(data.sha);
@@ -173,23 +159,17 @@
                             const vaultData = JSON.parse(decodedContent);
 
                             if (vaultData.isEncrypted) {
+                                // 30 Dakikalık Oturum Kontrolü
                                 const sessionStr = localStorage.getItem('vault_session_v4');
                                 if (sessionStr) {
                                     try {
                                         const session = JSON.parse(sessionStr);
                                         if (session.expiry > new Date().getTime()) {
-                                            
                                             const bytes = CryptoJS.AES.decrypt(vaultData.payload, session.password);
                                             const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
                                             
                                             if (decryptedString) {
-                                                let parsedData = JSON.parse(decryptedString);
-                                                
-                                                // KURTARMA: Eğer kasa boşaltılmışsa default veriyi doldur
-                                                if (!Array.isArray(parsedData) || parsedData.length === 0 || parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0) === 0) {
-                                                    parsedData = defaultData;
-                                                }
-
+                                                const parsedData = JSON.parse(decryptedString);
                                                 setPortfolio(parsedData);
                                                 setVaultPassword(session.password);
                                                 setVaultSession(session.password); 
@@ -222,7 +202,7 @@
             }, [githubConfig]);
 
             // ==========================================
-            // KASA KİLİDİ AÇMA (MANUEL DECRYPT)
+            // KASA KİLİDİ AÇMA (DECRYPT)
             // ==========================================
             const unlockVault = (e) => {
                 e.preventDefault();
@@ -240,13 +220,7 @@
                     
                     if (!decryptedString) throw new Error("Yanlış şifre"); 
 
-                    let parsedData = JSON.parse(decryptedString);
-                    
-                    // KURTARMA: Eğer kasa boşaltılmışsa default veriyi doldur
-                    if (!Array.isArray(parsedData) || parsedData.length === 0 || parsedData.reduce((acc, p) => acc + (p.assets ? p.assets.length : 0), 0) === 0) {
-                        parsedData = defaultData;
-                    }
-
+                    const parsedData = JSON.parse(decryptedString);
                     setPortfolio(parsedData);
                     setVaultPassword(passwordInput); 
                     setVaultSession(passwordInput); 
@@ -291,7 +265,7 @@
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(vaultPackage, null, 2))));
                     
                     const body = {
-                        message: "🔒 Kasa kilitlendi ve güncellendi",
+                        message: "🔒 Kasa güncellendi",
                         content: contentBase64,
                         ...(fileSha ? { sha: fileSha } : {}) 
                     };
@@ -414,7 +388,7 @@
 
 
             // ==========================================
-            // RENDER: GÜVENLİK VE BAĞLANTI EKRANLARI
+            // GÜVENLİK EKRANLARI
             // ==========================================
 
             if (appState === 'loading_vault') {
@@ -434,14 +408,14 @@
                             <div className="text-center mb-8">
                                 <i className="fa-brands fa-github text-4xl text-white mb-3"></i>
                                 <h3 className="text-xl font-bold text-white">GitHub Kasası</h3>
-                                <p className="text-xs text-zinc-500 mt-2">Verilerini şifreleyerek kaydedeceğimiz Private Repository (Gizli Kasa) bilgilerini gir.</p>
+                                <p className="text-xs text-zinc-500 mt-2">Private Repository bilgilerinizi giriniz. Bu bilgiler cihazınızda güvenle tutulur.</p>
                             </div>
                             
                             {authError && <div className="bg-red-900/30 text-red-400 text-[11px] p-3 rounded-xl mb-6 text-center border border-red-900/50">{authError}</div>}
 
                             <div className="space-y-5">
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Kullanıcı Adı</label>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">GitHub Kullanıcı Adı</label>
                                     <input required type="text" value={githubConfig.username} onChange={e => setGithubConfig({...githubConfig, username: e.target.value})} placeholder="Örn: eray123" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
                                 </div>
                                 <div>
@@ -449,11 +423,11 @@
                                     <input required type="text" value={githubConfig.repo} onChange={e => setGithubConfig({...githubConfig, repo: e.target.value})} placeholder="Örn: portfoy-kasa" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Erişim Token (PAT)</label>
+                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1.5 text-center">Token (PAT)</label>
                                     <input required type="password" value={githubConfig.token} onChange={e => setGithubConfig({...githubConfig, token: e.target.value})} placeholder="ghp_..." className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3 text-center text-white outline-none focus:border-primary transition-colors text-sm"/>
                                 </div>
                             </div>
-                            <button type="submit" className="w-full mt-8 py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)]">Kasaya Bağlan</button>
+                            <button type="submit" className="w-full mt-8 py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)]">Kasayı Bağla</button>
                         </form>
                     </div>
                 );
@@ -465,12 +439,12 @@
                         <form onSubmit={setupNewVault} className="bg-card border border-primary/30 p-8 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(16,185,129,0.1)] text-center">
                             <i className="fa-solid fa-shield-check text-5xl text-primary mb-4"></i>
                             <h3 className="text-xl font-bold text-white">Kasa Şifresi Oluştur</h3>
-                            <p className="text-xs text-zinc-400 mt-2 mb-6">Bu depo yepyeni! Verilerin GitHub'a gönderilirken kriptolanacak. Sadece senin bileceğin bir şifre belirle.</p>
+                            <p className="text-xs text-zinc-400 mt-2 mb-6">Kasanız hazır. Verileriniz şifrelenerek saklanacaktır. Lütfen güçlü bir şifre belirleyin.</p>
                             
                             {authError && <p className="text-red-400 text-xs mb-4">{authError}</p>}
 
-                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Yeni Şifre Belirle" className="w-full bg-background border border-zinc-700 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary mb-4 text-lg tracking-widest"/>
-                            <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors">Uygulamaya Başla</button>
+                            <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifre Belirle" className="w-full bg-background border border-zinc-700 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary mb-4 text-lg tracking-widest"/>
+                            <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-primary text-background hover:bg-primary/90 transition-colors">Başlat</button>
                         </form>
                     </div>
                 );
@@ -487,22 +461,22 @@
 
                             <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifrenizi Girin" className="w-full bg-background border border-zinc-800 rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary focus:shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all mb-4 text-lg tracking-widest"/>
                             <button type="submit" className="w-full py-3.5 rounded-xl font-bold text-sm bg-zinc-800 text-white hover:bg-zinc-700 border border-zinc-700 transition-colors">Kilidi Aç</button>
-                            <p className="text-[10px] text-zinc-500 mt-4">* 30 dakikalık aktif oturum başlar.</p>
+                            <p className="text-[10px] text-zinc-500 mt-4">* Oturum 30 dakika boyunca aktif kalacaktır.</p>
                         </form>
                     </div>
                 );
             }
 
             // ==========================================
-            // RENDER: ANA UYGULAMA (KASA AÇIK)
+            // ANA UYGULAMA EKRANI (KASA AÇIK)
             // ==========================================
             return (
                 <div className="max-w-md mx-auto md:max-w-4xl pt-6 pb-12 relative">
                     
-                    {/* Premium Header */}
+                    {/* Header Bölümü */}
                     <header className="flex justify-between items-center px-6 pb-6 border-b border-zinc-900/50 mb-6">
                         <div className="w-1/3 flex justify-start gap-3">
-                             <button onClick={lockVault} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Kasayı Kilitle ve Çık">
+                             <button onClick={lockVault} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Kasayı Kilitle">
                                 <i className="fa-solid fa-lock text-sm sm:text-base"></i>
                             </button>
                         </div>
@@ -517,15 +491,14 @@
                                 onClick={handleSaveToGithub} 
                                 disabled={isSaving}
                                 className={`flex items-center gap-2 font-bold text-xs px-3 py-2 sm:text-sm sm:px-5 sm:py-2.5 rounded-xl transition-all border ${isSaving ? 'bg-primary text-background border-primary shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-background'}`}
-                                title="Şifreleyerek GitHub'a Kaydet"
                             >
                                 <i className={`fa-solid ${isSaving ? 'fa-check' : 'fa-cloud-arrow-up'} text-sm sm:text-lg`}></i>
-                                <span className="hidden sm:inline">{isSaving ? 'Kilitlendi' : 'Kaydet'}</span>
+                                <span className="hidden sm:inline">{isSaving ? 'Kaydedildi' : 'Kaydet'}</span>
                             </button>
                         </div>
                     </header>
 
-                    {/* Toplam Bakiye */}
+                    {/* Toplam Bakiye Göstergesi */}
                     <div className="text-center px-4 py-4 mb-4 flex flex-col items-center">
                         <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase mb-2 bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800 text-center">Toplam Net Varlık</p>
                         <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-white drop-shadow-md text-center">
@@ -533,7 +506,7 @@
                         </h2>
                     </div>
 
-                    {/* Kurlar (Grid Yapısı) */}
+                    {/* Piyasa Kurları Grid Sistemi */}
                     <div className="mb-10">
                         <div className="flex justify-between items-center px-4 mb-3">
                             <p className="text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 text-center">Piyasa Fiyatları</p>
@@ -556,7 +529,7 @@
                         </div>
                     </div>
 
-                    {/* Kişiler Listesi (Akordeon Kartlar) */}
+                    {/* Portföyler (Akordeon Yapısı) */}
                     <div className="px-4 space-y-4">
                         {portfolio.map((person) => {
                             const personTotal = calculatePersonTotal(person.assets);
@@ -575,7 +548,7 @@
                                                 className="bg-transparent text-base sm:text-lg font-bold text-white uppercase tracking-wider w-full outline-none stealth-input text-left"
                                             />
                                             <p className="text-[9px] sm:text-[10px] text-zinc-500 font-semibold uppercase tracking-wider mt-1 text-left">
-                                                {person.assets.length} Varlık
+                                                {person.assets.length} Varlık Kalemi
                                             </p>
                                         </div>
                                         <div className="text-right flex items-center gap-3 sm:gap-4 shrink-0">
@@ -695,7 +668,7 @@
                             );
                         })}
 
-                        {/* Yeni Kişi Ekle */}
+                        {/* Yeni Portföy Girişi */}
                         <button onClick={addNewPerson} className="w-full py-5 border border-dashed border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-zinc-300 bg-card rounded-3xl transition-colors text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm text-center">
                             <i className="fa-solid fa-plus text-lg"></i> Yeni Portföy Ekle
                         </button>
