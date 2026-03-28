@@ -237,15 +237,21 @@
             const [vaultPassword, setVaultPassword] = useState("");
             const [passwordInput, setPasswordInput] = useState("");
             const [authError, setAuthError] = useState("");
+            const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
             const [rates, setRates] = useState({ USD: 44.46, EUR: 51.30, GRAM: 6600, ATA: 45400, TRY: 1 });
+
+            const showToast = (message, type = 'success') => {
+                setToast({ show: true, message, type });
+                setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
+            };
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [isSaving, setIsSaving] = useState(false);
 
             const [expandedPersons, setExpandedPersons] = useState({});
             const [expandedAssets, setExpandedAssets] = useState({});
 
-            const currencyLabels = { USD: 'Dolar', EUR: 'Euro', TRY: 'TL', GRAM: 'Gram', ATA: 'Ata' };
+            const [currencyLabels, setCurrencyLabels] = useState({ USD: 'Dolar', EUR: 'Euro', TRY: 'TL', GRAM: 'Gram', ATA: 'Ata' });
             const [portfolio, setPortfolio] = useState([]);
 
             const setVaultSession = (pass) => {
@@ -308,13 +314,18 @@
                                             const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
                                             if (decryptedString) {
                                                 const parsedData = JSON.parse(decryptedString);
-                                                setPortfolio(parsedData);
+                                                if (Array.isArray(parsedData)) {
+                                                    setPortfolio(parsedData);
+                                                } else {
+                                                    setPortfolio(parsedData.portfolio || []);
+                                                    if (parsedData.labels) setCurrencyLabels(parsedData.labels);
+                                                }
                                                 setVaultPassword(session.password);
                                                 setVaultSession(session.password);
                                                 setAuthError(""); // Başarılı girişte hata temizlenir
                                                 setAppState('app');
                                                 const expandedInit = {};
-                                                parsedData.forEach(p => expandedInit[p.id] = true);
+                                                (Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || [])).forEach(p => expandedInit[p.id] = true);
                                                 setExpandedPersons(expandedInit);
                                                 return;
                                             }
@@ -325,10 +336,15 @@
                                 setAppState('enter_password');
                                 sessionStorage.setItem('locked_vault', vaultData.payload);
                             } else {
-                                setPortfolio(vaultData);
+                                if (Array.isArray(vaultData)) {
+                                    setPortfolio(vaultData);
+                                } else {
+                                    setPortfolio(vaultData.portfolio || []);
+                                    if (vaultData.labels) setCurrencyLabels(vaultData.labels);
+                                }
                                 setAppState('app');
                                 const expandedInit = {};
-                                vaultData.forEach(p => expandedInit[p.id] = true);
+                                (Array.isArray(vaultData) ? vaultData : (vaultData.portfolio || [])).forEach(p => expandedInit[p.id] = true);
                                 setExpandedPersons(expandedInit);
                             }
                         }
@@ -351,14 +367,19 @@
                     const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
                     if (!decryptedString) throw new Error("Yanlış şifre");
                     const parsedData = JSON.parse(decryptedString);
-                    setPortfolio(parsedData);
+                    if (Array.isArray(parsedData)) {
+                        setPortfolio(parsedData);
+                    } else {
+                        setPortfolio(parsedData.portfolio || []);
+                        if (parsedData.labels) setCurrencyLabels(parsedData.labels);
+                    }
                     setVaultPassword(passwordInput);
                     setVaultSession(passwordInput);
                     sessionStorage.removeItem('locked_vault');
                     setAppState('app');
 
                     const expandedInit = {};
-                    parsedData.forEach(p => expandedInit[p.id] = true);
+                    (Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || [])).forEach(p => expandedInit[p.id] = true);
                     setExpandedPersons(expandedInit);
                 } catch (error) {
                     setAuthError("Hatalı Şifre!");
@@ -378,7 +399,7 @@
             const handleSaveToGithub = async () => {
                 setIsSaving(true);
                 try {
-                    const jsonString = JSON.stringify(portfolio);
+                    const jsonString = JSON.stringify({ portfolio, labels: currencyLabels });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, vaultPassword).toString();
                     const vaultPackage = { isEncrypted: true, lastUpdate: new Date().toISOString(), payload: encryptedPayload };
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(vaultPackage, null, 2))));
@@ -393,10 +414,11 @@
                         const data = await response.json();
                         setFileSha(data.content.sha);
                         setVaultSession(vaultPassword);
+                        showToast("Kasa başarıyla senkronize edildi", "success");
                         setTimeout(() => setIsSaving(false), 800);
                     } else { throw new Error("Kayıt reddedildi."); }
                 } catch (error) {
-                    alert("Kayıt Hatası! İnternet bağlantınızı kontrol edin.");
+                    showToast("Kayıt Hatası! İnternet bağlantınızı veya ayarlarınızı kontrol edin.", "error");
                     setIsSaving(false);
                 }
             };
@@ -461,6 +483,39 @@
 
             const calculatePersonTotal = (assets) => assets.reduce((total, asset) => total + calculateAssetValue(asset), 0);
             const grandTotal = useMemo(() => portfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [portfolio, rates]);
+
+            const calculateDistribution = () => {
+                const totals = { TRY: 0, USD: 0, EUR: 0, GRAM: 0, ATA: 0 };
+                portfolio.forEach(person => {
+                    person.assets.forEach(asset => {
+                        if (asset.subItems && asset.subItems.length > 0) {
+                            asset.subItems.forEach(sub => {
+                                totals[sub.type] = (totals[sub.type] || 0) + safeParseNum(sub.amount);
+                            });
+                        } else {
+                            totals[asset.type] = (totals[asset.type] || 0) + safeParseNum(asset.amount);
+                        }
+                    });
+                });
+                
+                const tryEquivalent = {
+                    TRY: totals.TRY, USD: totals.USD * rates.USD, EUR: totals.EUR * rates.EUR,
+                    GRAM: totals.GRAM * rates.GRAM, ATA: totals.ATA * rates.ATA
+                };
+                
+                if (grandTotal === 0) return [];
+                
+                return Object.keys(tryEquivalent)
+                    .filter(key => tryEquivalent[key] > 0)
+                    .map(key => ({
+                        type: key,
+                        label: currencyLabels[key] || key,
+                        percentage: ((tryEquivalent[key] / grandTotal) * 100).toFixed(1)
+                    }))
+                    .sort((a, b) => b.percentage - a.percentage);
+            };
+            const distribution = calculateDistribution();
+
             const formatMoney = (value) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value) + " ₺";
 
             const togglePersonAccordion = (personId) => setExpandedPersons(prev => ({ ...prev, [personId]: !prev[personId] }));
@@ -571,6 +626,15 @@
 
             return (
                 <div className="mx-auto w-full max-w-[95%] xl:max-w-6xl pt-6 pb-20 relative z-10 animate-fade-in-up">
+                    
+                    {/* Toast Notification */}
+                    <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl premium-border backdrop-blur-xl ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8 pointer-events-none'} ${toast.type === 'error' ? 'bg-red-500/20 border-red-500/30' : 'bg-emerald-500/20 border-emerald-500/30'}`}>
+                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${toast.type === 'error' ? 'bg-red-500/30 text-red-200' : 'bg-emerald-500/30 text-emerald-300'}`}>
+                            <i className={`fa-solid text-[10px] ${toast.type === 'error' ? 'fa-triangle-exclamation' : 'fa-check'}`}></i>
+                        </div>
+                        <p className={`font-bold text-xs tracking-wide ${toast.type === 'error' ? 'text-red-100' : 'text-emerald-50'}`}>{toast.message}</p>
+                    </div>
+
                     {/* Header */}
                     <header className="flex justify-between items-center pb-5 mb-8 border-b border-white/5">
                         <button onClick={lockVault} className="w-10 h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-transparent hover:border-red-500/30">
@@ -609,20 +673,42 @@
                                 <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin" : ""}`}></i> Yenile
                             </button>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {['USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                            {['TRY', 'USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
                                 <div key={currency} className="glass-surface p-3 rounded-xl flex flex-col items-center border border-transparent hover:border-white/10 transition-colors">
-                                    <p className="text-[9px] text-zinc-400 font-bold tracking-widest mb-1.5 uppercase">{currencyLabels[currency]}</p>
+                                    <textarea
+                                        rows={1}
+                                        value={currencyLabels[currency] || currency}
+                                        onChange={(e) => setCurrencyLabels(prev => ({ ...prev, [currency]: e.target.value }))}
+                                        onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                        className="text-[8px] sm:text-[9px] text-zinc-400 font-bold tracking-widest mb-1 uppercase bg-transparent text-center outline-none hover:text-white transition-colors w-full border-b border-transparent focus:border-white/20 resize-none overflow-hidden"
+                                        style={{ minHeight: '16px' }}
+                                        title="İsmi Değiştir"
+                                    />
                                     <input
                                         type="number"
                                         value={rates[currency]}
+                                        disabled={currency === 'TRY'}
                                         onChange={(e) => handleRateChange(currency, e.target.value)}
-                                        className={`w-full text-base sm:text-lg font-bold font-numbers outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-emerald-400' : 'text-white'}`}
+                                        className={`w-full text-base sm:text-lg font-bold font-numbers outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-emerald-400' : 'text-white'} ${currency === 'TRY' ? 'opacity-50' : ''}`}
                                     />
                                 </div>
                             ))}
                         </div>
                     </div>
+
+                    {/* Asset Distribution Summary */}
+                    {distribution.length > 0 && (
+                        <div className="mb-10 max-w-3xl mx-auto flex flex-wrap justify-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                            {distribution.map(dist => (
+                                <div key={dist.type} className="glass-surface px-4 py-2.5 rounded-2xl flex items-center gap-2.5 border border-transparent hover:border-white/10 transition-colors cursor-default">
+                                    <div className={`w-2 h-2 rounded-full ${dist.type === 'TRY' ? 'bg-zinc-400' : dist.type === 'USD' ? 'bg-green-400' : dist.type === 'EUR' ? 'bg-blue-400' : 'bg-yellow-400'}`}></div>
+                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{dist.label}</span>
+                                    <span className="text-xs font-black text-white font-numbers">%{dist.percentage}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Portfolios Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
@@ -636,15 +722,17 @@
                                     {/* Card Header (Person Name & Total) */}
                                     <div onClick={() => togglePersonAccordion(person.id)} className={`p-5 sm:p-6 flex justify-between items-center cursor-pointer transition-colors ${isOpen ? 'bg-white/5 rounded-t-[2rem]' : 'rounded-[2rem]'}`}>
                                         <div className="flex flex-col flex-1 min-w-0 pr-3">
-                                            <input
-                                                type="text"
+                                            <textarea
+                                                rows={1}
                                                 value={person.person}
                                                 onChange={(e) => updatePersonName(person.id, e.target.value)}
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="bg-transparent text-lg sm:text-xl font-bold text-white uppercase tracking-wide w-full outline-none stealth-input truncate pb-0.5"
+                                                onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                                className="bg-transparent text-lg sm:text-xl font-bold text-white uppercase tracking-wide w-full outline-none resize-none overflow-hidden flex-1 pb-0.5"
+                                                style={{ minHeight: '28px' }}
                                                 placeholder="İSİM GİRİNİZ"
                                             />
-                                            <div className="flex items-center gap-1.5 mt-1.5 pl-0.5">
+                                            <div className="flex items-center gap-1.5 mt-0.5 pl-0.5">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                                                 <p className="text-[9px] text-zinc-400 font-semibold uppercase tracking-widest">{person.assets.length} Varlık</p>
                                             </div>
@@ -674,12 +762,15 @@
                                                                 <div className="w-7 h-7 rounded-full bg-black/30 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
                                                                     <i className="fa-solid fa-wallet text-zinc-400 text-[10px] group-hover:text-emerald-400"></i>
                                                                 </div>
-                                                                <input
-                                                                    type="text"
+                                                                <textarea
+                                                                    rows={1}
                                                                     value={asset.name}
                                                                     onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: e.target.value }))}
                                                                     onClick={(e) => e.stopPropagation()}
-                                                                    className="flex-1 min-w-0 bg-transparent font-bold text-white text-xs sm:text-sm outline-none stealth-input placeholder:text-zinc-500 truncate"
+                                                                    onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                                                    title={asset.name}
+                                                                    className="flex-1 min-w-0 bg-transparent font-bold text-white text-xs sm:text-sm outline-none placeholder:text-zinc-500 resize-none overflow-hidden"
+                                                                    style={{ minHeight: '20px', paddingTop: '2px' }}
                                                                     placeholder="KURUM / VARLIK ADI"
                                                                 />
                                                             </div>
@@ -715,11 +806,9 @@
                                                                                 onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, type: e.target.value }))}
                                                                                 className="bg-black/30 text-[10px] font-bold text-zinc-300 outline-none px-3 py-2 uppercase cursor-pointer no-arrow text-center hover:bg-white/5 transition-colors"
                                                                             >
-                                                                                <option value="TRY">TL</option>
-                                                                                <option value="USD">USD</option>
-                                                                                <option value="EUR">EUR</option>
-                                                                                <option value="GRAM">GRAM</option>
-                                                                                <option value="ATA">ATA</option>
+                                                                                {Object.entries(currencyLabels).map(([key, label]) => (
+                                                                                    <option key={key} value={key}>{label}</option>
+                                                                                ))}
                                                                             </select>
                                                                         </div>
                                                                     ) : (
@@ -745,6 +834,7 @@
                                                                                         onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'name', e.target.value)}
                                                                                         className="bg-transparent py-1 px-1 rounded-md text-xs font-semibold text-zinc-200 outline-none flex-1 min-w-0 placeholder:text-zinc-600 focus:bg-white/5 transition-colors"
                                                                                         placeholder="Kalem Adı"
+                                                                                        title={sub.name}
                                                                                     />
                                                                                     <button onClick={(e) => { e.stopPropagation(); removeSubItem(person.id, asset.id, sub.id); }} className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md transition-colors"><i className="fa-solid fa-trash text-[10px]"></i></button>
                                                                                 </div>
@@ -763,11 +853,9 @@
                                                                                         onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'type', e.target.value)}
                                                                                         className="bg-black/30 text-white text-[10px] font-bold outline-none px-2 py-1 cursor-pointer no-arrow text-center hover:bg-white/5 transition-colors"
                                                                                     >
-                                                                                        <option value="TRY">TL</option>
-                                                                                        <option value="USD">USD</option>
-                                                                                        <option value="EUR">EUR</option>
-                                                                                        <option value="GRAM">GR</option>
-                                                                                        <option value="ATA">ATA</option>
+                                                                                        {Object.entries(currencyLabels).map(([key, label]) => (
+                                                                                            <option key={key} value={key}>{label}</option>
+                                                                                        ))}
                                                                                     </select>
                                                                                 </div>
                                                                             </div>
