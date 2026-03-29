@@ -4,33 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portföy Yönetim</title>
-
-    <!-- PWA Installation Requirements -->
-    <link rel="manifest"
-        href="data:application/manifest+json,%7B%22name%22%3A%22Kasa%20%28Portf%C3%B6y%29%22%2C%22short_name%22%3A%22Kasa%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2309090b%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%252310b981%27%20rx%3D%2720%27%2F%253E%253Cpath%20fill%3D%27%2523fff%27%20d%3D%27M50%2020a30%2030%200%201%200%200%2060%2030%2030%200%200%200%200-60zm0%2010a20%2020%200%201%201%200%2040%2020%2020%200%200%201%200-40z%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
-    <script>
-        if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', function(event) {});";
-            const blob = new Blob([swCode], { type: 'text/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(console.error);
-        }
-    </script>
+    <title>Portföy Yönetim (Kasa)</title>
+    
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Kasa%20%28Portf%C3%B6y%29%22%2C%22short_name%22%3A%22Kasa%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2309090b%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%252310b981%27%20rx%3D%2720%27%2F%253E%253Cpath%20fill%3D%27%2523fff%27%20d%3D%27M50%2020a30%2030%200%201%200%200%2060%2030%2030%200%200%200%200-60zm0%2010a20%2020%200%201%201%200%2040%2020%2020%200%200%201%200-40z%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310b981' rx='20'/%3E%3Cpath fill='%23fff' d='M50 20a30 30 0 1 0 0 60 30 30 0 0 0 0-60zm0 10a20 20 0 1 1 0 40 20 20 0 0 1 0-40z'/%3E%3C/svg%3E">
-
-
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -98,68 +84,29 @@
             width: 100vw;
             height: 100vh;
             z-index: -10;
-            background: linear-gradient(to bottom right, rgba(16, 185, 129, 0.03), transparent 70%);
-        }
-
-        .blob-1 {
-            position: absolute;
-            top: -10%;
-            left: -5%;
-            width: 55vw;
-            height: 55vw;
-            background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 60%);
-            border-radius: 50%;
-            filter: blur(90px);
-        }
-
-        .blob-2 {
-            position: absolute;
-            bottom: -15%;
-            right: -5%;
-            width: 65vw;
-            height: 65vw;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 60%);
-            border-radius: 50%;
-            filter: blur(100px);
+            background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.4), transparent 60%),
+                        linear-gradient(to bottom right, rgba(16, 185, 129, 0.02), transparent 70%);
         }
 
         .glass-card {
-            background: rgba(18, 24, 34, 0.4);
+            background: rgba(18, 24, 34, 0.6);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .glass-surface {
-            background: rgba(30, 40, 54, 0.3);
+            background: rgba(25, 35, 48, 0.4);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .premium-border {
             position: relative;
             z-index: 1;
-        }
-
-        .premium-border::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(59, 130, 246, 0.1));
-            border-radius: inherit;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .premium-border:hover::before {
-            opacity: 1;
         }
 
         input[type="number"],
@@ -176,23 +123,12 @@
             margin: 0;
         }
 
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
         .accordion-content {
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, transform 0.3s ease, overflow 0s;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, transform 0.3s ease;
             max-height: 0;
             opacity: 0;
             overflow: hidden;
             transform: translateY(-10px);
-            position: relative;
-            z-index: 10;
         }
 
         .accordion-content.open {
@@ -200,39 +136,42 @@
             opacity: 1;
             transform: translateY(0);
             overflow: visible;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, transform 0.3s ease, overflow 0s 0.4s;
-        }
-
-        .stealth-input {
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        .stealth-input:focus {
-            border-bottom: 2px solid #10b981;
-            outline: none;
-            text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-        }
-
-        .no-arrow {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
         }
 
         .font-numbers {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
         }
+
+        .midas-input-group {
+            display: flex;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+        .midas-input-group:focus-within {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+        }
+        .midas-input {
+            background: transparent;
+            color: white;
+            padding: 10px 12px;
+            outline: none;
+            width: 100%;
+            font-weight: 600;
+        }
+        .midas-divider {
+            width: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 
 <body class="antialiased min-h-screen relative">
 
-    <div class="ambient-bg">
-        <div class="blob-1 animate-blob"></div>
-        <div class="blob-2 animate-blob-reverse"></div>
-    </div>
+    <div class="ambient-bg"></div>
 
     <div id="root"></div>
 
@@ -249,130 +188,73 @@
 
         const CustomSelect = ({ value, options, onChange, className }) => {
             const [isOpen, setIsOpen] = useState(false);
-            const [coords, setCoords] = useState(null);
+            const [dropDirection, setDropDirection] = useState('down');
             const dropdownRef = useRef(null);
 
             useEffect(() => {
                 const handleClickOutside = (event) => {
-                    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                        if (!event.target.closest('.custom-select-portal')) {
-                            setIsOpen(false);
-                        }
-                    }
+                    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
                 };
-
-                const handleScroll = (e) => {
-                    // Sadece seçici açıksa ve scroll olan yer portalın kendisi değilse kapat
-                    if (isOpen && !e.target.closest('.custom-select-portal')) {
-                        setIsOpen(false);
-                    }
-                };
-
                 if (isOpen) {
                     if (dropdownRef.current) {
                         const rect = dropdownRef.current.getBoundingClientRect();
-                        const estimatedHeight = Object.keys(options).length * 36;
                         const spaceBelow = window.innerHeight - rect.bottom;
-                        const spaceAbove = rect.top;
-                        const direction = (spaceBelow < estimatedHeight + 20 && spaceAbove > spaceBelow) ? 'up' : 'down';
-
-                        setCoords({
-                            right: window.innerWidth - rect.right,
-                            top: rect.bottom + 5,
-                            bottom: window.innerHeight - rect.top + 5,
-                            width: rect.width,
-                            direction
-                        });
+                        const estimatedHeight = Object.keys(options).length * 40;
+                        setDropDirection((spaceBelow < estimatedHeight + 20 && rect.top > estimatedHeight + 20) ? 'up' : 'down');
                     }
                     document.addEventListener("mousedown", handleClickOutside);
-                    window.addEventListener("scroll", handleScroll, true);
+                    
+                    if (dropdownRef.current) {
+                        let el = dropdownRef.current;
+                        while(el && el !== document.body) {
+                            if (el.classList && (el.classList.contains('relative') || el.classList.contains('glass-card') || el.classList.contains('glass-surface'))) {
+                                el.dataset.oldZ = el.style.zIndex || '';
+                                el.style.zIndex = '99999';
+                            }
+                            el = el.parentElement;
+                        }
+                    }
+                } else {
+                    if (dropdownRef.current) {
+                        let el = dropdownRef.current;
+                        while(el && el !== document.body) {
+                            if (el.dataset && el.dataset.oldZ !== undefined) {
+                                el.style.zIndex = el.dataset.oldZ;
+                                delete el.dataset.oldZ;
+                            }
+                            el = el.parentElement;
+                        }
+                    }
                 }
-                return () => {
-                    document.removeEventListener("mousedown", handleClickOutside);
-                    window.removeEventListener("scroll", handleScroll, true);
-                };
-            }, [isOpen, options]);
-
-            const portalContent = isOpen && coords ? ReactDOM.createPortal(
-                <div
-                    className="custom-select-portal fixed bg-zinc-900 border border-white/20 rounded-xl shadow-[0_40px_100px_rgba(0,0,0,1)] z-[999999] overflow-hidden py-1.5 animate-fade-in-up"
-                    style={{
-                        right: coords.right + 'px',
-                        top: coords.direction === 'up' ? 'auto' : coords.top + 'px',
-                        bottom: coords.direction === 'up' ? coords.bottom + 'px' : 'auto',
-                        minWidth: Math.max(120, coords.width) + 'px'
-                    }}
-                >
-                    {Object.entries(options).map(([key, label]) => (
-                        <div
-                            key={key}
-                            onClick={(e) => { e.stopPropagation(); onChange(key); setIsOpen(false); }}
-                            className={`px-4 py-2.5 text-[11px] font-bold text-center cursor-pointer transition-colors ${value === key ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}`}
-                        >
-                            {formatTitleCase(label)}
-                        </div>
-                    ))}
-                </div>,
-                document.body
-            ) : null;
+                return () => document.removeEventListener("mousedown", handleClickOutside);
+            }, [isOpen]);
 
             return (
                 <div ref={dropdownRef} className={`relative flex ${className}`} onClick={(e) => e.stopPropagation()}>
-                    <div
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="w-full h-full flex items-center justify-center cursor-pointer px-1 sm:px-2 text-[9px] sm:text-[10px] font-bold outline-none no-arrow hover:bg-white/5 transition-colors whitespace-nowrap"
-                    >
+                    <div onClick={() => setIsOpen(!isOpen)} className="w-full h-full flex items-center justify-center cursor-pointer px-1 sm:px-2 text-[10px] sm:text-[11px] font-bold outline-none no-arrow hover:bg-white/5 transition-colors whitespace-nowrap">
                         {formatTitleCase(options[value] || value)}
                     </div>
-                    {portalContent}
+                    {isOpen && (
+                        <div className={`absolute right-0 min-w-[120px] w-max bg-zinc-900 border border-white/20 rounded-xl shadow-2xl z-[999999] overflow-hidden py-1.5 animate-fade-in-up ${dropDirection === 'up' ? 'bottom-[110%] mb-1' : 'top-[110%] mt-1'}`}>
+                            {Object.entries(options).map(([key, label]) => (
+                                <div key={key} onClick={(e) => { e.stopPropagation(); onChange(key); setIsOpen(false); }} className={`px-4 py-2.5 text-[11px] font-bold text-center cursor-pointer transition-colors ${value === key ? 'bg-emerald-500/20 text-emerald-400' : 'text-zinc-300 hover:bg-white/10 hover:text-white'}`}>
+                                    {formatTitleCase(label)}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-            );
-        };
-
-        const useDebounce = (callback, delay) => {
-            const timeoutRef = useRef(null);
-            return (...args) => {
-                if (timeoutRef.current) clearTimeout(timeoutRef.current);
-                timeoutRef.current = setTimeout(() => {
-                    callback(...args);
-                }, delay);
-            };
-        };
-
-        const DebouncedInput = ({ value, onChange, delay = 500, as = "input", ...props }) => {
-            const [localValue, setLocalValue] = useState(value);
-            useEffect(() => { setLocalValue(value); }, [value]);
-
-            useEffect(() => {
-                const handler = setTimeout(() => {
-                    if (localValue !== value) onChange(localValue);
-                }, delay);
-                return () => clearTimeout(handler);
-            }, [localValue]);
-
-            const Component = as;
-            return (
-                <Component
-                    {...props}
-                    value={localValue}
-                    onChange={(e) => setLocalValue(e.target.value)}
-                    onBlur={() => { if (localValue !== value) onChange(localValue); }}
-                />
             );
         };
 
         const PortfolioApp = () => {
             const [appState, setAppState] = useState('loading_vault');
-
-            // Cihaza kayıtlı konfigürasyon (Sadece açılışta veya Bağla dendiğinde okunur/yazılır)
             const [githubConfig, setGithubConfig] = useState(() => {
                 const saved = localStorage.getItem('gh_config_v3');
                 return saved ? JSON.parse(saved) : { token: '', username: 'turkyeray', repo: 'portfoy-kasa' };
             });
 
-            // Form için geçici konfigürasyon (Her tuşa basıldığında API isteği atılmasını engeller!)
             const [formConfig, setFormConfig] = useState(githubConfig);
-
             const [fileSha, setFileSha] = useState(null);
             const [vaultPassword, setVaultPassword] = useState("");
             const [passwordInput, setPasswordInput] = useState("");
@@ -385,6 +267,7 @@
                 setToast({ show: true, message, type });
                 setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
             };
+            
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [isSaving, setIsSaving] = useState(false);
 
@@ -400,113 +283,99 @@
             };
             const clearVaultSession = () => localStorage.removeItem('vault_session_v4');
 
-            const isInitialMount = React.useRef(true);
-            const skipNextSave = React.useRef(true);
-
-            const debouncedSave = useDebounce((isAuto) => {
-                handleSaveToGithub(isAuto);
-            }, 2000);
+            const isInitialMount = useRef(true);
+            const saveTimeoutRef = useRef(null);
 
             useEffect(() => {
-                if (isInitialMount.current) {
-                    isInitialMount.current = false;
-                    return;
-                }
+                if (isInitialMount.current) { isInitialMount.current = false; return; }
                 if (appState === 'app' && vaultPassword && !isSaving) {
-                    if (skipNextSave.current) {
-                        skipNextSave.current = false;
-                        return;
-                    }
-                    const handler = setTimeout(() => {
-                        debouncedSave(true);
-                    }, 10);
-                    return () => clearTimeout(handler);
+                    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                    saveTimeoutRef.current = setTimeout(() => handleSaveToGithub(true), 4000);
                 }
+                return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
             }, [portfolio, currencyLabels]);
 
             useEffect(() => {
-                const init = () => {
-                    const savedConfig = localStorage.getItem('gh_config_v5');
-                    if (savedConfig) {
-                        setGithubConfig(JSON.parse(savedConfig));
-                        setAppState('enter_password');
-                    } else {
-                        localStorage.removeItem('gh_config_v4');
-                        setAppState('setup_github');
-                    }
+                if (!githubConfig.token || !githubConfig.username || !githubConfig.repo) {
+                    setAppState('setup_github');
+                    return;
+                }
+                const initializeApp = async () => {
+                    setAppState('loading_vault');
+                    setAuthError(""); 
+                    try {
+                        const cleanUser = githubConfig.username.trim();
+                        const cleanRepo = githubConfig.repo.trim();
+                        const cleanToken = githubConfig.token.trim();
+                        const timestamp = new Date().getTime();
+
+                        const response = await fetch(`https://api.github.com/repos/${cleanUser}/${cleanRepo}/contents/data.json?t=${timestamp}`, {
+                            headers: { 'Authorization': `Bearer ${cleanToken}`, 'Accept': 'application/vnd.github.v3+json' }
+                        });
+
+                        if (response.status === 404) {
+                            setAppState('set_password'); return;
+                        } else if (response.status === 401) {
+                            throw new Error("Erişim reddedildi: Token geçersiz.");
+                        } else if (response.ok) {
+                            const data = await response.json();
+                            setFileSha(data.sha);
+                            const decodedContent = decodeURIComponent(escape(atob(data.content)));
+                            if (!decodedContent || decodedContent === "[]") { setAppState('set_password'); return; }
+                            const vaultData = JSON.parse(decodedContent);
+
+                            if (vaultData.isEncrypted) {
+                                const sessionStr = localStorage.getItem('vault_session_v4');
+                                if (sessionStr) {
+                                    try {
+                                        const session = JSON.parse(sessionStr);
+                                        if (session.expiry > new Date().getTime()) {
+                                            const bytes = CryptoJS.AES.decrypt(vaultData.payload, session.password);
+                                            const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+                                            if (decryptedString) {
+                                                const parsedData = JSON.parse(decryptedString);
+                                                setPortfolio(Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || []));
+                                                if (!Array.isArray(parsedData) && parsedData.labels) setCurrencyLabels(parsedData.labels);
+                                                setVaultPassword(session.password);
+                                                setVaultSession(session.password);
+                                                setAppState('app');
+                                                const expandedInit = {};
+                                                (Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || [])).forEach(p => expandedInit[p.id] = true);
+                                                setExpandedPersons(expandedInit);
+                                                return;
+                                            }
+                                        } else clearVaultSession();
+                                    } catch (e) { clearVaultSession(); }
+                                }
+                                setAppState('enter_password');
+                                sessionStorage.setItem('locked_vault', vaultData.payload);
+                            }
+                        }
+                    } catch (error) { setAuthError(error.message); setAppState('setup_github'); }
                 };
-                init();
-            }, []);
+                initializeApp();
+            }, [githubConfig]);
 
-            const handleAuth = async (e) => {
+            const unlockVault = (e) => {
                 e.preventDefault();
-                if (!passwordInput) { setAuthError("Şifre boş olamaz."); return; }
                 setAuthError("");
-                setIsLoadingRates(true);
-                setAppState('loading_vault');
+                const encryptedPayload = sessionStorage.getItem('locked_vault');
+                if (!encryptedPayload) { setAuthError("Veri bulunamadı."); return; }
                 try {
-                    const cleanUser = githubConfig.username.trim();
-                    const cleanRepo = githubConfig.repo.trim();
-                    const cleanToken = githubConfig.token.replace(/[^\x20-\x7E]/g, '').trim();
-                    const timestamp = new Date().getTime();
-
-                    const response = await fetch(`https://api.github.com/repos/${cleanUser}/${cleanRepo}/contents/data.json?t=${timestamp}`, {
-                        headers: { 'Authorization': `Bearer ${cleanToken}`, 'Accept': 'application/vnd.github.v3+json' }
-                    });
-
-                    if (response.status === 404) {
-                        setAppState('create_vault');
-                        return;
-                    }
-                    if (!response.ok) throw new Error("GitHub erişim reddedildi.");
-
-                    const data = await response.json();
-                    setFileSha(data.sha);
-                    const decodedContent = decodeURIComponent(escape(atob(data.content)));
-                    const vaultData = JSON.parse(decodedContent);
-
-                    if (vaultData.isEncrypted) {
-                        let decryptedString;
-                        try {
-                            const vBytes = CryptoJS.AES.decrypt(vaultData.payload, passwordInput);
-                            decryptedString = vBytes.toString(CryptoJS.enc.Utf8);
-                        } catch (e) {
-                            throw new Error("Kasa Şifresi Yanlış");
-                        }
-                        if (!decryptedString) throw new Error("Kasa Şifresi Yanlış");
-
-                        const parsedData = JSON.parse(decryptedString);
-                        const finalPortfolio = Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || []);
-                        setPortfolio(finalPortfolio);
-
-                        if (parsedData.labels && !Array.isArray(parsedData)) {
-                            const lbls = parsedData.labels;
-                            if (!lbls.STOCK) lbls.STOCK = 'Hisse';
-                            setCurrencyLabels(lbls);
-                        }
-
-                        const expandedInit = {};
-                        finalPortfolio.forEach(p => expandedInit[p.id] = true);
-                        setExpandedPersons(expandedInit);
-                    } else {
-                        throw new Error("Eski format kasa desteklenmiyor.");
-                    }
-
+                    const bytes = CryptoJS.AES.decrypt(encryptedPayload, passwordInput);
+                    const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+                    if (!decryptedString) throw new Error("Yanlış şifre");
+                    const parsedData = JSON.parse(decryptedString);
+                    setPortfolio(Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || []));
+                    if (!Array.isArray(parsedData) && parsedData.labels) setCurrencyLabels(parsedData.labels);
                     setVaultPassword(passwordInput);
                     setVaultSession(passwordInput);
+                    sessionStorage.removeItem('locked_vault');
                     setAppState('app');
-                } catch (err) {
-                    const errMsg = err.message || "";
-                    if (errMsg.toLowerCase().includes('failed to fetch')) {
-                        setAuthError("Ağa bağlanılamadı. İnternet bağlantınızı kontrol edin.");
-                    } else {
-                        setAuthError(errMsg || "Erişim Reddedildi.");
-                    }
-                    setAppState('enter_password');
-                    setPasswordInput("");
-                } finally {
-                    setIsLoadingRates(false);
-                }
+                    const expandedInit = {};
+                    (Array.isArray(parsedData) ? parsedData : (parsedData.portfolio || [])).forEach(p => expandedInit[p.id] = true);
+                    setExpandedPersons(expandedInit);
+                } catch (error) { setAuthError("Hatalı Şifre!"); setPasswordInput(""); }
             };
 
             const setupNewVault = (e) => {
@@ -526,10 +395,9 @@
                     const vaultPackage = { isEncrypted: true, lastUpdate: new Date().toISOString(), payload: encryptedPayload };
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(vaultPackage, null, 2))));
 
-                    const cleanToken = githubConfig.token.replace(/[^\x20-\x7E]/g, '').trim();
                     const response = await fetch(`https://api.github.com/repos/${githubConfig.username.trim()}/${githubConfig.repo.trim()}/contents/data.json`, {
                         method: 'PUT',
-                        headers: { 'Authorization': `Bearer ${cleanToken}`, 'Content-Type': 'application/json' },
+                        headers: { 'Authorization': `Bearer ${githubConfig.token.trim()}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify({ message: isAutoSave ? "🤖 Oto-Kayıt" : "🔒 Kasa güncellendi", content: contentBase64, ...(fileSha ? { sha: fileSha } : {}) })
                     });
 
@@ -538,537 +406,391 @@
                         setFileSha(data.content.sha);
                         setVaultSession(vaultPassword);
                         if (!isAutoSave) showToast("Kasa başarıyla senkronize edildi", "success");
-                        setTimeout(() => setIsSaving(false), 800);
-                    } else { throw new Error("Kayıt reddedildi."); }
+                    } else throw new Error("Kayıt reddedildi.");
                 } catch (error) {
-                    if (!isAutoSave) showToast("Kayıt Hatası! İnternet bağlantınızı veya ayarlarınızı kontrol edin.", "error");
-                    setIsSaving(false);
+                    if (!isAutoSave) showToast("Kayıt Hatası! İnterneti kontrol edin.", "error");
+                } finally {
+                    setTimeout(() => setIsSaving(false), 800);
                 }
             };
 
             const saveGithubConfig = (e) => {
                 e.preventDefault();
-                const cleanedConfig = {
-                    username: formConfig.username.trim(),
-                    repo: formConfig.repo.trim(),
-                    token: formConfig.token.trim()
-                };
-                localStorage.setItem('gh_config_v5', JSON.stringify(cleanedConfig));
+                localStorage.setItem('gh_config_v3', JSON.stringify({ username: formConfig.username.trim(), repo: formConfig.repo.trim(), token: formConfig.token.trim() }));
                 window.location.reload();
             };
 
             const lockVault = () => {
-                setVaultPassword("");
-                setPortfolio([]);
-                clearVaultSession();
-                setAppState('enter_password');
-                window.location.reload();
-            };
-
-            const disconnectGithub = () => {
-                if (window.confirm("GitHub bağlantısını kesmek istediğinize emin misiniz?")) {
-                    localStorage.removeItem('gh_config_v5');
-                    window.location.reload();
-                }
+                setVaultPassword(""); setPortfolio([]); clearVaultSession();
+                setAppState('enter_password'); window.location.reload();
             };
 
             const fetchLiveRates = async () => {
+                setIsLoadingRates(true);
+                let updateMessage = "Piyasa güncellendi";
+                let isError = false;
+
+                // 1. Döviz ve Altın Çekimi
                 try {
-                    setIsLoadingRates(true);
                     const response = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
-                    if (!response.ok) throw new Error("API cevap vermedi");
                     const data = await response.json();
                     const usdTry = data.usd.try;
                     let gramTry = rates.GRAM, ataTry = rates.ATA;
 
                     if (data.usd.xau) {
                         const xauUsd = 1 / data.usd.xau;
-                        const spotGramGoldUsd = xauUsd / 31.1034768;
-                        const spotGramGoldTry = spotGramGoldUsd * usdTry;
-                        const physicalPremium = 1.045;
-                        gramTry = spotGramGoldTry * physicalPremium;
+                        gramTry = (xauUsd / 31.1034768) * usdTry * 1.045; // Fiziksel prim
                         ataTry = gramTry * 6.88;
                     }
+                    
                     setRates(prev => ({
-                        ...prev,
-                        USD: parseFloat(usdTry.toFixed(2)), EUR: parseFloat((usdTry / data.usd.eur).toFixed(2)),
+                        ...prev, USD: parseFloat(usdTry.toFixed(2)), EUR: parseFloat((usdTry / data.usd.eur).toFixed(2)),
                         GRAM: parseFloat(gramTry.toFixed(2)), ATA: parseFloat(ataTry.toFixed(2))
                     }));
                 } catch (err) {
-                    console.error("Fiyat çekme hatası", err);
-                    showToast("Kurlar güncellenemedi, eski veriyi görüyorsunuz", "error");
-                } finally { setIsLoadingRates(false); }
+                    console.error("Döviz hatası", err);
+                    updateMessage = "Döviz güncellenemedi. Sadece hisseler kontrol ediliyor.";
+                    isError = true;
+                }
+
+                // 2. Hisse Çekimi (Geliştirilmiş Midas Vari Algoritma)
+                const stockTickers = new Set();
+                portfolio.forEach(p => p.assets.forEach(a => {
+                    if (a.subItems?.length > 0) {
+                        a.subItems.forEach(s => { if (s.type === 'STOCK' && s.name) stockTickers.add(s.name.trim().split(' ')[0].toUpperCase()); });
+                    } else if (a.type === 'STOCK' && a.name) stockTickers.add(a.name.trim().split(' ')[0].toUpperCase());
+                }));
+
+                if (stockTickers.size > 0) {
+                    const priceMap = {};
+                    let stocksFound = 0;
+
+                    await Promise.allSettled(Array.from(stockTickers).map(async (ticker) => {
+                        try {
+                            const symbol = ticker.includes('.') ? ticker : `${ticker}.IS`;
+                            // Daha stabil raw proxy kullanımı (Yahoo query2)
+                            const url = `https://query2.finance.yahoo.com/v8/finance/chart/${symbol}`;
+                            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                            
+                            const res = await fetch(proxyUrl);
+                            if(!res.ok) throw new Error("Proxy veya Yahoo reddetti");
+                            const json = await res.json();
+                            const price = json.chart?.result?.[0]?.meta?.regularMarketPrice;
+                            
+                            if (price) {
+                                priceMap[ticker] = price;
+                                stocksFound++;
+                            }
+                        } catch (e) { console.warn(`${ticker} alınamadı:`, e); }
+                    }));
+
+                    if (stocksFound > 0) {
+                        setPortfolio(prev => prev.map(p => ({
+                            ...p,
+                            assets: p.assets.map(a => {
+                                if (a.subItems?.length > 0) {
+                                    return { ...a, subItems: a.subItems.map(s => {
+                                        if (s.type === 'STOCK' && s.name) {
+                                            const t = s.name.trim().split(' ')[0].toUpperCase();
+                                            if (priceMap[t]) return { ...s, currentPrice: priceMap[t] };
+                                        }
+                                        return s;
+                                    })};
+                                } else if (a.type === 'STOCK' && a.name) {
+                                    const t = a.name.trim().split(' ')[0].toUpperCase();
+                                    if (priceMap[t]) return { ...a, currentPrice: priceMap[t] };
+                                }
+                                return a;
+                            })
+                        })));
+                        updateMessage = isError ? "Döviz çekilemedi ama hisseler güncellendi." : "Tüm piyasa güncellendi!";
+                        isError = false;
+                    } else {
+                        updateMessage = isError ? "Hem döviz hem hisse API'leri şu an yanıt vermiyor." : "Döviz güncellendi ancak hisse fiyatları çekilemedi (Manuel giriş yapınız).";
+                        if(!isError) isError = true; // Warning level
+                    }
+                }
+
+                showToast(updateMessage, isError ? 'error' : 'success');
+                setIsLoadingRates(false);
             };
 
-            const handleRateChange = (currency, value) => { setRates(prev => ({ ...prev, [currency]: parseFloat(value) || 0 })); };
-
             const safeParseNum = (val) => {
-                if (val === "" || val === null || val === undefined) return 0;
-                const num = parseFloat(val);
+                if (!val) return 0;
+                const num = typeof val === 'string' ? parseFloat(val.replace(',', '.')) : val;
                 return isNaN(num) ? 0 : num;
             };
 
-            const calculateAssetValue = (asset) => {
-                if (asset.subItems && asset.subItems.length > 0) {
-                    return asset.subItems.reduce((total, sub) => total + (safeParseNum(sub.amount) * (rates[sub.type] || 1)), 0);
-                }
-                return safeParseNum(asset.amount) * (rates[asset.type] || 1);
+            const calculateAssetValue = (item) => {
+                const getRate = (i) => i.type === 'STOCK' ? (safeParseNum(i.currentPrice) || safeParseNum(i.costPrice) || 0) : (rates[i.type] || 1);
+                return safeParseNum(item.amount) * getRate(item);
             };
 
-            const calculatePnL = (amount, rate, costPrice, type) => {
+            const calculatePnL = (amount, rate, costPrice, type, currentPrice) => {
                 const cost = safeParseNum(costPrice);
                 const qty = safeParseNum(amount);
+                const actualRate = type === 'STOCK' ? (safeParseNum(currentPrice) || cost) : rate;
+
                 if (cost <= 0 || qty <= 0) return null;
-                const currentTotal = qty * rate;
-                const costTotal = type === 'STOCK' ? cost : qty * cost;
-                const profit = currentTotal - costTotal;
-                const percentage = (profit / costTotal) * 100;
-                return { profit, percentage, isProfit: profit >= 0, isNeutral: Math.abs(profit) < 0.01 };
+                const profit = (qty * actualRate) - (qty * cost);
+                const percentage = (qty * cost) > 0 ? (profit / (qty * cost)) * 100 : 0;
+                
+                return { profit, percentage, isProfit: profit > 0, isZero: profit === 0 };
             };
 
-            const calculatePersonTotal = (assets) => assets.reduce((total, asset) => total + calculateAssetValue(asset), 0);
+            const calculatePersonTotal = (assets) => assets.reduce((total, asset) => {
+                if (asset.subItems?.length > 0) return total + asset.subItems.reduce((t, sub) => t + calculateAssetValue(sub), 0);
+                return total + calculateAssetValue(asset);
+            }, 0);
+
             const grandTotal = useMemo(() => portfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [portfolio, rates]);
 
-            const calculateDistribution = () => {
-                const totals = { TRY: 0, USD: 0, EUR: 0, GRAM: 0, ATA: 0, STOCK: 0 };
-                portfolio.forEach(person => {
-                    person.assets.forEach(asset => {
-                        if (asset.subItems && asset.subItems.length > 0) {
-                            asset.subItems.forEach(sub => {
-                                totals[sub.type] = (totals[sub.type] || 0) + safeParseNum(sub.amount);
-                            });
-                        } else {
-                            totals[asset.type] = (totals[asset.type] || 0) + safeParseNum(asset.amount);
-                        }
-                    });
-                });
+            const updatePortfolioAsset = (personId, assetId, updater) => setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, assets: p.assets.map(a => a.id === assetId ? updater(a) : a) } : p));
+            const updateSubItem = (personId, assetId, subId, field, value) => updatePortfolioAsset(personId, assetId, a => ({ ...a, subItems: a.subItems.map(s => s.id === subId ? { ...s, [field]: value } : s) }));
 
-                const tryEquivalent = {
-                    TRY: totals.TRY, USD: totals.USD * rates.USD, EUR: totals.EUR * rates.EUR,
-                    GRAM: totals.GRAM * rates.GRAM, ATA: totals.ATA * rates.ATA, STOCK: totals.STOCK * rates.STOCK
-                };
-
-                if (grandTotal === 0) return [];
-
-                return Object.keys(tryEquivalent)
-                    .filter(key => tryEquivalent[key] > 0)
-                    .map(key => ({
-                        type: key,
-                        label: currencyLabels[key] || key,
-                        percentage: ((tryEquivalent[key] / grandTotal) * 100).toFixed(1)
-                    }))
-                    .sort((a, b) => b.percentage - a.percentage);
+            const addAsset = (personId) => {
+                const newId = `asset-${Date.now()}`;
+                setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, assets: [...p.assets, { id: newId, name: '', type: 'TRY', amount: '', costPrice: '', currentPrice: '', subItems: [] }] } : p));
+                setExpandedAssets(prev => ({ ...prev, [newId]: true }));
             };
-            const distribution = calculateDistribution();
-
-            const formatMoney = (value) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value) + " ₺";
-
-            const togglePersonAccordion = (personId) => setExpandedPersons(prev => ({ ...prev, [personId]: !prev[personId] }));
-            const toggleAssetAccordion = (assetId) => setExpandedAssets(prev => ({ ...prev, [assetId]: !prev[assetId] }));
-            const updatePersonName = (personId, newName) => setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, person: newName } : p));
-            const updatePortfolioAsset = (personId, assetId, updater) => setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.map(asset => asset.id === assetId ? updater(asset) : asset) } : person));
 
             const addSubItem = (personId, assetId) => {
                 updatePortfolioAsset(personId, assetId, asset => {
                     const subItems = [...(asset.subItems || [])];
-                    subItems.push({ id: `sub-${Date.now() + 1}`, name: '', type: 'TRY', amount: '' });
+                    subItems.push({ id: `sub-${Date.now()}`, name: '', type: asset.type === 'STOCK' ? 'STOCK' : 'TRY', amount: '', costPrice: '', currentPrice: '' });
+                    // Ana bakiyeyi silmeme mantığı düzeltildi. Artık girdiği miktar kaybolmuyor, sadece yeni boş bir kalem açılıyor.
                     return { ...asset, subItems };
                 });
             };
 
-            const removeSubItem = (personId, assetId, subItemId) => {
-                if (window.confirm("Bu alt kalemi silmek istediğinize emin misiniz?")) {
-                    updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.filter(s => s.id !== subItemId) }));
-                }
-            };
-            const updateSubItem = (personId, assetId, subItemId, field, value) => updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.map(sub => sub.id === subItemId ? { ...sub, [field]: value } : sub) }));
-            const addAsset = (personId) => {
-                const newId = `asset-${Date.now()}`;
-                setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: [...person.assets, { id: newId, name: '', type: 'TRY', amount: '', subItems: [] }] } : person));
-                setExpandedAssets(prev => ({ ...prev, [newId]: true }));
-            };
-            const removeAsset = (e, personId, assetId) => {
-                e.stopPropagation();
-                if (window.confirm("Bu varlığı kalıcı olarak silmek istediğinize emin misiniz?")) {
-                    setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.filter(a => a.id !== assetId) } : person));
-                }
-            };
-
-            const removePerson = (e, personId) => {
-                e.preventDefault();
-                e.stopPropagation(); // Olası tüm sıçramaları kes
-
-                const isConfirmed = window.confirm("Bu kişiyi ve tüm varlıklarını silmek istediğine emin misin?");
-                if (isConfirmed) {
-                    setPortfolio(prev => prev.filter(p => p.id !== personId));
-                    setExpandedPersons(prev => {
-                        const newState = { ...prev };
-                        delete newState[personId];
-                        return newState;
-                    });
-                }
-            };
-
-            const addNewPerson = () => {
-                const newId = `person-${Date.now()}`;
-                setPortfolio(prev => [...prev, { id: newId, person: '', assets: [] }]);
-                setExpandedPersons(prev => ({ ...prev, [newId]: true }));
-            };
-
-            if (appState === 'loading_vault') {
-                return (
-                    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-                        <i className="fa-solid fa-vault text-primary text-5xl animate-float opacity-80"></i>
-                        <p className="text-emerald-300 font-semibold tracking-widest uppercase text-xs animate-pulse opacity-70">Bağlanıyor</p>
+            // UI Rendering Helpers
+            const renderInputGroup = (item, onChangeAmount, onChangeCost, onChangeCurrent, onChangeType) => (
+                <div className="flex flex-col gap-1 w-full relative z-[10]">
+                    <div className="midas-input-group w-full relative">
+                        <input type="number" value={item.amount} onChange={e => onChangeAmount(e.target.value)} className={`midas-input font-numbers text-sm ${item.type === 'STOCK' ? 'flex-[1]' : 'flex-[2]'}`} placeholder={item.type === 'STOCK' ? 'Adet' : 'Miktar'} />
+                        <div className="midas-divider"></div>
+                        <input type="number" value={item.costPrice || ''} onChange={e => onChangeCost(e.target.value)} disabled={item.type === 'TRY'} className={`midas-input font-numbers text-sm text-zinc-300 ${item.type === 'STOCK' ? 'flex-[1]' : 'flex-[2]'} ${item.type === 'TRY' ? 'opacity-30' : ''}`} placeholder="Maliyet ₺" />
+                        
+                        {item.type === 'STOCK' && (
+                            <>
+                                <div className="midas-divider"></div>
+                                <input type="number" value={item.currentPrice || ''} onChange={e => onChangeCurrent(e.target.value)} className="midas-input font-numbers text-sm text-emerald-300 flex-[1.2]" placeholder="Anlık ₺" />
+                            </>
+                        )}
+                        <div className="midas-divider"></div>
+                        <CustomSelect value={item.type} options={currencyLabels} onChange={onChangeType} className={`text-white ${item.type === 'STOCK' ? 'flex-[0.8] min-w-[55px]' : 'flex-1 min-w-[70px]'}`} />
                     </div>
-                );
-            }
 
-            if (appState === 'setup_github' || appState === 'set_password' || appState === 'enter_password') {
+                    {item.costPrice && item.type !== 'TRY' && (() => {
+                        const pnl = calculatePnL(item.amount, rates[item.type], item.costPrice, item.type, item.currentPrice);
+                        if (!pnl) return null;
+                        return (
+                            <div className="flex justify-end pr-1 mt-1">
+                                <span className={`text-[10px] font-bold tracking-widest px-2 py-1 rounded-md shadow-sm border ${pnl.isZero ? 'bg-zinc-800 border-zinc-700 text-zinc-400' : pnl.isProfit ? 'bg-emerald-900/40 border-emerald-800/50 text-emerald-400' : 'bg-red-900/40 border-red-800/50 text-red-400'}`}>
+                                    {pnl.isProfit && !pnl.isZero ? '+' : ''}{pnl.percentage.toFixed(2)}% ({formatMoney(pnl.profit)})
+                                </span>
+                            </div>
+                        );
+                    })()}
+                </div>
+            );
+
+
+            if (appState === 'loading_vault' || appState === 'setup_github' || appState === 'set_password' || appState === 'enter_password') {
                 return (
                     <div className="min-h-screen flex items-center justify-center p-4">
-                        <div className="glass-card p-8 sm:p-10 rounded-[2rem] w-full max-w-sm relative animate-fade-in-up premium-border">
-                            {appState === 'setup_github' && (
-                                <form onSubmit={saveGithubConfig} className="flex flex-col gap-5">
-                                    <div className="text-center mb-4">
-                                        <i className="fa-solid fa-database text-5xl text-emerald-400 mb-4 opacity-90"></i>
+                        {appState === 'loading_vault' ? (
+                            <div className="flex flex-col items-center gap-4">
+                                <i className="fa-solid fa-vault text-primary text-5xl animate-float opacity-80"></i>
+                                <p className="text-emerald-300 font-semibold tracking-widest uppercase text-xs animate-pulse opacity-70">Bağlanıyor</p>
+                            </div>
+                        ) : (
+                            <div className="glass-card p-8 sm:p-10 rounded-[2rem] w-full max-w-sm relative animate-fade-in-up premium-border">
+                                {appState === 'setup_github' && (
+                                    <form onSubmit={saveGithubConfig} className="flex flex-col gap-5 text-center">
+                                        <i className="fa-brands fa-github text-5xl text-white mb-2 opacity-90"></i>
                                         <h3 className="text-2xl font-bold text-white tracking-tight">Kasa Erişimi</h3>
-                                        <p className="text-xs text-zinc-400 mt-2">Private Repository bilgilerini girin.</p>
-                                    </div>
-                                    {authError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">{authError}</div>}
-                                    <input required type="text" value={formConfig.username} onChange={e => setFormConfig({ ...formConfig, username: e.target.value })} placeholder="GitHub Kullanıcı Adı" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none focus:border-primary/50" />
-                                    <input required type="text" value={formConfig.repo} onChange={e => setFormConfig({ ...formConfig, repo: e.target.value })} placeholder="Depo Adı" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none focus:border-primary/50" />
-                                    <input required type="password" value={formConfig.token} onChange={e => setFormConfig({ ...formConfig, token: e.target.value })} placeholder="Erişim Token (PAT)" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none focus:border-primary/50" />
-                                    <button type="submit" className="mt-2 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">BAĞLA</button>
-                                </form>
-                            )}
-                            {appState === 'set_password' && (
-                                <form onSubmit={setupNewVault} className="flex flex-col gap-6 text-center relative">
-                                    <i className="fa-solid fa-shield-halved text-5xl text-emerald-400 mb-2 opacity-90 animate-pulse"></i>
-                                    <div>
+                                        {authError && <div className="text-red-400 text-xs text-center">{authError}</div>}
+                                        <input required type="text" value={formConfig.username} onChange={e => setFormConfig({ ...formConfig, username: e.target.value })} placeholder="GitHub Kullanıcı Adı" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none" />
+                                        <input required type="text" value={formConfig.repo} onChange={e => setFormConfig({ ...formConfig, repo: e.target.value })} placeholder="Depo Adı" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none" />
+                                        <input required type="password" value={formConfig.token} onChange={e => setFormConfig({ ...formConfig, token: e.target.value })} placeholder="Erişim Token (PAT)" className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none" />
+                                        <button type="submit" className="mt-2 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20">BAĞLA</button>
+                                    </form>
+                                )}
+                                {appState === 'set_password' && (
+                                    <form onSubmit={setupNewVault} className="flex flex-col gap-6 text-center">
+                                        <i className="fa-solid fa-shield-halved text-5xl text-emerald-400 mb-2 opacity-90"></i>
                                         <h3 className="text-2xl font-bold text-white mb-2">Şifre Oluştur</h3>
-                                        <p className="text-xs text-zinc-400">Verileriniz bu şifreyle saklanacak.</p>
-                                    </div>
-                                    {authError && <div className="text-red-400 text-xs text-center">{authError}</div>}
-                                    <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifre" className="w-full glass-surface rounded-xl px-4 py-4 text-center text-white outline-none text-xl tracking-[0.3em] font-bold focus:border-primary/50" />
-                                    <button type="submit" className="py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg active:scale-95 transition-all">BAŞLAT</button>
-                                </form>
-                            )}
-                            {appState === 'enter_password' && (
-                                <form onSubmit={handleAuth} className="flex flex-col gap-6 text-center relative">
-                                    <i className="fa-solid fa-lock text-5xl text-white opacity-80 mb-2"></i>
-                                    <h3 className="text-2xl font-bold text-white">Kasaya Giriş</h3>
-                                    {authError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">{authError}</div>}
-                                    <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="······" className="w-full glass-surface rounded-xl px-4 py-4 text-center text-white outline-none text-xl tracking-[0.3em] focus:border-primary/50 font-bold" />
-                                    <button type="submit" className="py-3.5 rounded-xl font-bold text-sm bg-white text-black shadow-lg active:scale-95 transition-all">KİLİDİ AÇ</button>
-                                </form>
-                            )}
-                        </div>
+                                        {authError && <div className="text-red-400 text-xs text-center">{authError}</div>}
+                                        <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Şifre" className="w-full glass-surface rounded-xl px-4 py-4 text-center text-white outline-none text-xl tracking-[0.3em] font-bold" />
+                                        <button type="submit" className="py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-emerald-600 text-white">BAŞLAT</button>
+                                    </form>
+                                )}
+                                {appState === 'enter_password' && (
+                                    <form onSubmit={unlockVault} className="flex flex-col gap-6 text-center">
+                                        <i className="fa-solid fa-lock text-5xl text-white opacity-80 mb-2"></i>
+                                        <h3 className="text-2xl font-bold text-white">Kasaya Giriş</h3>
+                                        {authError && <div className="text-red-400 text-xs text-center">{authError}</div>}
+                                        <input required type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="······" className="w-full glass-surface rounded-xl px-4 py-4 text-center text-white outline-none text-xl tracking-[0.3em] font-bold" />
+                                        <button type="submit" className="py-3.5 rounded-xl font-bold text-sm bg-white text-black">KİLİDİ AÇ</button>
+                                    </form>
+                                )}
+                            </div>
+                        )}
                     </div>
                 );
             }
 
             return (
                 <div className="mx-auto w-full max-w-[95%] xl:max-w-6xl pt-6 pb-20 relative z-10 animate-fade-in-up">
-
-                    {/* Toast Notification */}
-                    <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl premium-border backdrop-blur-xl ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8 pointer-events-none'} ${toast.type === 'error' ? 'bg-red-500/20 border-red-500/30' : 'bg-emerald-500/20 border-emerald-500/30'}`}>
+                    <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl premium-border backdrop-blur-xl ${toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-8 pointer-events-none'} ${toast.type === 'error' ? 'bg-red-500/20 border-red-500/30' : 'bg-emerald-500/20 border-emerald-500/30'}`}>
                         <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${toast.type === 'error' ? 'bg-red-500/30 text-red-200' : 'bg-emerald-500/30 text-emerald-300'}`}>
                             <i className={`fa-solid text-[10px] ${toast.type === 'error' ? 'fa-triangle-exclamation' : 'fa-check'}`}></i>
                         </div>
                         <p className={`font-bold text-xs tracking-wide ${toast.type === 'error' ? 'text-red-100' : 'text-emerald-50'}`}>{toast.message}</p>
                     </div>
 
-                    {/* Header */}
-                    <header className="flex justify-between items-center pb-5 mb-8 border-b border-white/5">
-                        <div className="flex gap-2">
-                            <button onClick={lockVault} title="Kasayı Kilitle" className="w-10 h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors border border-transparent hover:border-amber-500/30">
-                                <i className="fa-solid fa-lock text-sm"></i>
-                            </button>
-                            <button onClick={disconnectGithub} title="GitHub Bağlantısını Kes" className="w-10 h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-transparent hover:border-red-500/30">
-                                <i className="fa-solid fa-power-off text-sm"></i>
-                            </button>
-                        </div>
+                    <header className="flex justify-between items-center pb-5 mb-8 border-b border-white/10">
+                        <button onClick={lockVault} className="w-10 h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                            <i className="fa-solid fa-lock text-sm"></i>
+                        </button>
                         <div className="flex flex-col items-center">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                                <i className="fa-solid fa-shield-halved text-black text-lg"></i>
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center mb-2 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                                <i className="fa-solid fa-chart-pie text-white text-lg"></i>
                             </div>
-                            <h1 className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">Portföy Takip</h1>
+                            <h1 className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">Midas Vari Kasa</h1>
                         </div>
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <span className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-widest transition-opacity duration-300 flex items-center gap-1.5 ${isSaving ? 'opacity-100 text-emerald-400' : 'opacity-0'}`}>
-                                <i className="fa-solid fa-cloud-arrow-up animate-bounce"></i> <span className="hidden sm:inline">Eşitleniyor...</span>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-[9px] uppercase font-bold tracking-widest transition-opacity duration-300 flex items-center gap-1.5 ${isSaving ? 'opacity-100 text-emerald-400' : 'opacity-0'}`}>
+                                <i className="fa-solid fa-cloud-arrow-up animate-bounce"></i> <span className="hidden sm:inline">Eşitleniyor</span>
                             </span>
-                            <button onClick={() => handleSaveToGithub(false)} disabled={isSaving} className={`flex items-center gap-2 font-bold text-[10px] sm:text-xs px-4 py-2.5 rounded-xl transition-all ${isSaving ? 'bg-primary text-black' : 'glass-surface text-primary border border-primary/30 hover:bg-primary/10'}`}>
-                                <i className={`fa-solid ${isSaving ? 'fa-check' : 'fa-cloud-arrow-up'} text-sm`}></i>
-                                <span className="hidden sm:inline">{isSaving ? 'KAYDEDİLDİ' : 'KAYDET'}</span>
-                            </button>
                         </div>
                     </header>
 
-                    {/* Total Balance */}
                     <div className="text-center py-4 mb-8 flex flex-col items-center px-2">
-                        <div className="glass-surface px-4 py-2 rounded-full border border-white/10 inline-flex items-center gap-2 mb-3">
-                            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                            <p className="text-[10px] text-zinc-200 font-semibold tracking-widest uppercase">Toplam Varlık</p>
-                        </div>
-                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-emerald-800 font-numbers break-words max-w-full">
+                        <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white font-numbers drop-shadow-lg">
                             {formatMoney(grandTotal)}
                         </h2>
                     </div>
 
-                    {/* Market Rates Grid */}
-                    <div className="mb-10 glass-card p-4 sm:p-5 rounded-3xl max-w-2xl mx-auto premium-border">
+                    <div className="mb-10 glass-card p-4 sm:p-5 rounded-3xl max-w-2xl mx-auto border-t border-white/10">
                         <div className="flex justify-between items-center mb-4 px-2">
                             <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                                <i className="fa-solid fa-chart-line text-emerald-400"></i> Piyasa
+                                <i className="fa-solid fa-bolt text-yellow-400"></i> Canlı Piyasa
                             </p>
-                            <button onClick={fetchLiveRates} disabled={isLoadingRates} className="text-[9px] text-emerald-300 hover:text-emerald-200 uppercase font-bold tracking-wider flex items-center gap-1.5 glass-surface px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/5">
-                                <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin" : ""}`}></i> Yenile
+                            <button onClick={fetchLiveRates} disabled={isLoadingRates} className="text-[10px] text-zinc-900 bg-emerald-400 hover:bg-emerald-300 uppercase font-bold tracking-wider flex items-center gap-2 px-4 py-2 rounded-xl transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin" : ""}`}></i> VERİLERİ ÇEK
                             </button>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                             {['TRY', 'USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
-                                <div key={currency} className="glass-surface p-3 rounded-xl flex flex-col items-center border border-transparent hover:border-white/10 transition-colors">
-                                    <textarea
-                                        rows={1}
-                                        value={currencyLabels[currency] || currency}
-                                        onChange={(e) => setCurrencyLabels(prev => ({ ...prev, [currency]: e.target.value }))}
-                                        onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                        className="text-[8px] sm:text-[9px] text-zinc-400 font-bold tracking-widest mb-1 uppercase bg-transparent text-center outline-none hover:text-white transition-colors w-full border-b border-transparent focus:border-white/20 resize-none overflow-hidden"
-                                        style={{ minHeight: '16px' }}
-                                        title="İsmi Değiştir"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={rates[currency]}
-                                        disabled={currency === 'TRY'}
-                                        onChange={(e) => handleRateChange(currency, e.target.value)}
-                                        className={`w-full text-base sm:text-lg font-bold font-numbers outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-emerald-400' : 'text-white'} ${currency === 'TRY' ? 'opacity-50' : ''}`}
-                                    />
+                                <div key={currency} className="glass-surface p-3 rounded-xl flex flex-col items-center border border-transparent hover:border-emerald-500/30 transition-colors">
+                                    <textarea rows={1} value={currencyLabels[currency] || currency} onChange={(e) => setCurrencyLabels(prev => ({ ...prev, [currency]: e.target.value }))} className="text-[9px] text-zinc-400 font-bold tracking-widest mb-1 uppercase bg-transparent text-center outline-none hover:text-white w-full border-b border-transparent resize-none overflow-hidden" style={{ minHeight: '16px' }} />
+                                    <input type="number" value={rates[currency]} disabled={currency === 'TRY'} onChange={(e) => setRates(prev => ({ ...prev, [currency]: parseFloat(e.target.value) || 0 }))} className={`w-full text-base sm:text-lg font-bold font-numbers outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-yellow-400' : 'text-white'} ${currency === 'TRY' ? 'opacity-50' : ''}`} />
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Asset Distribution Summary */}
-                    {distribution.length > 0 && (
-                        <div className="mb-10 max-w-3xl mx-auto flex flex-wrap justify-center gap-3 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                            {distribution.map(dist => (
-                                <div key={dist.type} className="glass-surface px-4 py-2.5 rounded-2xl flex items-center gap-2.5 border border-transparent hover:border-white/10 transition-colors cursor-default">
-                                    <div className={`w-2 h-2 rounded-full ${dist.type === 'TRY' ? 'bg-zinc-400' : dist.type === 'USD' ? 'bg-green-400' : dist.type === 'EUR' ? 'bg-blue-400' : 'bg-yellow-400'}`}></div>
-                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{dist.label}</span>
-                                    <span className="text-xs font-black text-white font-numbers">%{dist.percentage}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Portfolios Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
                         {portfolio.map((person) => {
                             const personTotal = calculatePersonTotal(person.assets);
                             const isOpen = expandedPersons[person.id] !== false;
 
                             return (
-                                <div key={person.id} className={`glass-card rounded-[2rem] transition-all duration-300 premium-border z-10 ${isOpen ? 'shadow-2xl border-white/10' : 'hover:border-white/10 shadow-lg'}`}>
-
-                                    {/* Card Header (Person Name & Total) */}
-                                    <div onClick={() => togglePersonAccordion(person.id)} className={`p-5 sm:p-6 flex justify-between items-center cursor-pointer transition-colors ${isOpen ? 'bg-white/5 rounded-t-[2rem]' : 'rounded-[2rem]'}`}>
+                                <div key={person.id} className={`glass-card rounded-[2rem] transition-all duration-300 ${isOpen ? 'shadow-2xl border-white/10' : 'hover:border-white/10 shadow-lg'}`}>
+                                    <div onClick={() => setExpandedPersons(prev => ({ ...prev, [person.id]: !prev[person.id] }))} className={`p-5 sm:p-6 flex justify-between items-center cursor-pointer transition-colors ${isOpen ? 'bg-white/5 rounded-t-[2rem]' : 'rounded-[2rem]'}`}>
                                         <div className="flex flex-col flex-1 min-w-0 pr-3">
-                                            <textarea
-                                                rows={1}
-                                                value={person.person}
-                                                onChange={(e) => updatePersonName(person.id, e.target.value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                                className="bg-transparent text-lg sm:text-xl font-bold text-white uppercase tracking-wide w-full outline-none resize-none overflow-hidden flex-1 pb-0.5"
-                                                style={{ minHeight: '28px' }}
-                                                placeholder="İSİM GİRİNİZ"
-                                            />
-                                            <div className="flex items-center gap-1.5 mt-0.5 pl-0.5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                            <input type="text" value={person.person} onChange={(e) => setPortfolio(prev => prev.map(p => p.id === person.id ? { ...p, person: e.target.value } : p))} onClick={e => e.stopPropagation()} className="bg-transparent text-xl font-bold text-white uppercase tracking-wide w-full outline-none placeholder:text-zinc-600" placeholder="PORTFÖY ADI" />
+                                            <div className="flex items-center gap-1.5 mt-1 pl-0.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
                                                 <p className="text-[9px] text-zinc-400 font-semibold uppercase tracking-widest">{person.assets.length} Varlık</p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex items-center gap-2 sm:gap-3 shrink-0">
-                                            <span className="text-sm sm:text-base font-bold font-numbers text-white">{formatMoney(personTotal)}</span>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'bg-white text-black rotate-180' : 'glass-surface text-zinc-400'}`}>
-                                                <i className="fa-solid fa-chevron-down text-xs"></i>
-                                            </div>
+                                        <div className="text-right flex items-center gap-3 shrink-0">
+                                            <span className="text-base font-bold font-numbers text-white">{formatMoney(personTotal)}</span>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 ${isOpen ? 'bg-white text-black rotate-180' : 'glass-surface text-zinc-400'}`}><i className="fa-solid fa-chevron-down text-xs"></i></div>
                                         </div>
                                     </div>
 
-                                    {/* Card Content (Assets) */}
                                     <div className={`accordion-content ${isOpen ? 'open' : ''}`}>
                                         <div className="px-4 sm:px-6 pb-6 pt-2 flex flex-col gap-4 border-t border-white/5">
                                             {person.assets.map((asset) => {
-                                                const hasSubItems = asset.subItems && asset.subItems.length > 0;
-                                                const assetValue = calculateAssetValue(asset);
+                                                const hasSubItems = asset.subItems?.length > 0;
                                                 const isAssetOpen = expandedAssets[asset.id];
+                                                const assetValue = hasSubItems ? asset.subItems.reduce((t, sub) => t + calculateAssetValue(sub), 0) : calculateAssetValue(asset);
 
                                                 return (
-                                                    <div key={asset.id} className="glass-surface rounded-2xl border border-transparent hover:border-white/10 transition-all flex flex-col">
-
-                                                        {/* Asset Header (Accordion Toggle) */}
-                                                        <div onClick={() => toggleAssetAccordion(asset.id)} className="p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 rounded-t-2xl transition-colors group">
-                                                            <div className="flex items-center gap-2 flex-1 min-w-0 pr-2">
-                                                                <div className="w-7 h-7 rounded-full bg-black/30 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
-                                                                    <i className="fa-solid fa-wallet text-zinc-400 text-[10px] group-hover:text-emerald-400"></i>
+                                                    <div key={asset.id} className="glass-surface rounded-2xl flex flex-col">
+                                                        <div onClick={() => setExpandedAssets(prev => ({ ...prev, [asset.id]: !prev[asset.id] }))} className="p-4 flex justify-between items-center cursor-pointer hover:bg-white/5 rounded-t-2xl transition-colors group">
+                                                            <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${asset.type === 'STOCK' ? 'bg-purple-500/20 text-purple-400' : 'bg-black/40 text-emerald-400'}`}>
+                                                                    <i className={`fa-solid ${asset.type === 'STOCK' ? 'fa-chart-line' : 'fa-wallet'} text-xs`}></i>
                                                                 </div>
-                                                                <DebouncedInput
-                                                                    as="textarea"
-                                                                    rows={1}
-                                                                    value={asset.name}
-                                                                    onChange={(val) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: val }))}
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                                                    title={asset.name}
-                                                                    className="flex-1 min-w-0 bg-transparent font-bold text-white text-xs sm:text-sm outline-none placeholder:text-zinc-500 resize-none overflow-hidden"
-                                                                    style={{ minHeight: '20px', paddingTop: '2px' }}
-                                                                    placeholder="KURUM / VARLIK ADI"
-                                                                />
+                                                                <input type="text" value={asset.name} onChange={(e) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: e.target.value.toUpperCase() }))} onClick={e => e.stopPropagation()} className="flex-1 min-w-0 bg-transparent font-bold text-white text-sm outline-none placeholder:text-zinc-600 uppercase" placeholder={asset.type === 'STOCK' ? "HİSSE KODU (Örn: THYAO)" : "VARLIK / KURUM ADI"} />
                                                             </div>
                                                             <div className="flex items-center gap-3 shrink-0">
                                                                 <div className="text-right">
-                                                                    <span className="text-sm font-bold font-numbers text-emerald-400">{formatMoney(assetValue)}</span>
+                                                                    <span className="text-sm font-bold font-numbers text-white">{formatMoney(assetValue)}</span>
                                                                     {hasSubItems && !isAssetOpen && <div className="text-[9px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">{asset.subItems.length} Kalem</div>}
                                                                 </div>
-                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isAssetOpen ? 'bg-white/20 text-white rotate-180' : 'text-zinc-500 group-hover:bg-white/10'}`}>
-                                                                    <i className="fa-solid fa-chevron-down text-[10px]"></i>
-                                                                </div>
-                                                                <button onClick={(e) => removeAsset(e, person.id, asset.id)} className="text-zinc-500 hover:text-red-400 opacity-60 hover:opacity-100 p-1.5 rounded-lg z-20 relative ml-1 transition-colors"><i className="fa-solid fa-trash text-[11px]"></i></button>
+                                                                <button onClick={(e) => { e.stopPropagation(); if (window.confirm("Bu varlığı silmek istediğinize emin misiniz?")) setPortfolio(prev => prev.map(p => p.id === person.id ? { ...p, assets: p.assets.filter(a => a.id !== asset.id) } : p)); }} className="text-zinc-500 hover:text-red-400 p-1.5"><i className="fa-solid fa-trash text-[11px]"></i></button>
                                                             </div>
                                                         </div>
 
-                                                        {/* Collapsible Content */}
                                                         <div className={`accordion-content ${isAssetOpen ? 'open' : ''}`}>
                                                             <div className="p-4 pt-1 flex flex-col gap-4 border-t border-white/5">
-
                                                                 <div className="flex flex-col gap-3">
                                                                     {!hasSubItems ? (
-                                                                        <div className="flex flex-col gap-1 w-full relative z-[100]">
-                                                                            <div className="flex bg-black/40 border border-white/10 rounded-xl focus-within:border-emerald-500/50 transition-colors w-full relative">
-                                                                                <DebouncedInput
-                                                                                    type="number"
-                                                                                    value={asset.amount}
-                                                                                    onChange={(val) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, amount: val }))}
-                                                                                    className="flex-[2] min-w-0 bg-transparent text-white font-numbers font-bold text-sm py-2.5 px-3 outline-none"
-                                                                                    placeholder="Miktar"
-                                                                                />
-                                                                                <div className="w-[1px] bg-white/10"></div>
-                                                                                <DebouncedInput
-                                                                                    type="number"
-                                                                                    value={asset.costPrice || ''}
-                                                                                    onChange={(val) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, costPrice: val }))}
-                                                                                    className="flex-[2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-sm py-2.5 px-3 outline-none border-r border-white/10"
-                                                                                    placeholder="Maliyet ₺"
-                                                                                    disabled={asset.type === 'TRY'}
-                                                                                    title="Birim Maliyet (₺)"
-                                                                                />
-                                                                                <CustomSelect
-                                                                                    value={asset.type}
-                                                                                    options={currencyLabels}
-                                                                                    onChange={(newVal) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, type: newVal }))}
-                                                                                    className="flex-1 bg-black/30 text-zinc-300"
-                                                                                />
-                                                                            </div>
-                                                                            {asset.costPrice && asset.type !== 'TRY' && (() => {
-                                                                                const pnl = calculatePnL(asset.amount, rates[asset.type], asset.costPrice, asset.type);
-                                                                                if (!pnl) return null;
-                                                                                return (
-                                                                                    <div className="flex justify-end pr-1 mt-0.5">
-                                                                                        <span className={`text-[10px] font-bold tracking-widest px-1.5 py-0.5 rounded-md ${pnl.isNeutral ? 'bg-zinc-500/20 text-zinc-400' : pnl.isProfit ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                                                            {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({formatMoney(pnl.profit)})
-                                                                                        </span>
-                                                                                    </div>
-                                                                                );
-                                                                            })()}
-                                                                        </div>
+                                                                        renderInputGroup(
+                                                                            asset, 
+                                                                            (v) => updatePortfolioAsset(person.id, asset.id, a => ({...a, amount: v})),
+                                                                            (v) => updatePortfolioAsset(person.id, asset.id, a => ({...a, costPrice: v})),
+                                                                            (v) => updatePortfolioAsset(person.id, asset.id, a => ({...a, currentPrice: v})),
+                                                                            (v) => updatePortfolioAsset(person.id, asset.id, a => ({...a, type: v}))
+                                                                        )
                                                                     ) : (
                                                                         <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl w-fit">
-                                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                                                                            <span className="text-[9px] font-bold text-emerald-300 tracking-widest uppercase">Alt Kalemler Aktif</span>
+                                                                            <span className="text-[9px] font-bold text-emerald-300 tracking-widest uppercase">Parçalı Varlık Aktif</span>
                                                                         </div>
                                                                     )}
 
+                                                                    <button onClick={() => addSubItem(person.id, asset.id)} className="w-full text-[10px] text-zinc-400 hover:text-white font-bold tracking-widest uppercase flex items-center justify-center gap-1.5 bg-black/20 px-4 py-2.5 rounded-xl transition-colors hover:bg-black/40 border border-white/5">
+                                                                        <i className="fa-solid fa-layer-group text-[9px]"></i> Parçalı Alım Ekle
+                                                                    </button>
                                                                 </div>
 
                                                                 {hasSubItems && (
-                                                                    <div className="flex flex-col gap-2 pl-2 border-l-2 border-white/10 ml-2 mt-1 mb-2">
+                                                                    <div className="flex flex-col gap-3 pl-2 border-l-2 border-white/10 ml-2 mt-2">
                                                                         {asset.subItems.map((sub) => (
-                                                                            <div key={sub.id} className="flex flex-col gap-2 bg-black/20 p-2.5 rounded-xl border border-white/5 relative">
+                                                                            <div key={sub.id} className="flex flex-col gap-2 p-3 rounded-xl bg-black/30 border border-white/5">
                                                                                 <div className="flex items-center justify-between gap-2">
-                                                                                    <DebouncedInput
-                                                                                        type="text"
-                                                                                        value={sub.name}
-                                                                                        onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'name', val)}
-                                                                                        className="bg-transparent py-1 px-1 rounded-md text-xs font-semibold text-zinc-200 outline-none flex-1 min-w-0 placeholder:text-zinc-600 focus:bg-white/5 transition-colors"
-                                                                                        placeholder="Kalem Adı"
-                                                                                        title={sub.name}
-                                                                                    />
-                                                                                    <button onClick={(e) => { e.stopPropagation(); removeSubItem(person.id, asset.id, sub.id); }} className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md transition-colors"><i className="fa-solid fa-trash text-[10px]"></i></button>
+                                                                                    <input type="text" value={sub.name} onChange={(e) => updateSubItem(person.id, asset.id, sub.id, 'name', e.target.value.toUpperCase())} className="bg-transparent text-xs font-bold text-zinc-200 outline-none flex-1 placeholder:text-zinc-600 uppercase" placeholder={sub.type === 'STOCK' ? "HİSSE KODU (Örn: EREGL)" : "Açıklama (Örn: Ziraat)"} />
+                                                                                    <button onClick={() => { if (window.confirm("Bu alt kalemi silmek istediğinize emin misiniz?")) updatePortfolioAsset(person.id, asset.id, a => ({ ...a, subItems: a.subItems.filter(s => s.id !== sub.id) })); }} className="text-zinc-500 hover:text-red-400"><i className="fa-solid fa-times text-[12px]"></i></button>
                                                                                 </div>
-
-                                                                                <div className="flex flex-col gap-1 w-full relative z-[100]">
-                                                                                    <div className="flex glass-surface border border-white/10 rounded-lg focus-within:border-white/30 transition-colors w-full relative">
-                                                                                        <DebouncedInput
-                                                                                            type="number"
-                                                                                            value={sub.amount}
-                                                                                            onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'amount', val)}
-                                                                                            className="flex-[2] min-w-0 bg-transparent text-white font-numbers font-bold text-xs py-2 px-3 outline-none"
-                                                                                            placeholder="Miktar"
-                                                                                        />
-                                                                                        <div className="w-[1px] bg-white/10"></div>
-                                                                                        <DebouncedInput
-                                                                                            type="number"
-                                                                                            value={sub.costPrice || ''}
-                                                                                            onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', val)}
-                                                                                            className="flex-[2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs py-2 px-3 outline-none border-r border-white/10"
-                                                                                            placeholder="Maliyet ₺"
-                                                                                            disabled={sub.type === 'TRY'}
-                                                                                            title="Birim Maliyet (₺)"
-                                                                                        />
-                                                                                        <CustomSelect
-                                                                                            value={sub.type}
-                                                                                            options={currencyLabels}
-                                                                                            onChange={(newVal) => updateSubItem(person.id, asset.id, sub.id, 'type', newVal)}
-                                                                                            className="flex-1 bg-black/30 text-white"
-                                                                                        />
-                                                                                    </div>
-                                                                                    {sub.costPrice && sub.type !== 'TRY' && (() => {
-                                                                                        const pnl = calculatePnL(sub.amount, rates[sub.type], sub.costPrice, sub.type);
-                                                                                        if (!pnl) return null;
-                                                                                        return (
-                                                                                            <div className="flex justify-end pr-1 mt-0.5">
-                                                                                                <span className={`text-[9.5px] font-bold tracking-widest px-1.5 py-0.5 rounded-md ${pnl.isNeutral ? 'bg-zinc-500/20 text-zinc-400' : pnl.isProfit ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                                                                    {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({formatMoney(pnl.profit)})
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        );
-                                                                                    })()}
-                                                                                </div>
+                                                                                {renderInputGroup(
+                                                                                    sub,
+                                                                                    (v) => updateSubItem(person.id, asset.id, sub.id, 'amount', v),
+                                                                                    (v) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', v),
+                                                                                    (v) => updateSubItem(person.id, asset.id, sub.id, 'currentPrice', v),
+                                                                                    (v) => updateSubItem(person.id, asset.id, sub.id, 'type', v)
+                                                                                )}
                                                                             </div>
                                                                         ))}
                                                                     </div>
                                                                 )}
-
-                                                                <button onClick={() => addSubItem(person.id, asset.id)} className="w-full text-[10px] text-zinc-300 hover:text-white font-bold tracking-widest uppercase flex items-center justify-center gap-1.5 glass-surface px-4 py-2.5 rounded-xl transition-colors hover:bg-white/5 border border-transparent hover:border-white/10 mt-1">
-                                                                    <i className="fa-solid fa-plus text-[9px]"></i> Kalem Ekle
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 );
                                             })}
 
-                                            {/* Footer Actions (New Asset & Delete Person) */}
-                                            <div className="flex flex-row justify-between items-center gap-3 pt-4 border-t border-white/5 mt-2 relative z-50">
-                                                <button onClick={(e) => removePerson(e, person.id)} className="text-[10px] text-zinc-400 hover:text-red-400 font-bold uppercase tracking-widest px-5 py-3.5 glass-surface rounded-xl transition-all hover:bg-red-500/10 hover:border-red-500/30 shrink-0 z-50 relative cursor-pointer flex items-center justify-center">
-                                                    KİŞİYİ SİL
+                                            <div className="flex flex-row justify-between items-center gap-3 pt-4 border-t border-white/5 mt-2">
+                                                <button onClick={() => { if (window.confirm("Bu portföyü silmek istediğine emin misin?")) { setPortfolio(prev => prev.filter(p => p.id !== person.id)); setExpandedPersons(prev => { const n = {...prev}; delete n[person.id]; return n; }); } }} className="text-[10px] text-zinc-500 hover:text-red-400 font-bold uppercase tracking-widest px-4 py-3 bg-black/20 rounded-xl transition-all hover:bg-red-900/20">
+                                                    SİL
                                                 </button>
-                                                <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-emerald-500 hover:text-black transition-all shadow-sm">
-                                                    + YENİ VARLIK
+                                                <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-black bg-emerald-500 font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                                                    + YENİ VARLIK EKLE
                                                 </button>
                                             </div>
                                         </div>
@@ -1077,17 +799,15 @@
                             );
                         })}
 
-                        {/* Add New Person Button */}
                         <div className="pt-2 pb-10">
-                            <button onClick={addNewPerson} className="w-full py-10 border border-dashed border-white/20 hover:border-emerald-500/50 glass-card rounded-[2rem] text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all flex flex-col items-center gap-4 hover:bg-white/5 group">
+                            <button onClick={() => { const newId = `person-${Date.now()}`; setPortfolio(prev => [...prev, { id: newId, person: '', assets: [] }]); setExpandedPersons(prev => ({ ...prev, [newId]: true })); }} className="w-full py-10 border border-dashed border-white/20 hover:border-emerald-500/50 glass-card rounded-[2rem] text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition-all flex flex-col items-center gap-4 hover:bg-white/5 group">
                                 <div className="w-12 h-12 rounded-full glass-surface flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-black transition-colors">
                                     <i className="fa-solid fa-plus text-lg"></i>
                                 </div>
-                                YENİ PORTFÖY
+                                YENİ PORTFÖY OLUŞTUR
                             </button>
                         </div>
                     </div>
-
                 </div>
             );
         };
@@ -1098,3 +818,5 @@
 </body>
 
 </html>
+
+
