@@ -367,25 +367,10 @@
             symbol = symbol.replace(/[^A-Z0-9]/g, '');
 
             try {
-                // Yahoo Finance proxy'si (allorigins /get metodu Origin: null destekler)
-                const url = `https://api.allorigins.win/get?url=` + encodeURIComponent(`https://query2.finance.yahoo.com/v8/finance/chart/${symbol}.IS`);
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.contents) {
-                        const parsed = JSON.parse(data.contents);
-                        if (parsed.chart && parsed.chart.result && parsed.chart.result.length > 0) {
-                            return parsed.chart.result[0].meta.regularMarketPrice;
-                        }
-                    }
-                }
-            } catch (e) { console.warn("YFinance via AllOrigins failed", e); }
-            
-            try {
-                // TradingView (Yedek)
+                // TradingView (Content-Type: text/plain kullanarak OPTIONS preflight CORS hatasını atlatır)
                 const res = await fetch('https://scanner.tradingview.com/turkey/scan', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ symbols: { tickers: [`BIST:${symbol}`] }, query: { types: [] }, columns: ["close"] })
                 });
                 if (res.ok) {
@@ -394,7 +379,9 @@
                         return data.data[0].d[0];
                     }
                 }
-            } catch (e) { console.warn("TradingView failed", e); }
+            } catch (e) {
+                console.warn("TradingView fetch failed: ", e);
+            }
 
             return null;
         };
