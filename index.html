@@ -713,11 +713,13 @@
             };
 
             const calculatePersonTotal = (assets) => assets.reduce((total, asset) => total + calculateAssetValue(asset), 0);
-            const grandTotal = useMemo(() => portfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [portfolio, rates]);
+            
+            const visiblePortfolio = useMemo(() => portfolio.filter(p => !p.isHidden), [portfolio]);
+            const grandTotal = useMemo(() => visiblePortfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [visiblePortfolio, rates]);
 
             const calculateDistribution = () => {
                 const tryEquivalent = { TRY: 0, USD: 0, EUR: 0, GRAM: 0, ATA: 0, STOCK: 0 };
-                portfolio.forEach(person => {
+                visiblePortfolio.forEach(person => {
                     person.assets.forEach(asset => {
                         if (asset.subItems && asset.subItems.length > 0) {
                             asset.subItems.forEach(sub => {
@@ -777,6 +779,10 @@
                 if (window.confirm("Bu varlığı kalıcı olarak silmek istediğinize emin misiniz?")) {
                     setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.filter(a => a.id !== assetId) } : person));
                 }
+            };
+
+            const togglePersonVisibility = (personId) => {
+                setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, isHidden: !p.isHidden } : p));
             };
 
             const removePerson = (e, personId) => {
@@ -998,8 +1004,18 @@
                                             </div>
                                         </div>
                                         <div className="text-right flex items-center gap-2 sm:gap-3 shrink-0">
-                                            <span className="text-sm sm:text-base font-bold font-numbers text-white">{formatMoney(personTotal)}</span>
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'bg-white text-black rotate-180' : 'glass-surface text-zinc-400'}`}>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); togglePersonVisibility(person.id); }}
+                                                className={`p-2 rounded-xl transition-all shadow-sm flex items-center justify-center shrink-0 border ${person.isHidden ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10 hover:text-white'}`}
+                                                title={person.isHidden ? "Hesaplamaya Dahil Et" : "Hesaplamadan Çıkar"}
+                                            >
+                                                <i className={`fa-solid ${person.isHidden ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
+                                            </button>
+                                            <div className="flex flex-col items-end">
+                                                <span className={`text-sm sm:text-base font-bold font-numbers transition-colors ${person.isHidden ? 'text-zinc-500 line-through decoration-zinc-500/50' : 'text-white'}`}>{formatMoney(personTotal)}</span>
+                                                {person.isHidden && <span className="text-[9px] text-red-400/80 uppercase tracking-wider font-semibold mt-0.5">Gizlendi</span>}
+                                            </div>
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ml-1 ${isOpen ? 'bg-white text-black rotate-180' : 'glass-surface text-zinc-400'}`}>
                                                 <i className="fa-solid fa-chevron-down text-xs"></i>
                                             </div>
                                         </div>
