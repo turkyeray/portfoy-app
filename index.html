@@ -406,6 +406,9 @@
 
             const [rates, setRates] = useState({ USD: 44.46, EUR: 51.30, GRAM: 6600, ATA: 45400, TRY: 1, STOCK: 1 });
 
+            // deleteTarget: { type: 'person' | 'asset' | 'subItem', personId, assetId, subItemId }
+            const [deleteTarget, setDeleteTarget] = useState(null);
+
             const showToast = (message, type = 'success') => {
                 setToast({ show: true, message, type });
                 setTimeout(() => setToast(prev => ({ ...prev, show: false })), 3000);
@@ -424,6 +427,7 @@
                 localStorage.setItem('vault_session_v4', JSON.stringify({ password: pass, expiry }));
             };
             const clearVaultSession = () => localStorage.removeItem('vault_session_v4');
+            const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
             const isInitialMount = React.useRef(true);
             const skipNextSave = React.useRef(true);
@@ -447,7 +451,19 @@
                     }, 10);
                     return () => clearTimeout(handler);
                 }
-            }, [portfolio, currencyLabels]);
+            }, [portfolio, currencyLabels, rates]);
+
+            // Otomatik piyasa kurları güncellemesi
+            useEffect(() => {
+                let mounted = true;
+                if (appState === 'app') {
+                    // Kasadan kurların yüklenmesine ve UI'ın oturmasına izin vermek için ufak bir gecikme
+                    setTimeout(() => {
+                        if (mounted) fetchLiveRates();
+                    }, 500);
+                }
+                return () => { mounted = false; };
+            }, [appState]);
 
             // OTOMATİK HİSSE FİYATI GÜNCELLEMESİ (Sadece isim değiştiğinde tetiklenir)
             useEffect(() => {
@@ -557,6 +573,10 @@
                             setCurrencyLabels(lbls);
                         }
 
+                        if (parsedData.rates && !Array.isArray(parsedData)) {
+                            setRates(prev => ({ ...prev, ...parsedData.rates }));
+                        }
+
                         const expandedInit = {};
                         finalPortfolio.forEach(p => expandedInit[p.id] = true);
                         setExpandedPersons(expandedInit);
@@ -593,7 +613,7 @@
             const handleSaveToGithub = async (isAutoSave = false) => {
                 setIsSaving(true);
                 try {
-                    const jsonString = JSON.stringify({ portfolio, labels: currencyLabels });
+                    const jsonString = JSON.stringify({ portfolio, labels: currencyLabels, rates });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, vaultPassword).toString();
                     const vaultPackage = { isEncrypted: true, lastUpdate: new Date().toISOString(), payload: encryptedPayload };
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(vaultPackage, null, 2))));
@@ -638,10 +658,7 @@
             };
 
             const disconnectGithub = () => {
-                if (window.confirm("GitHub bağlantısını kesmek istediğinize emin misiniz?")) {
-                    localStorage.removeItem('gh_config_v5');
-                    window.location.reload();
-                }
+                setShowDisconnectModal(true);
             };
 
             const fetchLiveRates = async () => {
@@ -712,7 +729,7 @@
                 return { profit, percentage, isProfit: profit >= 0, isNeutral: Math.abs(profit) < 0.01 };
             };
 
-            const calculatePersonTotal = (assets) => assets.reduce((total, asset) => total + calculateAssetValue(asset), 0);
+            const calculatePersonTotal = (assets) => assets.filter(a => !a.isHidden).reduce((total, asset) => total + calculateAssetValue(asset), 0);
             
             const visiblePortfolio = useMemo(() => portfolio.filter(p => !p.isHidden), [portfolio]);
             const grandTotal = useMemo(() => visiblePortfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0), [visiblePortfolio, rates]);
@@ -720,7 +737,7 @@
             const calculateDistribution = () => {
                 const tryEquivalent = { TRY: 0, USD: 0, EUR: 0, GRAM: 0, ATA: 0, STOCK: 0 };
                 visiblePortfolio.forEach(person => {
-                    person.assets.forEach(asset => {
+                    person.assets.filter(a => !a.isHidden).forEach(asset => {
                         if (asset.subItems && asset.subItems.length > 0) {
                             asset.subItems.forEach(sub => {
                                 const rate = sub.type === 'STOCK' ? (safeParseNum(sub.currentPrice) || safeParseNum(sub.costPrice) || 0) : (rates[sub.type] || 1);
@@ -763,10 +780,9 @@
                 });
             };
 
-            const removeSubItem = (personId, assetId, subItemId) => {
-                if (window.confirm("Bu alt kalemi silmek istediğinize emin misiniz?")) {
-                    updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.filter(s => s.id !== subItemId) }));
-                }
+            const removeSubItem = (e, personId, assetId, subItemId) => {
+                e.stopPropagation();
+                setDeleteTarget({ type: 'subItem', personId, assetId, subItemId });
             };
             const updateSubItem = (personId, assetId, subItemId, field, value) => updatePortfolioAsset(personId, assetId, asset => ({ ...asset, subItems: asset.subItems.map(sub => sub.id === subItemId ? { ...sub, [field]: value } : sub) }));
             const addAsset = (personId) => {
@@ -776,28 +792,22 @@
             };
             const removeAsset = (e, personId, assetId) => {
                 e.stopPropagation();
-                if (window.confirm("Bu varlığı kalıcı olarak silmek istediğinize emin misiniz?")) {
-                    setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.filter(a => a.id !== assetId) } : person));
-                }
+                setDeleteTarget({ type: 'asset', personId, assetId });
             };
 
             const togglePersonVisibility = (personId) => {
                 setPortfolio(prev => prev.map(p => p.id === personId ? { ...p, isHidden: !p.isHidden } : p));
             };
 
+            const toggleAssetVisibility = (e, personId, assetId) => {
+                e.stopPropagation();
+                setPortfolio(prev => prev.map(person => person.id === personId ? { ...person, assets: person.assets.map(asset => asset.id === assetId ? { ...asset, isHidden: !asset.isHidden } : asset) } : person));
+            };
+
             const removePerson = (e, personId) => {
                 e.preventDefault();
-                e.stopPropagation(); // Olası tüm sıçramaları kes
-
-                const isConfirmed = window.confirm("Bu kişiyi ve tüm varlıklarını silmek istediğine emin misin?");
-                if (isConfirmed) {
-                    setPortfolio(prev => prev.filter(p => p.id !== personId));
-                    setExpandedPersons(prev => {
-                        const newState = { ...prev };
-                        delete newState[personId];
-                        return newState;
-                    });
-                }
+                e.stopPropagation();
+                setDeleteTarget({ type: 'person', personId });
             };
 
             const forceFetchStockPrice = async (personId, assetId, subId = null) => {
@@ -817,8 +827,9 @@
                     target.currentPrice = price;
                     target._lastFetchedTicker = ticker;
                     setPortfolio(newPortfolio);
+                    showToast(`${ticker} fiyatı güncellendi`, 'success');
                 } else {
-                    alert(`${ticker} için TradingView'dan fiyat çekilemedi. Girdiğiniz sembolü kontrol edin.`);
+                    showToast(`${ticker} için fiyat çekilemedi. Sembolü kontrol edin.`, 'error');
                 }
             };
 
@@ -931,35 +942,58 @@
                     </div>
 
                     {/* Market Rates Grid */}
-                    <div className="mb-10 glass-card p-4 sm:p-5 rounded-3xl max-w-2xl mx-auto premium-border">
-                        <div className="flex justify-between items-center mb-4 px-2">
-                            <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
-                                <i className="fa-solid fa-chart-line text-emerald-400"></i> Piyasa
-                            </p>
-                            <button onClick={fetchLiveRates} disabled={isLoadingRates} className="text-[9px] text-emerald-300 hover:text-emerald-200 uppercase font-bold tracking-wider flex items-center gap-1.5 glass-surface px-2.5 py-1.5 rounded-lg transition-colors hover:bg-white/5">
-                                <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin" : ""}`}></i> Yenile
+                    <div className="mb-10 glass-card p-5 sm:p-6 rounded-[2rem] max-w-3xl mx-auto premium-border shadow-2xl relative overflow-hidden group">
+                        {/* Decorative glow inside card */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none transition-opacity duration-700 opacity-50 group-hover:opacity-100"></div>
+                        
+                        <div className="flex justify-between items-center mb-5 px-2 relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <i className="fa-solid fa-chart-line text-emerald-400 text-xs"></i>
+                                </div>
+                                <p className="text-[11px] font-black text-white uppercase tracking-widest">
+                                    Canlı Piyasa
+                                </p>
+                            </div>
+                            <button onClick={fetchLiveRates} disabled={isLoadingRates} className={`text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-2 glass-surface w-28 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 ${isLoadingRates ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/20 border-white/5'}`}>
+                                <i className={`fa-solid fa-rotate-right ${isLoadingRates ? "fa-spin" : ""}`}></i> 
+                                <span className="hidden sm:inline">YENİLE</span>
                             </button>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
-                            {['USD', 'EUR', 'GRAM', 'ATA'].map(currency => (
-                                <div key={currency} className="glass-surface p-3 rounded-xl flex flex-col items-center border border-transparent hover:border-white/10 transition-colors">
-                                    <textarea
-                                        rows={1}
-                                        value={currencyLabels[currency] || currency}
-                                        onChange={(e) => setCurrencyLabels(prev => ({ ...prev, [currency]: e.target.value }))}
-                                        onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                        className="text-[8px] sm:text-[9px] text-zinc-400 font-bold tracking-widest mb-1 uppercase bg-transparent text-center outline-none hover:text-white transition-colors w-full border-b border-transparent focus:border-white/20 resize-none overflow-hidden"
-                                        style={{ minHeight: '16px' }}
-                                        title="İsmi Değiştir"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={rates[currency]}
-                                        onChange={(e) => handleRateChange(currency, e.target.value)}
-                                        className={`w-full text-base sm:text-lg font-bold font-numbers outline-none bg-transparent text-center px-0 ${['GRAM', 'ATA'].includes(currency) ? 'text-emerald-400' : 'text-white'}`}
-                                    />
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 relative z-10">
+                            {['USD', 'EUR', 'GRAM', 'ATA'].map(currency => {
+                                const icons = { USD: 'fa-dollar-sign', EUR: 'fa-euro-sign', GRAM: 'fa-coins', ATA: 'fa-medal' };
+                                const colors = { USD: 'text-green-400', EUR: 'text-blue-400', GRAM: 'text-amber-400', ATA: 'text-amber-500' };
+                                const bgColors = { USD: 'bg-green-500/10', EUR: 'bg-blue-500/10', GRAM: 'bg-amber-500/10', ATA: 'bg-amber-500/10' };
+                                
+                                return (
+                                    <div key={currency} className="glass-surface p-3 sm:p-4 rounded-2xl flex flex-col items-center border border-white/5 hover:border-white/20 transition-all hover:-translate-y-1 hover:shadow-xl hover:bg-white/[0.03] group/card relative overflow-hidden">
+                                        <div className={`absolute -right-6 -top-6 w-20 h-20 rounded-full opacity-20 blur-xl ${bgColors[currency]} group-hover/card:opacity-40 transition-opacity duration-300 pointer-events-none`}></div>
+                                        
+                                        <div className="w-full flex items-center justify-center gap-2 mb-2 relative z-10">
+                                            <i className={`fa-solid ${icons[currency]} ${colors[currency]} opacity-80 text-[10px]`}></i>
+                                            <textarea
+                                                rows={1}
+                                                value={currencyLabels[currency] || currency}
+                                                onChange={(e) => setCurrencyLabels(prev => ({ ...prev, [currency]: e.target.value }))}
+                                                onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                                className="text-[9px] sm:text-[10px] text-zinc-300 font-bold tracking-widest uppercase bg-transparent text-center outline-none hover:text-white transition-colors border-b border-transparent focus:border-emerald-500/50 resize-none overflow-hidden max-w-[80%] leading-tight pb-0.5"
+                                                style={{ minHeight: '16px' }}
+                                                title="İsmi Değiştir"
+                                            />
+                                        </div>
+                                        
+                                        <div className="relative w-full z-10">
+                                            <input
+                                                type="number"
+                                                value={rates[currency]}
+                                                onChange={(e) => handleRateChange(currency, e.target.value)}
+                                                className={`w-full text-xl sm:text-2xl font-black font-numbers outline-none bg-black/20 focus:bg-black/40 rounded-xl py-2 text-center transition-all border border-transparent focus:border-white/10 ${['GRAM', 'ATA'].includes(currency) ? 'text-amber-400' : 'text-white'}`}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -988,16 +1022,20 @@
                                     {/* Card Header (Person Name & Total) */}
                                     <div onClick={() => togglePersonAccordion(person.id)} className={`p-5 sm:p-6 flex justify-between items-center cursor-pointer transition-colors ${isOpen ? 'bg-white/5 rounded-t-[2rem]' : 'rounded-[2rem]'}`}>
                                         <div className="flex flex-col flex-1 min-w-0 pr-3">
-                                            <textarea
-                                                rows={1}
-                                                value={person.person}
-                                                onChange={(e) => updatePersonName(person.id, e.target.value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                                className="bg-transparent text-lg sm:text-xl font-bold text-white uppercase tracking-wide w-full outline-none resize-none overflow-hidden flex-1 pb-0.5"
-                                                style={{ minHeight: '28px' }}
-                                                placeholder="İSİM GİRİNİZ"
-                                            />
+                                            <div className="relative w-full min-w-0 flex-1 pb-0.5">
+                                                <div className="invisible whitespace-pre-wrap break-words text-lg sm:text-xl font-bold uppercase tracking-wide leading-tight p-0 m-0 w-full min-w-0 pointer-events-none">
+                                                    {person.person || "İSİM GİRİNİZ"}
+                                                </div>
+                                                <DebouncedInput
+                                                    as="textarea"
+                                                    value={person.person}
+                                                    onChange={(val) => updatePersonName(person.id, val)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="absolute inset-0 w-full h-full bg-transparent text-lg sm:text-xl font-bold text-white uppercase tracking-wide leading-tight p-0 m-0 border-0 outline-none resize-none overflow-hidden"
+                                                    placeholder="İSİM GİRİNİZ"
+                                                    title={person.person}
+                                                />
+                                            </div>
                                             <div className="flex items-center gap-1.5 mt-0.5 pl-0.5">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
                                                 <p className="text-[9px] text-zinc-400 font-semibold uppercase tracking-widest">{person.assets.length} Varlık</p>
@@ -1038,18 +1076,20 @@
                                                                 <div className="w-7 h-7 rounded-full bg-black/30 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
                                                                     <i className="fa-solid fa-wallet text-zinc-400 text-[10px] group-hover:text-emerald-400"></i>
                                                                 </div>
-                                                                <DebouncedInput
-                                                                    as="textarea"
-                                                                    rows={1}
-                                                                    value={asset.name}
-                                                                    onChange={(val) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: val }))}
-                                                                    onClick={(e) => e.stopPropagation()}
-                                                                    onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                                                    title={asset.name}
-                                                                    className="flex-1 min-w-0 bg-transparent font-bold text-white text-xs sm:text-sm outline-none placeholder:text-zinc-500 resize-none overflow-hidden"
-                                                                    style={{ minHeight: '20px', paddingTop: '2px' }}
-                                                                    placeholder="KURUM / VARLIK ADI"
-                                                                />
+                                                                <div className="relative w-full min-w-0 flex-1">
+                                                                    <div className="invisible whitespace-pre-wrap break-words font-bold text-[11px] sm:text-sm leading-tight p-0 m-0 w-full min-w-0 pointer-events-none">
+                                                                        {asset.name || "VARLIK ADI"}
+                                                                    </div>
+                                                                    <DebouncedInput
+                                                                        as="textarea"
+                                                                        value={asset.name}
+                                                                        onChange={(val) => updatePortfolioAsset(person.id, asset.id, a => ({ ...a, name: val }))}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        title={asset.name}
+                                                                        className="absolute inset-0 w-full h-full bg-transparent font-bold text-white text-[11px] sm:text-sm leading-tight p-0 m-0 border-0 outline-none placeholder:text-zinc-500 resize-none overflow-hidden"
+                                                                        placeholder="VARLIK ADI"
+                                                                    />
+                                                                </div>
                                                                 {asset.type === 'STOCK' && (
                                                                     <button 
                                                                         onClick={(e) => { e.stopPropagation(); forceFetchStockPrice(person.id, asset.id); }}
@@ -1060,15 +1100,25 @@
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            <div className="flex items-center gap-3 shrink-0">
-                                                                <div className="text-right">
-                                                                    <span className="text-sm font-bold font-numbers text-emerald-400">{formatMoney(assetValue)}</span>
-                                                                    {hasSubItems && !isAssetOpen && <div className="text-[9px] text-zinc-500 font-semibold tracking-widest uppercase mt-0.5">{asset.subItems.length} Kalem</div>}
+                                                            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                                                                <button 
+                                                                    onClick={(e) => toggleAssetVisibility(e, person.id, asset.id)}
+                                                                    className={`p-1 rounded-md transition-all flex items-center justify-center shrink-0 border ${asset.isHidden ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-transparent text-zinc-500 hover:text-white border-transparent'}`}
+                                                                    title={asset.isHidden ? "Hesaplamaya Dahil Et" : "Hesaplamadan Çıkar"}
+                                                                >
+                                                                    <i className={`fa-solid ${asset.isHidden ? 'fa-eye-slash' : 'fa-eye'} text-[10px]`}></i>
+                                                                </button>
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className={`text-[11px] sm:text-sm font-bold font-numbers transition-colors ${asset.isHidden ? 'text-zinc-500 line-through decoration-zinc-500/50' : 'text-emerald-400'}`}>{formatMoney(assetValue)}</span>
+                                                                    {asset.isHidden && <span className="text-[7px] sm:text-[8px] text-red-400/80 uppercase tracking-wider font-semibold mt-[1px]">Gizlendi</span>}
+                                                                    {hasSubItems && !isAssetOpen && !asset.isHidden && <div className="text-[8px] sm:text-[9px] text-zinc-500 font-semibold tracking-widest uppercase mt-[1px]">{asset.subItems.length} Kalem</div>}
                                                                 </div>
-                                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isAssetOpen ? 'bg-white/20 text-white rotate-180' : 'text-zinc-500 group-hover:bg-white/10'}`}>
-                                                                    <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                                                                <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ml-0.5 sm:ml-1 ${isAssetOpen ? 'bg-white/20 text-white rotate-180' : 'text-zinc-500 group-hover:bg-white/10'}`}>
+                                                                    <i className="fa-solid fa-chevron-down text-[9px]"></i>
                                                                 </div>
-                                                                <button onClick={(e) => removeAsset(e, person.id, asset.id)} className="text-zinc-500 hover:text-red-400 opacity-60 hover:opacity-100 p-1.5 rounded-lg z-20 relative ml-1 transition-colors"><i className="fa-solid fa-trash text-[11px]"></i></button>
+                                                                <button onClick={(e) => { e.stopPropagation(); removeAsset(e, person.id, asset.id); }} className="p-1 sm:p-1.5 rounded-md text-zinc-500 hover:text-red-400 opacity-60 hover:opacity-100 z-20 relative ml-0.5 transition-colors">
+                                                                    <i className="fa-solid fa-trash text-[10px] sm:text-[11px]"></i>
+                                                                </button>
                                                             </div>
                                                         </div>
 
@@ -1146,7 +1196,7 @@
                                                                                             type="text"
                                                                                             value={sub.name}
                                                                                             onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'name', val)}
-                                                                                            className="bg-transparent py-1 px-1 rounded-md text-xs font-semibold text-zinc-200 outline-none flex-1 min-w-0 placeholder:text-zinc-600 focus:bg-white/5 transition-colors"
+                                                                                            className="bg-transparent py-1 px-1 rounded-md text-xs font-semibold text-zinc-200 outline-none flex-1 min-w-0 placeholder:text-zinc-600 focus:bg-white/5 transition-colors overflow-hidden text-ellipsis whitespace-nowrap"
                                                                                             placeholder="Kalem Adı"
                                                                                             title={sub.name}
                                                                                         />
@@ -1160,7 +1210,12 @@
                                                                                             </button>
                                                                                         )}
                                                                                     </div>
-                                                                                    <button onClick={(e) => { e.stopPropagation(); removeSubItem(person.id, asset.id, sub.id); }} className="text-zinc-500 hover:text-red-400 p-1.5 rounded-md transition-colors"><i className="fa-solid fa-trash text-[10px]"></i></button>
+                                                                                    <button 
+                                                                                        onClick={(e) => removeSubItem(e, person.id, asset.id, sub.id)} 
+                                                                                        className="p-1.5 rounded-md transition-colors flex items-center justify-center text-zinc-500 hover:text-red-400"
+                                                                                    >
+                                                                                        <i className="fa-solid fa-trash text-[10px]"></i>
+                                                                                    </button>
                                                                                 </div>
 
                                                                                 <div className="flex flex-col gap-1 w-full relative z-[100]">
@@ -1239,7 +1294,10 @@
 
                                             {/* Footer Actions (New Asset & Delete Person) */}
                                             <div className="flex flex-row justify-between items-center gap-3 pt-4 border-t border-white/5 mt-2 relative z-50">
-                                                <button onClick={(e) => removePerson(e, person.id)} className="text-[10px] text-zinc-400 hover:text-red-400 font-bold uppercase tracking-widest px-5 py-3.5 glass-surface rounded-xl transition-all hover:bg-red-500/10 hover:border-red-500/30 shrink-0 z-50 relative cursor-pointer flex items-center justify-center">
+                                                <button 
+                                                    onClick={(e) => removePerson(e, person.id)} 
+                                                    className="text-[10px] font-bold uppercase tracking-widest px-5 py-3.5 rounded-xl transition-all shrink-0 z-50 relative cursor-pointer flex items-center justify-center text-zinc-400 hover:text-red-400 glass-surface hover:bg-red-500/10 hover:border-red-500/30"
+                                                >
                                                     KİŞİYİ SİL
                                                 </button>
                                                 <button onClick={() => addAsset(person.id)} className="flex-1 text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 font-bold uppercase tracking-widest py-3 rounded-xl hover:bg-emerald-500 hover:text-black transition-all shadow-sm">
@@ -1262,6 +1320,73 @@
                             </button>
                         </div>
                     </div>
+
+                    {/* Delete Target Modal */}
+                    {deleteTarget && (
+                        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="glass-card p-6 sm:p-8 rounded-[2rem] max-w-sm w-full border border-white/10 shadow-2xl animate-fade-in-up">
+                                <div className="flex flex-col items-center text-center gap-5">
+                                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2 premium-border">
+                                        <i className="fa-solid fa-triangle-exclamation text-3xl text-red-500 animate-pulse"></i>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Emin misiniz?</h3>
+                                    <p className="text-sm text-zinc-400 -mt-2 leading-relaxed">
+                                        {deleteTarget.type === 'person' && "Bu kişiyi ve ona bağlı tüm varlıkları silmek istediğinize emin misiniz? Bu işlem geri alınamaz."}
+                                        {deleteTarget.type === 'asset' && "Bu varlığı (ve varsa alt kalemlerini) kalıcı olarak silmek istediğinize emin misiniz?"}
+                                        {deleteTarget.type === 'subItem' && "Bu alt kalemi silmek istediğinize emin misiniz?"}
+                                    </p>
+                                    <div className="flex w-full gap-3 mt-4">
+                                        <button onClick={() => setDeleteTarget(null)} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] sm:text-xs bg-white/5 hover:bg-white/10 text-white transition-colors border border-white/10 tracking-widest">İPTAL</button>
+                                        <button 
+                                            onClick={() => {
+                                                if (deleteTarget.type === 'person') {
+                                                    setPortfolio(prev => prev.filter(p => p.id !== deleteTarget.personId));
+                                                    setExpandedPersons(prev => { const newState = { ...prev }; delete newState[deleteTarget.personId]; return newState; });
+                                                } else if (deleteTarget.type === 'asset') {
+                                                    setPortfolio(prev => prev.map(p => p.id === deleteTarget.personId ? { ...p, assets: p.assets.filter(a => a.id !== deleteTarget.assetId) } : p));
+                                                } else if (deleteTarget.type === 'subItem') {
+                                                    updatePortfolioAsset(deleteTarget.personId, deleteTarget.assetId, asset => ({ ...asset, subItems: asset.subItems.filter(s => s.id !== deleteTarget.subItemId) }));
+                                                }
+                                                setDeleteTarget(null);
+                                            }} 
+                                            className="flex-1 py-3.5 rounded-xl font-bold text-[11px] sm:text-xs bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/30 transition-colors tracking-widest"
+                                        >
+                                            SİL GİTSİN
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Disconnect Modal */}
+                    {showDisconnectModal && (
+                        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="glass-card p-6 sm:p-8 rounded-[2rem] max-w-sm w-full border border-white/10 shadow-2xl animate-fade-in-up">
+                                <div className="flex flex-col items-center text-center gap-5">
+                                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-2 premium-border">
+                                        <i className="fa-solid fa-power-off text-3xl text-red-500 animate-pulse"></i>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Bağlantıyı Kes</h3>
+                                    <p className="text-sm text-zinc-400 -mt-2 leading-relaxed">
+                                        Cihaz kayıtlı GitHub erişimini unutacak. Kasaya tekrar erişmek için bilgilerinizi yeniden girmelisiniz. Emin misiniz?
+                                    </p>
+                                    <div className="flex w-full gap-3 mt-4">
+                                        <button onClick={() => setShowDisconnectModal(false)} className="flex-1 py-3.5 rounded-xl font-bold text-[11px] sm:text-xs bg-white/5 hover:bg-white/10 text-white transition-colors border border-white/10 tracking-widest">İPTAL</button>
+                                        <button 
+                                            onClick={() => {
+                                                localStorage.removeItem('gh_config_v5');
+                                                window.location.reload();
+                                            }} 
+                                            className="flex-1 py-3.5 rounded-xl font-bold text-[11px] sm:text-xs bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/30 transition-colors tracking-widest"
+                                        >
+                                            ÇIKIŞ YAP
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             );
