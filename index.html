@@ -231,11 +231,113 @@
         // CONSTANTS & PURE HELPERS
         // =========================================================================
         const DEFAULT_GH_CONFIG = { token: '', username: 'turkyeray', repo: 'portfoy-kasa' };
-        const DEFAULT_RATES = { USD: 44.46, EUR: 51.30, GRAM: 6600, ATA: 45400, TRY: 1, STOCK: 1 };
-        const DEFAULT_LABELS = { USD: 'Dolar', EUR: 'Euro', TRY: 'TL', GRAM: 'Gram', ATA: 'Ata', STOCK: 'Hisse' };
+        const DEFAULT_RATES = {
+            USD: 50.67,
+            EUR: 55.63,
+            GBP: 66.44,
+            GRAM: 6078,
+            CEYREK: 9908,
+            ATA: 41823,
+            SILVER: 70.6,
+            BTC: 3070000,
+            TRY: 1,
+            STOCK: 1
+        };
+        const DEFAULT_LABELS = {
+            USD: 'Dolar',
+            EUR: 'Euro',
+            GBP: 'Sterlin',
+            TRY: 'TL',
+            GRAM: 'Gram',
+            CEYREK: 'Çeyrek',
+            ATA: 'Ata',
+            SILVER: 'Gümüş',
+            BTC: 'Bitcoin',
+            STOCK: 'Hisse'
+        };
+        const ASSET_DOT_COLORS = {
+            TRY: 'bg-zinc-400',
+            USD: 'bg-green-400',
+            EUR: 'bg-blue-400',
+            GBP: 'bg-cyan-400',
+            GRAM: 'bg-yellow-400',
+            CEYREK: 'bg-amber-300',
+            ATA: 'bg-amber-500',
+            SILVER: 'bg-slate-300',
+            BTC: 'bg-orange-400',
+            STOCK: 'bg-indigo-400'
+        };
+
+        const BIST_POPULAR = [
+            { sym: 'THYAO', name: 'Türk Hava Yolları' },
+            { sym: 'ASELS', name: 'Aselsan' },
+            { sym: 'TUPRS', name: 'Tüpraş' },
+            { sym: 'KCHOL', name: 'Koç Holding' },
+            { sym: 'SAHOL', name: 'Sabancı Holding' },
+            { sym: 'BIMAS', name: 'BİM Mağazalar' },
+            { sym: 'GARAN', name: 'Garanti BBVA' },
+            { sym: 'AKBNK', name: 'Akbank' },
+            { sym: 'ISCTR', name: 'İş Bankası (C)' },
+            { sym: 'YKBNK', name: 'Yapı Kredi' },
+            { sym: 'SISE', name: 'Şişecam' },
+            { sym: 'EREGL', name: 'Ereğli Demir Çelik' },
+            { sym: 'FROTO', name: 'Ford Otosan' },
+            { sym: 'TOASO', name: 'Tofaş Oto' },
+            { sym: 'MGROS', name: 'Migros' },
+            { sym: 'PGSUS', name: 'Pegasus' },
+            { sym: 'TCELL', name: 'Turkcell' },
+            { sym: 'TTKOM', name: 'Türk Telekom' },
+            { sym: 'ENKAI', name: 'Enka İnşaat' },
+            { sym: 'ASTOR', name: 'Astor Enerji' },
+            { sym: 'SASA', name: 'Sasa Polyester' },
+            { sym: 'HEKTS', name: 'Hektaş' },
+            { sym: 'ARCLK', name: 'Arçelik' },
+            { sym: 'VESTL', name: 'Vestel' },
+            { sym: 'DOAS', name: 'Doğuş Otomotiv' },
+            { sym: 'AEFES', name: 'Anadolu Efes' },
+            { sym: 'CCOLA', name: 'Coca-Cola İçecek' },
+            { sym: 'ULKER', name: 'Ülker Bisküvi' },
+            { sym: 'PETKM', name: 'Petkim' },
+            { sym: 'GUBRF', name: 'Gübre Fabrikaları' },
+            { sym: 'KRDMD', name: 'Kardemir (D)' },
+            { sym: 'KOZAL', name: 'Koza Altın' },
+            { sym: 'OYAKC', name: 'Oyak Çimento' },
+            { sym: 'CIMSA', name: 'Çimsa' },
+            { sym: 'AKCNS', name: 'Akçansa' },
+            { sym: 'HALKB', name: 'Halkbank' },
+            { sym: 'VAKBN', name: 'VakıfBank' },
+            { sym: 'TSKB', name: 'TSKB' },
+            { sym: 'ALARK', name: 'Alarko Holding' },
+            { sym: 'DOHOL', name: 'Doğan Holding' },
+            { sym: 'AGHOL', name: 'Anadolu Grubu' },
+            { sym: 'EKGYO', name: 'Emlak Konut GYO' },
+            { sym: 'ISGYO', name: 'İş GYO' },
+            { sym: 'BRSAN', name: 'Borusan Boru' },
+            { sym: 'OTKAR', name: 'Otokar' },
+            { sym: 'TTRAK', name: 'Türk Traktör' },
+            { sym: 'TAVHL', name: 'TAV Havalimanları' },
+            { sym: 'CLEBI', name: 'Çelebi Hava Servisi' },
+            { sym: 'MAVI', name: 'Mavi Giyim' },
+            { sym: 'SOKM', name: 'Şok Marketler' },
+            { sym: 'MPARK', name: 'MLP Sağlık' },
+            { sym: 'TABGD', name: 'TAB Gıda' },
+            { sym: 'LOGO', name: 'Logo Yazılım' },
+            { sym: 'MIATK', name: 'Mia Teknoloji' },
+            { sym: 'KONTR', name: 'Kontrolmatik' },
+            { sym: 'EUPWR', name: 'Europower Enerji' },
+            { sym: 'GESAN', name: 'Girişim Elektrik' },
+            { sym: 'SMRTG', name: 'Smart Güneş' },
+            { sym: 'CWENE', name: 'CW Enerji' },
+            { sym: 'YEOTK', name: 'Yeo Teknoloji' },
+            { sym: 'AKSEN', name: 'Aksa Enerji' },
+            { sym: 'ENERY', name: 'Enerya Enerji' },
+            { sym: 'ODAS', name: 'Odaş Elektrik' },
+            { sym: 'ZOREN', name: 'Zorlu Enerji' }
+        ];
 
         const GH_CONFIG_KEY = 'gh_config_v5';
         const VAULT_SESSION_KEY = 'vault_session_v5';
+        const PRIVACY_MODE_KEY = 'privacy_mode_v1';
         const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 dakika
         const IDLE_TIMEOUT_MS = 15 * 60 * 1000;     // 15 dakika
 
@@ -289,17 +391,54 @@
             return Number.isFinite(num) ? num : 0;
         };
 
-        const formatMoney = (value) => {
+        const formatMoney = (value, masked = false) => {
+            if (masked) return '•••••• ₺';
             const safeVal = Number.isFinite(value) ? (Math.abs(value) < 0.5 ? 0 : value) : 0;
             return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(safeVal) + ' ₺';
         };
+
+        const formatInCurrency = (tryValue, currency, rates, masked = false) => {
+            if (masked) {
+                if (currency === 'USD') return '$•••••';
+                if (currency === 'EUR') return '€•••••';
+                if (currency === 'GRAM') return '•••• gr';
+                return '•••••• ₺';
+            }
+            const safeTry = Number.isFinite(tryValue) ? tryValue : 0;
+            if (currency === 'USD') {
+                const r = safeParseNum(rates?.USD);
+                const val = r > 0 ? safeTry / r : 0;
+                return '$' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+            }
+            if (currency === 'EUR') {
+                const r = safeParseNum(rates?.EUR);
+                const val = r > 0 ? safeTry / r : 0;
+                return '€' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(val);
+            }
+            if (currency === 'GRAM') {
+                const r = safeParseNum(rates?.GRAM);
+                const val = r > 0 ? safeTry / r : 0;
+                return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(val) + ' gr';
+            }
+            return formatMoney(safeTry, false);
+        };
+
+        const normalizeTurkishSearch = (str) =>
+            String(str || '')
+                .replace(/[çÇ]/g, 'c')
+                .replace(/[ğĞ]/g, 'g')
+                .replace(/[ıİI]/g, 'i')
+                .replace(/[öÖ]/g, 'o')
+                .replace(/[şŞ]/g, 's')
+                .replace(/[üÜ]/g, 'u')
+                .toLowerCase();
 
         const formatTitleCase = (str) => {
             if (!str) return 'TL';
             return String(str).trim().split(/[\s_-]+/).map((word) => {
                 if (!word) return '';
                 const upper = word.toUpperCase();
-                if (upper === 'TL' || upper === 'USD' || upper === 'EUR' || upper === 'BIST') return upper;
+                if (upper === 'TL' || upper === 'USD' || upper === 'EUR' || upper === 'GBP' || upper === 'BTC' || upper === 'BIST') return upper;
                 if (word.length <= 4 && word === upper && /[A-Z]/.test(word)) return word;
                 return word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR');
             }).filter(Boolean).join(' ');
@@ -853,7 +992,7 @@
             );
         };
 
-        // Instant auto-wrapping text field: mirror stays 100% in sync with live typing (never truncated with "...")
+        // Instant auto-wrapping text field with optional BIST stock autocomplete portal
         const AutoGrowText = ({
             value,
             onChange,
@@ -862,10 +1001,14 @@
             className = '',
             wrapperClassName = '',
             onClick,
-            title
+            title,
+            isStock = false
         }) => {
             const safeProp = value ?? '';
             const [localValue, setLocalValue] = useState(safeProp);
+            const [isFocused, setIsFocused] = useState(false);
+            const [suggestCoords, setSuggestCoords] = useState(null);
+            const wrapperRef = useRef(null);
             const timerRef = useRef(null);
             const onChangeRef = useRef(onChange);
             const latestPropRef = useRef(safeProp);
@@ -897,6 +1040,51 @@
                 };
             }, []);
 
+            const stockSuggestions = useMemo(() => {
+                if (!isStock || !isFocused) return [];
+                const q = normalizeTurkishSearch(localValue).trim();
+                if (!q) return BIST_POPULAR.slice(0, 6);
+                const exactAlready = BIST_POPULAR.some((s) => `${s.sym} ${s.name}`.toLowerCase() === localValue.trim().toLowerCase());
+                if (exactAlready) return [];
+                return BIST_POPULAR.filter(
+                    (s) =>
+                        s.sym.toLowerCase().startsWith(q) ||
+                        normalizeTurkishSearch(s.name).includes(q) ||
+                        s.sym.toLowerCase().includes(q)
+                ).slice(0, 6);
+            }, [isStock, isFocused, localValue]);
+
+            useEffect(() => {
+                if (!isStock || !isFocused || stockSuggestions.length === 0 || !wrapperRef.current) {
+                    setSuggestCoords(null);
+                    return;
+                }
+                const rect = wrapperRef.current.getBoundingClientRect();
+                const menuWidth = Math.min(260, Math.max(190, rect.width));
+                const left = Math.max(8, Math.min(rect.left, window.innerWidth - menuWidth - 8));
+                const spaceBelow = window.innerHeight - rect.bottom;
+                const direction = spaceBelow < 210 && rect.top > spaceBelow ? 'up' : 'down';
+                setSuggestCoords({
+                    left,
+                    top: rect.bottom + 6,
+                    bottom: window.innerHeight - rect.top + 6,
+                    width: menuWidth,
+                    direction
+                });
+            }, [isStock, isFocused, stockSuggestions.length, localValue]);
+
+            const commitImmediate = (next) => {
+                if (timerRef.current) {
+                    clearTimeout(timerRef.current);
+                    timerRef.current = null;
+                }
+                localValueRef.current = next;
+                setLocalValue(next);
+                if (next !== latestPropRef.current) {
+                    onChangeRef.current(next);
+                }
+            };
+
             const handleChange = (e) => {
                 const next = e.target.value.replace(/\r?\n/g, ' ');
                 localValueRef.current = next;
@@ -911,6 +1099,7 @@
             };
 
             const handleBlur = () => {
+                setIsFocused(false);
                 if (timerRef.current) {
                     clearTimeout(timerRef.current);
                     timerRef.current = null;
@@ -924,11 +1113,13 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     e.currentTarget.blur();
+                } else if (e.key === 'Escape') {
+                    setIsFocused(false);
                 }
             };
 
             return (
-                <div className={`relative w-full min-w-0 flex-1 ${wrapperClassName}`}>
+                <div ref={wrapperRef} className={`relative w-full min-w-0 flex-1 ${wrapperClassName}`}>
                     <div
                         aria-hidden="true"
                         className={`invisible whitespace-pre-wrap break-words p-0 m-0 w-full min-w-0 pointer-events-none select-none ${className}`}
@@ -938,6 +1129,7 @@
                     <textarea
                         rows={1}
                         value={localValue}
+                        onFocus={() => setIsFocused(true)}
                         onChange={handleChange}
                         onBlur={handleBlur}
                         onKeyDown={handleKeyDown}
@@ -946,6 +1138,38 @@
                         title={title || localValue}
                         className={`absolute inset-0 w-full h-full bg-transparent p-0 m-0 border-0 outline-none resize-none overflow-hidden ${className}`}
                     />
+                    {isStock && isFocused && suggestCoords && stockSuggestions.length > 0 && ReactDOM.createPortal(
+                        <div
+                            className="fixed bg-zinc-900/95 backdrop-blur-xl border border-indigo-500/35 rounded-xl shadow-[0_24px_80px_rgba(0,0,0,0.95)] z-[999998] overflow-hidden py-1"
+                            style={{
+                                left: `${suggestCoords.left}px`,
+                                top: suggestCoords.direction === 'up' ? 'auto' : `${suggestCoords.top}px`,
+                                bottom: suggestCoords.direction === 'up' ? `${suggestCoords.bottom}px` : 'auto',
+                                width: `${suggestCoords.width}px`
+                            }}
+                        >
+                            <div className="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-indigo-300/80 border-b border-white/5">
+                                BIST Sembol Önerileri
+                            </div>
+                            {stockSuggestions.map((item) => (
+                                <button
+                                    key={item.sym}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        commitImmediate(`${item.sym} ${item.name}`);
+                                        setIsFocused(false);
+                                    }}
+                                    className="w-full px-3 py-2 text-left flex items-center justify-between gap-2 hover:bg-indigo-500/20 transition-colors"
+                                >
+                                    <span className="text-xs font-black text-indigo-300 font-numbers">{item.sym}</span>
+                                    <span className="text-[11px] text-zinc-300 truncate">{item.name}</span>
+                                </button>
+                            ))}
+                        </div>,
+                        document.body
+                    )}
                 </div>
             );
         };
@@ -1012,8 +1236,10 @@
             liveHistory,
             calculateAssetValue,
             calculatePersonTotal,
-            calculatePnL
+            calculatePnL,
+            privacyMode = false
         }) => {
+            const fmt = (val) => formatMoney(val, privacyMode);
             const [isOpen, setIsOpen] = useState(true);
             const [selectedPersonId, setSelectedPersonId] = useState('all');
             const [chartTab, setChartTab] = useState('performance'); // 'performance' | 'allocation' | 'trend'
@@ -1295,13 +1521,13 @@
                                 <div className="bg-black/30 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
                                     <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Güncel Değer</span>
                                     <span className="text-xs sm:text-base font-black text-white font-numbers mt-1 break-words">
-                                        {formatMoney(analytics.totalValue)}
+                                        {fmt(analytics.totalValue)}
                                     </span>
                                 </div>
                                 <div className="bg-black/30 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
                                     <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Maliyet Bazı</span>
                                     <span className="text-xs sm:text-base font-black text-zinc-200 font-numbers mt-1 break-words">
-                                        {analytics.trackedCost > 0 ? formatMoney(analytics.trackedCost) : '—'}
+                                        {analytics.trackedCost > 0 ? fmt(analytics.trackedCost) : '—'}
                                     </span>
                                     {analytics.trackedCount > 0 && (
                                         <span className="text-[9px] text-zinc-500 mt-0.5">{analytics.trackedCount} kalem takipli</span>
@@ -1312,7 +1538,7 @@
                                     {analytics.netPct !== null ? (
                                         <>
                                             <span className={`text-xs sm:text-base font-black font-numbers mt-1 break-words ${analytics.netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                {analytics.netProfit >= 0 ? '+' : ''}{formatMoney(analytics.netProfit)}
+                                                {analytics.netProfit >= 0 ? '+' : ''}{fmt(analytics.netProfit)}
                                             </span>
                                             <span className={`text-[10px] font-bold font-numbers mt-0.5 ${analytics.netProfit >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
                                                 {analytics.netProfit >= 0 ? '+' : ''}%{analytics.netPct.toFixed(1)}
@@ -1405,7 +1631,7 @@
                                                                 {isPos ? '+' : ''}{item.pnl.percentage.toFixed(1)}%
                                                             </div>
                                                             <div className={`text-[10px] font-semibold ${isPos ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
-                                                                {isPos ? '+' : ''}{formatMoney(item.pnl.profit)}
+                                                                {isPos ? '+' : ''}{fmt(item.pnl.profit)}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1456,11 +1682,11 @@
                                                             </div>
                                                             <div>
                                                                 <span className="text-zinc-500 block font-sans">Toplam Maliyet</span>
-                                                                <span className="text-zinc-200 font-bold">{formatMoney(item.costTotal)}</span>
+                                                                <span className="text-zinc-200 font-bold">{fmt(item.costTotal)}</span>
                                                             </div>
                                                             <div>
                                                                 <span className="text-zinc-500 block font-sans">Güncel Değer</span>
-                                                                <span className="text-emerald-300 font-bold">{formatMoney(item.currentTotal)}</span>
+                                                                <span className="text-emerald-300 font-bold">{fmt(item.currentTotal)}</span>
                                                             </div>
                                                         </div>
                                                     )}
@@ -1525,7 +1751,7 @@
                                                     {activeSlice ? activeSlice.label : 'Toplam'}
                                                 </span>
                                                 <span className="text-xs font-black text-white font-numbers mt-0.5">
-                                                    {formatMoney(activeSlice ? activeSlice.value : analytics.totalValue)}
+                                                    {fmt(activeSlice ? activeSlice.value : analytics.totalValue)}
                                                 </span>
                                                 {activeSlice && (
                                                     <span className="text-[10px] font-bold font-numbers mt-0.5" style={{ color: activeSlice.color }}>
@@ -1560,7 +1786,7 @@
                                                                         {slice.pnlVal >= 0 ? '+' : ''}%{slice.pnlPct.toFixed(1)}
                                                                     </span>
                                                                 )}
-                                                                <span className="text-xs font-bold text-white">{formatMoney(slice.value)}</span>
+                                                                <span className="text-xs font-bold text-white">{fmt(slice.value)}</span>
                                                                 <span className="text-[10px] text-zinc-400 w-10 text-right">%{slice.pct.toFixed(1)}</span>
                                                             </div>
                                                         </div>
@@ -1592,14 +1818,14 @@
                                                     {formatShortDateTr(activeTrendPoint.date)}
                                                 </span>
                                                 <div className="text-sm sm:text-base font-black text-white font-numbers">
-                                                    {formatMoney(activeTrendPoint.value)}
+                                                    {fmt(activeTrendPoint.value)}
                                                 </div>
                                             </div>
                                             {trendDelta && (
                                                 <div className="text-right font-numbers">
                                                     <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-sans block">Dönem Değişimi</span>
                                                     <span className={`text-xs font-bold ${trendDelta.diff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                        {trendDelta.diff >= 0 ? '+' : ''}{formatMoney(trendDelta.diff)} ({trendDelta.diff >= 0 ? '+' : ''}%{trendDelta.pct.toFixed(1)})
+                                                        {trendDelta.diff >= 0 ? '+' : ''}{fmt(trendDelta.diff)} ({trendDelta.diff >= 0 ? '+' : ''}%{trendDelta.pct.toFixed(1)})
                                                     </span>
                                                 </div>
                                             )}
@@ -1733,6 +1959,15 @@
             const [currencyLabels, setCurrencyLabels] = useState(() => ({ ...DEFAULT_LABELS }));
             const [portfolio, setPortfolio] = useState([]);
             const [vaultHistory, setVaultHistory] = useState([]);
+            const [vaultGoal, setVaultGoal] = useState({ title: '', target: '', currency: 'TRY' });
+
+            // UX & View preferences
+            const [privacyMode, setPrivacyMode] = useState(() => localStorage.getItem(PRIVACY_MODE_KEY) === '1');
+            const [displayCurrency, setDisplayCurrency] = useState('TRY'); // 'TRY' | 'USD' | 'EUR' | 'GRAM'
+            const [showExtraRates, setShowExtraRates] = useState(false);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [activeTypeFilter, setActiveTypeFilter] = useState(null);
+            const [sortByValue, setSortByValue] = useState(false);
 
             const [isLoadingRates, setIsLoadingRates] = useState(false);
             const [lastRefreshTime, setLastRefreshTime] = useState('');
@@ -1757,12 +1992,22 @@
             const [deleteTarget, setDeleteTarget] = useState(null);
             const [showDisconnectModal, setShowDisconnectModal] = useState(false);
             const [showSettingsModal, setShowSettingsModal] = useState(false);
-            const [settingsTab, setSettingsTab] = useState('password');
+            const [settingsTab, setSettingsTab] = useState('password'); // 'password' | 'goal' | 'export'
             const [settingsOldPass, setSettingsOldPass] = useState('');
             const [settingsNewPass, setSettingsNewPass] = useState('');
             const [settingsNewPassConfirm, setSettingsNewPassConfirm] = useState('');
             const [settingsError, setSettingsError] = useState('');
             const [isChangingPassword, setIsChangingPassword] = useState(false);
+            const [goalForm, setGoalForm] = useState({ title: '', target: '', currency: 'TRY' });
+            const [importPreview, setImportPreview] = useState(null);
+            const [importMode, setImportMode] = useState('replace'); // 'replace' | 'merge'
+            const [importError, setImportError] = useState('');
+
+            // DCA Buy/Sell Calculator modal state
+            const [tradeTarget, setTradeTarget] = useState(null);
+            const [tradeMode, setTradeMode] = useState('buy'); // 'buy' | 'sell'
+            const [tradeQty, setTradeQty] = useState('');
+            const [tradePrice, setTradePrice] = useState('');
 
             // Refs for race-free async operations
             const toastTimerRef = useRef(null);
@@ -1784,9 +2029,20 @@
                 currencyLabels,
                 rates,
                 vaultHistory,
+                vaultGoal,
                 vaultPassword,
                 currentVaultFile
             };
+
+            const togglePrivacyMode = useCallback(() => {
+                setPrivacyMode((prev) => {
+                    const next = !prev;
+                    localStorage.setItem(PRIVACY_MODE_KEY, next ? '1' : '0');
+                    return next;
+                });
+            }, []);
+
+            const fmtMoney = useCallback((val) => formatMoney(val, privacyMode), [privacyMode]);
 
             const updateFileSha = useCallback((sha) => {
                 fileShaRef.current = sha;
@@ -1826,6 +2082,9 @@
                 setShowSettingsModal(false);
                 setAdminActionTarget(null);
                 setAdminModalError('');
+                setTradeTarget(null);
+                setImportPreview(null);
+                setImportError('');
                 setSettingsOldPass('');
                 setSettingsNewPass('');
                 setSettingsNewPassConfirm('');
@@ -1839,6 +2098,8 @@
                 setSettingsNewPass('');
                 setSettingsNewPassConfirm('');
                 setSettingsError('');
+                setImportPreview(null);
+                setImportError('');
             }, [isChangingPassword]);
 
             // Cleanup timers on unmount
@@ -1888,7 +2149,8 @@
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
                         rates: snap.rates,
-                        history: updatedHistory
+                        history: updatedHistory,
+                        goal: snap.vaultGoal
                     });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, targetPass).toString();
                     const vaultPackage = {
@@ -2008,7 +2270,7 @@
                         autoSaveTimerRef.current = null;
                     }
                 };
-            }, [portfolio, currencyLabels, rates, appState, vaultPassword, currentVaultFile, handleSaveToGithub]);
+            }, [portfolio, currencyLabels, rates, vaultGoal, appState, vaultPassword, currentVaultFile, handleSaveToGithub]);
 
             // =========================================================================
             // VAULT LISTING & AUTH
@@ -2151,12 +2413,22 @@
                     const loadedHistory = (parsedData && !Array.isArray(parsedData) && Array.isArray(parsedData.history))
                         ? parsedData.history
                         : [];
+                    const loadedGoal = (parsedData && !Array.isArray(parsedData) && parsedData.goal && typeof parsedData.goal === 'object')
+                        ? {
+                            title: String(parsedData.goal.title || ''),
+                            target: parsedData.goal.target ?? '',
+                            currency: ['TRY', 'USD', 'EUR', 'GRAM'].includes(parsedData.goal.currency) ? parsedData.goal.currency : 'TRY'
+                        }
+                        : { title: '', target: '', currency: 'TRY' };
 
                     // Prevent initial hydration from triggering a redundant auto-save
                     skipNextSaveRef.current = true;
                     updateFileSha(data.sha);
                     setPortfolio(finalPortfolio);
                     setVaultHistory(loadedHistory);
+                    setVaultGoal(loadedGoal);
+                    setSearchQuery('');
+                    setActiveTypeFilter(null);
                     setCurrencyLabels(mergedLabels);
                     setRates(mergedRates);
                     setExpandedPersons(expandedInit);
@@ -2191,6 +2463,9 @@
                 setPasswordInput('');
                 setPortfolio([]);
                 setVaultHistory([]);
+                setVaultGoal({ title: '', target: '', currency: 'TRY' });
+                setSearchQuery('');
+                setActiveTypeFilter(null);
                 setLastRefreshTime('');
                 setAdminVaults([]);
                 setCurrencyLabels({ ...DEFAULT_LABELS });
@@ -2405,14 +2680,21 @@
                         ratesOk = true;
                         const usdTry = data.usd.try;
                         const eurPerUsd = data.usd.eur;
+                        const gbpPerUsd = data.usd.gbp;
                         const xauPerUsd = data.usd.xau;
+                        const xagPerUsd = data.usd.xag;
+                        const btcPerUsd = data.usd.btc;
 
                         const nextUsd = parseFloat(usdTry.toFixed(2));
                         const nextEur = (Number.isFinite(eurPerUsd) && eurPerUsd > 0)
                             ? parseFloat((usdTry / eurPerUsd).toFixed(2))
                             : null;
+                        const nextGbp = (Number.isFinite(gbpPerUsd) && gbpPerUsd > 0)
+                            ? parseFloat((usdTry / gbpPerUsd).toFixed(2))
+                            : null;
 
                         let nextGram = null;
+                        let nextCeyrek = null;
                         let nextAta = null;
                         if (Number.isFinite(xauPerUsd) && xauPerUsd > 0) {
                             const xauUsd = 1 / xauPerUsd;
@@ -2420,7 +2702,19 @@
                             const spotGramGoldTry = spotGramGoldUsd * usdTry;
                             const physicalPremium = 1.045;
                             nextGram = parseFloat((spotGramGoldTry * physicalPremium).toFixed(2));
+                            nextCeyrek = parseFloat((nextGram * 1.63).toFixed(2));
                             nextAta = parseFloat((nextGram * 6.88).toFixed(2));
+                        }
+
+                        let nextSilver = null;
+                        if (Number.isFinite(xagPerUsd) && xagPerUsd > 0) {
+                            const xagUsd = 1 / xagPerUsd;
+                            nextSilver = parseFloat(((xagUsd / 31.1034768) * usdTry * 1.045).toFixed(2));
+                        }
+
+                        let nextBtc = null;
+                        if (Number.isFinite(btcPerUsd) && btcPerUsd > 0) {
+                            nextBtc = Math.round((1 / btcPerUsd) * usdTry);
                         }
 
                         setRates((prev) => {
@@ -2428,15 +2722,15 @@
                                 ...prev,
                                 USD: nextUsd,
                                 EUR: nextEur ?? prev.EUR,
+                                GBP: nextGbp ?? prev.GBP,
                                 GRAM: nextGram ?? prev.GRAM,
-                                ATA: nextAta ?? prev.ATA
+                                CEYREK: nextCeyrek ?? prev.CEYREK,
+                                ATA: nextAta ?? prev.ATA,
+                                SILVER: nextSilver ?? prev.SILVER,
+                                BTC: nextBtc ?? prev.BTC
                             };
-                            if (
-                                updated.USD === prev.USD &&
-                                updated.EUR === prev.EUR &&
-                                updated.GRAM === prev.GRAM &&
-                                updated.ATA === prev.ATA
-                            ) {
+                            const keys = ['USD', 'EUR', 'GBP', 'GRAM', 'CEYREK', 'ATA', 'SILVER', 'BTC'];
+                            if (keys.every((k) => updated[k] === prev[k])) {
                                 return prev;
                             }
                             return updated;
@@ -2824,20 +3118,21 @@
             };
 
             // =========================================================================
-            // SETTINGS: PASSWORD CHANGE & BACKUP EXPORT
+            // SETTINGS: PASSWORD CHANGE, GOAL, BACKUP EXPORT (JSON + CSV) & RESTORE
             // =========================================================================
             const handleExportData = () => {
                 try {
                     const snap = latestStateRef.current;
                     const exportData = {
-                        schema: 'v1.0',
+                        schema: 'v2.0',
                         timestamp: new Date().toISOString(),
                         vaultName: getVaultDisplayName(snap.currentVaultFile),
                         vaultFile: snap.currentVaultFile,
                         portfolio: snap.portfolio,
                         rates: snap.rates,
                         currencyLabels: snap.currencyLabels,
-                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates)
+                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates),
+                        goal: snap.vaultGoal
                     };
                     const jsonStr = JSON.stringify(exportData, null, 2);
                     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -2850,16 +3145,311 @@
 
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `portfoy_${safeSlug}_${new Date().toISOString().split('T')[0]}.json`;
+                    a.download = `portfoy_${safeSlug}_${getTodayDateKey()}.json`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     setTimeout(() => URL.revokeObjectURL(url), 1500);
 
-                    showToast('Yedek dosyası indiriliyor.', 'success');
+                    showToast('JSON yedek dosyası indiriliyor.', 'success');
                 } catch {
                     showToast('Yedekleme başarısız oldu.', 'error');
                 }
+            };
+
+            const handleExportCsv = () => {
+                try {
+                    const snap = latestStateRef.current;
+                    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+                    const numCsv = (n) => Number.isFinite(n) ? n.toFixed(2).replace('.', ',') : '0';
+                    const rows = [
+                        ['Portföy', 'Varlık', 'Alt Kalem', 'Tür', 'Miktar', 'Birim Maliyet (TL)', 'Güncel Birim (TL)', 'Toplam Değer (TL)', 'Kâr/Zarar (TL)', 'Getiri (%)', 'Durum'].map(esc).join(';')
+                    ];
+
+                    (snap.portfolio || []).forEach((p) => {
+                        const pName = p.person || 'İsimsiz Portföy';
+                        (p.assets || []).forEach((a) => {
+                            const status = (p.isHidden || a.isHidden) ? 'Gizli' : 'Aktif';
+                            const hasSubs = a.subItems && a.subItems.length > 0;
+                            if (hasSubs) {
+                                a.subItems.forEach((s) => {
+                                    const qty = safeParseNum(s.amount);
+                                    const cost = safeParseNum(s.costPrice);
+                                    const unit = getItemUnitRate(s, snap.rates);
+                                    const total = qty * unit;
+                                    const pnl = calculatePnL(s.amount, snap.rates[s.type], s.costPrice, s.type, s.currentPrice);
+                                    rows.push([
+                                        pName, a.name || '', s.name || '', snap.currencyLabels[s.type] || s.type,
+                                        numCsv(qty), cost > 0 ? numCsv(cost) : '', numCsv(unit), numCsv(total),
+                                        pnl ? numCsv(pnl.profit) : '', pnl ? numCsv(pnl.percentage) : '', status
+                                    ].map(esc).join(';'));
+                                });
+                            } else {
+                                const qty = safeParseNum(a.amount);
+                                const cost = safeParseNum(a.costPrice);
+                                const unit = getItemUnitRate(a, snap.rates);
+                                const total = qty * unit;
+                                const pnl = calculatePnL(a.amount, snap.rates[a.type], a.costPrice, a.type, a.currentPrice);
+                                rows.push([
+                                    pName, a.name || '', '', snap.currencyLabels[a.type] || a.type,
+                                    numCsv(qty), cost > 0 ? numCsv(cost) : '', numCsv(unit), numCsv(total),
+                                    pnl ? numCsv(pnl.profit) : '', pnl ? numCsv(pnl.percentage) : '', status
+                                ].map(esc).join(';'));
+                            }
+                        });
+                    });
+
+                    const csvContent = '\uFEFF' + rows.join('\r\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const safeSlug = getVaultDisplayName(snap.currentVaultFile)
+                        .toLowerCase()
+                        .replace(/[^a-z0-9çğıöşü]+/gi, '_')
+                        .replace(/^_|_$/g, '') || 'kasa';
+
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `portfoy_${safeSlug}_${getTodayDateKey()}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 1500);
+                    showToast('Excel uyumlu CSV dosyası indiriliyor.', 'success');
+                } catch {
+                    showToast('CSV dışa aktarma başarısız oldu.', 'error');
+                }
+            };
+
+            const handleImportFileChange = (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = '';
+                setImportError('');
+                setImportPreview(null);
+                setImportMode('replace');
+                if (!file) return;
+
+                const isCsv = file.name.toLowerCase().endsWith('.csv');
+
+                const resolveTypeFromLabel = (rawType) => {
+                    const cleaned = normalizeTurkishSearch(rawType).trim();
+                    const entries = Object.entries({ ...DEFAULT_LABELS, ...latestStateRef.current.currencyLabels });
+                    const directKey = Object.keys(DEFAULT_LABELS).find((k) => k.toLowerCase() === cleaned);
+                    if (directKey) return directKey;
+                    const matched = entries.find(([, lbl]) => normalizeTurkishSearch(lbl).trim() === cleaned);
+                    if (matched) return matched[0];
+                    if (cleaned.includes('hisse') || cleaned.includes('stock')) return 'STOCK';
+                    if (cleaned.includes('dolar') || cleaned.includes('usd')) return 'USD';
+                    if (cleaned.includes('euro') || cleaned.includes('eur')) return 'EUR';
+                    if (cleaned.includes('sterlin') || cleaned.includes('gbp')) return 'GBP';
+                    if (cleaned.includes('ceyrek')) return 'CEYREK';
+                    if (cleaned.includes('ata')) return 'ATA';
+                    if (cleaned.includes('gram') || cleaned.includes('altin')) return 'GRAM';
+                    if (cleaned.includes('gumus') || cleaned.includes('silver')) return 'SILVER';
+                    if (cleaned.includes('btc') || cleaned.includes('bitcoin')) return 'BTC';
+                    return 'TRY';
+                };
+
+                const parseCsvRow = (line, delim) => {
+                    const cols = [];
+                    let cur = '';
+                    let inQuotes = false;
+                    for (let i = 0; i < line.length; i++) {
+                        const ch = line[i];
+                        if (inQuotes) {
+                            if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+                            else if (ch === '"') inQuotes = false;
+                            else cur += ch;
+                        } else {
+                            if (ch === '"') inQuotes = true;
+                            else if (ch === delim) { cols.push(cur.trim()); cur = ''; }
+                            else cur += ch;
+                        }
+                    }
+                    cols.push(cur.trim());
+                    return cols;
+                };
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const rawText = String(reader.result || '').replace(/^\uFEFF/, '').trim();
+                        if (!rawText) throw new Error('Dosya boş.');
+
+                        if (isCsv || (!rawText.startsWith('{') && !rawText.startsWith('['))) {
+                            const lines = rawText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+                            if (lines.length < 2) throw new Error('CSV dosyasında veri satırı bulunamadı.');
+                            const delim = lines[0].includes(';') ? ';' : ',';
+                            const personMap = new Map();
+
+                            for (let i = 1; i < lines.length; i++) {
+                                const cols = parseCsvRow(lines[i], delim);
+                                if (cols.length < 5) continue;
+                                const [pName, aName, subName, typeStr, qtyStr, costStr, currStr, , , , statusStr] = cols;
+                                const personKey = pName || 'İçe Aktarılan Portföy';
+                                if (!personMap.has(personKey)) {
+                                    personMap.set(personKey, { id: generateId('person'), person: personKey, isHidden: false, assets: [] });
+                                }
+                                const personObj = personMap.get(personKey);
+                                const type = resolveTypeFromLabel(typeStr);
+                                const qty = safeParseNum(qtyStr);
+                                const cost = safeParseNum(costStr);
+                                const curr = safeParseNum(currStr);
+                                const isHidden = normalizeTurkishSearch(statusStr || '').includes('gizli');
+
+                                if (subName) {
+                                    let parentAsset = personObj.assets.find((a) => a.name === (aName || 'Varlık') && Array.isArray(a.subItems));
+                                    if (!parentAsset) {
+                                        parentAsset = { id: generateId('asset'), name: aName || 'Varlık', type: 'TRY', amount: '', costPrice: '', currentPrice: '', isHidden, subItems: [] };
+                                        personObj.assets.push(parentAsset);
+                                    }
+                                    parentAsset.subItems.push({
+                                        id: generateId('sub'),
+                                        name: subName,
+                                        type,
+                                        amount: qty > 0 ? String(qty) : '',
+                                        costPrice: cost > 0 ? String(cost) : '',
+                                        currentPrice: type === 'STOCK' && curr > 0 ? String(curr) : ''
+                                    });
+                                } else {
+                                    personObj.assets.push({
+                                        id: generateId('asset'),
+                                        name: aName || 'Varlık',
+                                        type,
+                                        amount: qty > 0 ? String(qty) : '',
+                                        costPrice: cost > 0 ? String(cost) : '',
+                                        currentPrice: type === 'STOCK' && curr > 0 ? String(curr) : '',
+                                        isHidden,
+                                        subItems: []
+                                    });
+                                }
+                            }
+
+                            const sanitized = sanitizePortfolioData(Array.from(personMap.values()));
+                            if (sanitized.length === 0) throw new Error('CSV içinden geçerli portföy okunamadı.');
+                            const assetCount = sanitized.reduce((acc, p) => acc + p.assets.length, 0);
+                            setImportPreview({
+                                format: 'CSV',
+                                portfolio: sanitized,
+                                rates: null,
+                                labels: null,
+                                history: null,
+                                goal: null,
+                                personCount: sanitized.length,
+                                assetCount,
+                                filename: file.name
+                            });
+                            return;
+                        }
+
+                        const parsed = JSON.parse(rawText);
+                        const rawPortfolio = Array.isArray(parsed) ? parsed : parsed?.portfolio;
+                        if (!Array.isArray(rawPortfolio)) {
+                            throw new Error('Geçerli portföy dizisi bulunamadı.');
+                        }
+                        const sanitized = sanitizePortfolioData(rawPortfolio);
+                        const assetCount = sanitized.reduce((acc, p) => acc + p.assets.length, 0);
+                        setImportPreview({
+                            format: 'JSON',
+                            portfolio: sanitized,
+                            rates: (parsed && !Array.isArray(parsed) && parsed.rates && typeof parsed.rates === 'object') ? parsed.rates : null,
+                            labels: (parsed && !Array.isArray(parsed) && (parsed.currencyLabels || parsed.labels)) || null,
+                            history: (parsed && !Array.isArray(parsed) && Array.isArray(parsed.history)) ? parsed.history : null,
+                            goal: (parsed && !Array.isArray(parsed) && parsed.goal && typeof parsed.goal === 'object') ? parsed.goal : null,
+                            personCount: sanitized.length,
+                            assetCount,
+                            filename: file.name
+                        });
+                    } catch (err) {
+                        setImportError('Geçersiz dosya: ' + (err?.message || 'Okunamadı'));
+                    }
+                };
+                reader.onerror = () => setImportError('Dosya okunamadı.');
+                reader.readAsText(file, 'UTF-8');
+            };
+
+            const confirmImportBackup = () => {
+                if (!importPreview) return;
+
+                if (importMode === 'merge') {
+                    // Generate fresh IDs so merged items never collide with existing ones
+                    const clonedWithFreshIds = importPreview.portfolio.map((p) => ({
+                        ...p,
+                        id: generateId('person'),
+                        assets: (p.assets || []).map((a) => ({
+                            ...a,
+                            id: generateId('asset'),
+                            subItems: (a.subItems || []).map((s) => ({ ...s, id: generateId('sub') }))
+                        }))
+                    }));
+                    setPortfolio((prev) => [...prev, ...clonedWithFreshIds]);
+                    setExpandedPersons((prev) => {
+                        const next = { ...prev };
+                        clonedWithFreshIds.forEach((p) => { next[p.id] = true; });
+                        return next;
+                    });
+                } else {
+                    setPortfolio(importPreview.portfolio);
+                    if (importPreview.rates) {
+                        setRates((prev) => {
+                            const next = { ...prev };
+                            Object.entries(importPreview.rates).forEach(([k, v]) => {
+                                const n = safeParseNum(v);
+                                if (n > 0) next[k] = n;
+                            });
+                            return next;
+                        });
+                    }
+                    if (importPreview.labels) {
+                        setCurrencyLabels((prev) => ({ ...DEFAULT_LABELS, ...prev, ...importPreview.labels }));
+                    }
+                    if (importPreview.history) {
+                        setVaultHistory(importPreview.history);
+                    }
+                    if (importPreview.goal) {
+                        setVaultGoal({
+                            title: String(importPreview.goal.title || ''),
+                            target: importPreview.goal.target ?? '',
+                            currency: ['TRY', 'USD', 'EUR', 'GRAM'].includes(importPreview.goal.currency) ? importPreview.goal.currency : 'TRY'
+                        });
+                    }
+                    const expandedInit = {};
+                    importPreview.portfolio.forEach((p) => { expandedInit[p.id] = true; });
+                    setExpandedPersons(expandedInit);
+                }
+
+                setImportPreview(null);
+                setImportError('');
+                setShowSettingsModal(false);
+                showToast(
+                    importMode === 'merge'
+                        ? `Mevcut kasaya eklendi (+${importPreview.personCount} portföy, +${importPreview.assetCount} varlık)`
+                        : `İçe aktarıldı (${importPreview.personCount} portföy, ${importPreview.assetCount} varlık)`,
+                    'success'
+                );
+            };
+
+            const handleSaveGoal = (e) => {
+                e.preventDefault();
+                const targetNum = safeParseNum(goalForm.target);
+                if (targetNum <= 0) {
+                    setSettingsError('Hedef tutarı 0’dan büyük olmalıdır.');
+                    return;
+                }
+                setVaultGoal({
+                    title: goalForm.title.trim() || 'Portföy Hedefi',
+                    target: targetNum,
+                    currency: goalForm.currency || 'TRY'
+                });
+                setSettingsError('');
+                setShowSettingsModal(false);
+                showToast('Finansal hedefiniz kaydedildi!', 'success');
+            };
+
+            const handleClearGoal = () => {
+                const empty = { title: '', target: '', currency: 'TRY' };
+                setVaultGoal(empty);
+                setGoalForm(empty);
+                showToast('Finansal hedef kaldırıldı.', 'success');
             };
 
             const handleChangePassword = async (e) => {
@@ -2897,7 +3487,8 @@
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
                         rates: snap.rates,
-                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates)
+                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates),
+                        goal: snap.vaultGoal
                     });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, settingsNewPass).toString();
                     const vaultPackage = {
@@ -3026,6 +3617,7 @@
                     setRates(freshRates);
                     setPortfolio([]);
                     setVaultHistory([]);
+                    setVaultGoal({ title: '', target: '', currency: 'TRY' });
                     setLastRefreshTime('');
                     setExpandedPersons({});
                     setExpandedAssets({});
@@ -3074,6 +3666,9 @@
                 setPasswordInput('');
                 setPortfolio([]);
                 setVaultHistory([]);
+                setVaultGoal({ title: '', target: '', currency: 'TRY' });
+                setSearchQuery('');
+                setActiveTypeFilter(null);
                 setLastRefreshTime('');
                 setAvailableVaults([]);
                 setAdminVaults([]);
@@ -3121,12 +3716,92 @@
                 return (assets || []).filter((a) => !a.isHidden).reduce((total, asset) => total + calculateAssetValue(asset), 0);
             }, [calculateAssetValue]);
 
+            const calculateAssetPnL = useCallback((asset) => {
+                const items = asset?.subItems && asset.subItems.length > 0 ? asset.subItems : [asset];
+                let costSum = 0;
+                let currSum = 0;
+                items.forEach((it) => {
+                    if (!it) return;
+                    const pnl = calculatePnL(it.amount, rates[it.type], it.costPrice, it.type, it.currentPrice);
+                    if (pnl) {
+                        costSum += safeParseNum(it.amount) * safeParseNum(it.costPrice);
+                        currSum += getItemValue(it, rates);
+                    }
+                });
+                if (costSum <= 0) return null;
+                const profit = currSum - costSum;
+                const percentage = (profit / costSum) * 100;
+                return { profit, percentage, isProfit: profit >= 0, isNeutral: Math.abs(profit) < 0.5 };
+            }, [rates, calculatePnL]);
+
+            const calculatePersonPnL = useCallback((assets) => {
+                let costSum = 0;
+                let currSum = 0;
+                (assets || []).filter((a) => !a.isHidden).forEach((asset) => {
+                    const items = asset.subItems && asset.subItems.length > 0 ? asset.subItems : [asset];
+                    items.forEach((it) => {
+                        const pnl = calculatePnL(it.amount, rates[it.type], it.costPrice, it.type, it.currentPrice);
+                        if (pnl) {
+                            costSum += safeParseNum(it.amount) * safeParseNum(it.costPrice);
+                            currSum += getItemValue(it, rates);
+                        }
+                    });
+                });
+                if (costSum <= 0) return null;
+                const profit = currSum - costSum;
+                const percentage = (profit / costSum) * 100;
+                return { profit, percentage, isProfit: profit >= 0, isNeutral: Math.abs(profit) < 0.5 };
+            }, [rates, calculatePnL]);
+
             const visiblePortfolio = useMemo(() => portfolio.filter((p) => !p.isHidden), [portfolio]);
 
             const grandTotal = useMemo(
                 () => visiblePortfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0),
                 [visiblePortfolio, calculatePersonTotal]
             );
+
+            const overallPnL = useMemo(() => {
+                let costSum = 0;
+                let currSum = 0;
+                visiblePortfolio.forEach((person) => {
+                    (person.assets || []).filter((a) => !a.isHidden).forEach((asset) => {
+                        const items = asset.subItems && asset.subItems.length > 0 ? asset.subItems : [asset];
+                        items.forEach((it) => {
+                            const pnl = calculatePnL(it.amount, rates[it.type], it.costPrice, it.type, it.currentPrice);
+                            if (pnl) {
+                                costSum += safeParseNum(it.amount) * safeParseNum(it.costPrice);
+                                currSum += getItemValue(it, rates);
+                            }
+                        });
+                    });
+                });
+                if (costSum <= 0) return null;
+                const profit = currSum - costSum;
+                const percentage = (profit / costSum) * 100;
+                return { profit, percentage, costSum, isProfit: profit >= 0 };
+            }, [visiblePortfolio, rates, calculatePnL]);
+
+            const goalProgress = useMemo(() => {
+                const targetNum = safeParseNum(vaultGoal?.target);
+                if (targetNum <= 0) return null;
+                const cur = vaultGoal.currency || 'TRY';
+                let targetInTry = targetNum;
+                if (cur !== 'TRY') {
+                    const r = safeParseNum(rates[cur]);
+                    if (r <= 0) return null;
+                    targetInTry = targetNum * r;
+                }
+                const pct = Math.min(100, Math.max(0, (grandTotal / targetInTry) * 100));
+                const remainingTry = Math.max(0, targetInTry - grandTotal);
+                return {
+                    title: vaultGoal.title || 'Portföy Hedefi',
+                    currency: cur,
+                    targetInTry,
+                    pct,
+                    remainingTry,
+                    reached: grandTotal >= targetInTry
+                };
+            }, [vaultGoal, grandTotal, rates]);
 
             const liveHistory = useMemo(
                 () => mergeTodayHistorySnapshot(vaultHistory, portfolio, rates),
@@ -3153,7 +3828,7 @@
 
             const distribution = useMemo(() => {
                 if (grandTotal <= 0) return [];
-                const tryEquivalent = { TRY: 0, USD: 0, EUR: 0, GRAM: 0, ATA: 0, STOCK: 0 };
+                const tryEquivalent = {};
 
                 visiblePortfolio.forEach((person) => {
                     (person.assets || []).filter((a) => !a.isHidden).forEach((asset) => {
@@ -3174,12 +3849,177 @@
                         return {
                             type: key,
                             label: currencyLabels[key] || key,
+                            value: tryEquivalent[key],
                             rawPct,
                             percentage: rawPct.toFixed(1)
                         };
                     })
                     .sort((a, b) => b.rawPct - a.rawPct);
             }, [visiblePortfolio, grandTotal, rates, currencyLabels]);
+
+            const filteredPortfolio = useMemo(() => {
+                const q = normalizeTurkishSearch(searchQuery).trim();
+                const hasQuery = q.length > 0;
+                const hasType = Boolean(activeTypeFilter);
+
+                let list = portfolio;
+
+                if (hasQuery || hasType) {
+                    list = portfolio
+                        .map((person) => {
+                            const personMatchesQuery = hasQuery && normalizeTurkishSearch(person.person).includes(q);
+                            const matchedAssets = (person.assets || []).filter((asset) => {
+                                const hasSubs = asset.subItems && asset.subItems.length > 0;
+                                const typeOk = !hasType || (
+                                    hasSubs
+                                        ? asset.subItems.some((s) => s.type === activeTypeFilter)
+                                        : asset.type === activeTypeFilter
+                                );
+                                if (!typeOk) return false;
+                                if (!hasQuery || personMatchesQuery) return true;
+                                if (normalizeTurkishSearch(asset.name).includes(q)) return true;
+                                if (normalizeTurkishSearch(currencyLabels[asset.type] || asset.type).includes(q)) return true;
+                                if (hasSubs) {
+                                    return asset.subItems.some(
+                                        (s) =>
+                                            normalizeTurkishSearch(s.name).includes(q) ||
+                                            normalizeTurkishSearch(currencyLabels[s.type] || s.type).includes(q)
+                                    );
+                                }
+                                return false;
+                            });
+
+                            if (matchedAssets.length === 0 && !(personMatchesQuery && !hasType)) return null;
+                            return { ...person, assets: matchedAssets };
+                        })
+                        .filter(Boolean);
+                }
+
+                if (sortByValue) {
+                    list = [...list]
+                        .map((person) => ({
+                            ...person,
+                            assets: [...(person.assets || [])].sort((a, b) => calculateAssetValue(b) - calculateAssetValue(a))
+                        }))
+                        .sort((a, b) => calculatePersonTotal(b.assets) - calculatePersonTotal(a.assets));
+                }
+
+                return list;
+            }, [portfolio, searchQuery, activeTypeFilter, sortByValue, currencyLabels, calculateAssetValue, calculatePersonTotal]);
+
+            // Keyboard Shortcuts (Desktop power users: Ctrl+S save, Alt+R refresh, Alt+H privacy)
+            useEffect(() => {
+                if (appState !== 'app') return;
+                const onKeyDown = (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                        e.preventDefault();
+                        handleSaveToGithub(false);
+                    } else if (e.altKey && e.key.toLowerCase() === 'r') {
+                        e.preventDefault();
+                        fetchLiveRates(true);
+                    } else if (e.altKey && e.key.toLowerCase() === 'h') {
+                        e.preventDefault();
+                        togglePrivacyMode();
+                    }
+                };
+                window.addEventListener('keydown', onKeyDown);
+                return () => window.removeEventListener('keydown', onKeyDown);
+            }, [appState, handleSaveToGithub, fetchLiveRates, togglePrivacyMode]);
+
+            const getSessionRemainingMinutes = () => {
+                const session = safeJsonParse(localStorage.getItem(VAULT_SESSION_KEY), null);
+                if (!session?.expiry) return null;
+                const diff = Math.max(0, Math.ceil((session.expiry - Date.now()) / 60000));
+                return diff;
+            };
+
+            const movePerson = (personId, direction) => {
+                setPortfolio((prev) => {
+                    const idx = prev.findIndex((p) => p.id === personId);
+                    const nextIdx = idx + direction;
+                    if (idx < 0 || nextIdx < 0 || nextIdx >= prev.length) return prev;
+                    const copy = [...prev];
+                    const [moved] = copy.splice(idx, 1);
+                    copy.splice(nextIdx, 0, moved);
+                    return copy;
+                });
+            };
+
+            const openTradeModal = (personId, assetId, item, subId = null) => {
+                const liveUnit = getItemUnitRate(item, rates);
+                setTradeTarget({
+                    personId,
+                    assetId,
+                    subId,
+                    name: item.name || (currencyLabels[item.type] || item.type),
+                    type: item.type,
+                    typeLabel: currencyLabels[item.type] || item.type,
+                    currentAmount: safeParseNum(item.amount),
+                    currentCost: safeParseNum(item.costPrice),
+                    liveUnit
+                });
+                setTradeMode('buy');
+                setTradeQty('');
+                setTradePrice(liveUnit > 0 ? String(liveUnit) : '');
+            };
+
+            const applyTrade = (e) => {
+                e.preventDefault();
+                if (!tradeTarget) return;
+                const qty = safeParseNum(tradeQty);
+                const price = safeParseNum(tradePrice);
+                if (qty <= 0) {
+                    showToast('İşlem miktarı 0’dan büyük olmalıdır.', 'error');
+                    return;
+                }
+                if (tradeMode === 'buy' && price <= 0) {
+                    showToast('Alım birim fiyatı 0’dan büyük olmalıdır.', 'error');
+                    return;
+                }
+                if (tradeMode === 'sell' && qty > tradeTarget.currentAmount) {
+                    showToast('Satış miktarı mevcut adetten fazla olamaz.', 'error');
+                    return;
+                }
+
+                let newAmount;
+                let newCost;
+                if (tradeMode === 'buy') {
+                    newAmount = parseFloat((tradeTarget.currentAmount + qty).toFixed(6));
+                    if (tradeTarget.currentAmount > 0 && tradeTarget.currentCost > 0) {
+                        newCost = parseFloat((((tradeTarget.currentAmount * tradeTarget.currentCost) + (qty * price)) / newAmount).toFixed(4));
+                    } else {
+                        newCost = parseFloat(price.toFixed(4));
+                    }
+                } else {
+                    newAmount = parseFloat(Math.max(0, tradeTarget.currentAmount - qty).toFixed(6));
+                    newCost = newAmount > 0 ? tradeTarget.currentCost : '';
+                }
+
+                if (tradeTarget.subId) {
+                    updatePortfolioAsset(tradeTarget.personId, tradeTarget.assetId, (asset) => ({
+                        ...asset,
+                        subItems: (asset.subItems || []).map((s) =>
+                            s.id === tradeTarget.subId
+                                ? { ...s, amount: String(newAmount), costPrice: newCost === '' ? '' : String(newCost) }
+                                : s
+                        )
+                    }));
+                } else {
+                    updatePortfolioAsset(tradeTarget.personId, tradeTarget.assetId, (asset) => ({
+                        ...asset,
+                        amount: String(newAmount),
+                        costPrice: newCost === '' ? '' : String(newCost)
+                    }));
+                }
+
+                showToast(
+                    tradeMode === 'buy'
+                        ? `${tradeTarget.name}: +${qty} eklendi (Yeni ort: ${newCost} ₺)`
+                        : `${tradeTarget.name}: -${qty} satıldı (Kalan: ${newAmount})`,
+                    'success'
+                );
+                setTradeTarget(null);
+            };
 
             // =========================================================================
             // PORTFOLIO MUTATIONS
@@ -3288,12 +4128,19 @@
                 setExpandedPersons((prev) => ({ ...prev, [newId]: true }));
             };
 
-            const openSettingsModal = () => {
-                setSettingsTab('password');
+            const openSettingsModal = (initialTab = 'password') => {
+                setSettingsTab(typeof initialTab === 'string' ? initialTab : 'password');
                 setSettingsOldPass('');
                 setSettingsNewPass('');
                 setSettingsNewPassConfirm('');
                 setSettingsError('');
+                setImportPreview(null);
+                setImportError('');
+                setGoalForm({
+                    title: vaultGoal?.title || '',
+                    target: vaultGoal?.target !== undefined && vaultGoal?.target !== '' ? String(vaultGoal.target) : '',
+                    currency: vaultGoal?.currency || 'TRY'
+                });
                 setShowSettingsModal(true);
             };
 
@@ -3678,7 +4525,7 @@
                 return (
                     <div className="mx-auto w-full max-w-[95%] xl:max-w-6xl safe-top pb-20 relative z-20">
                         {/* Header: Solid high-contrast surfaces (zero backdrop-filter blur trap on mobile) + balanced mobile/desktop layout */}
-                        <header className="relative z-30 pb-4 sm:pb-5 mb-6 sm:mb-8 border-b border-white/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <header className="relative z-30 pt-1 pb-4 sm:py-2 sm:pb-6 mb-6 sm:mb-8 border-b border-white/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:min-h-[84px]">
                             {/* Desktop Left / Mobile Row 2: Action Buttons */}
                             <div className="order-2 sm:order-1 flex items-center justify-between sm:justify-start gap-2 bg-[#0d131d]/95 sm:bg-transparent p-1.5 sm:p-0 rounded-2xl border border-white/10 sm:border-0">
                                 <button
@@ -3723,7 +4570,7 @@
 
                             {/* Mobile Row 1 (Brand + Save) / Desktop Center Brand + Right Save */}
                             <div className="order-1 sm:order-2 flex items-center justify-between sm:contents gap-3">
-                                <div className="flex items-center sm:flex-col gap-2.5 sm:gap-0 sm:items-center sm:text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 min-w-0">
+                                <div className="flex items-center sm:flex-col gap-2.5 sm:gap-0 sm:items-center sm:text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 sm:top-1 min-w-0">
                                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center sm:mb-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
                                         <i className="fa-solid fa-shield-halved text-black text-base sm:text-lg"></i>
                                     </div>
@@ -3740,8 +4587,21 @@
                                 <div className="sm:order-3 flex items-center justify-end gap-2 shrink-0">
                                     <button
                                         type="button"
+                                        onClick={togglePrivacyMode}
+                                        title={privacyMode ? 'Bakiyeleri Göster (Alt+H)' : 'Gizlilik Modu: Bakiyeleri Gizle (Alt+H)'}
+                                        className={`w-10 h-10 rounded-xl header-btn flex items-center justify-center transition-all shrink-0 ${
+                                            privacyMode
+                                                ? 'text-amber-300 border-amber-500/40 bg-amber-500/15'
+                                                : 'text-zinc-300 hover:text-white'
+                                        }`}
+                                    >
+                                        <i className={`fa-solid ${privacyMode ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={() => handleSaveToGithub(false)}
                                         disabled={saveStatus === 'saving'}
+                                        title="Kasayı GitHub'a Kaydet (Ctrl+S)"
                                         className={`relative flex items-center gap-2 font-bold text-[11px] sm:text-xs px-3.5 sm:px-4 py-2.5 rounded-xl transition-all shrink-0 ${
                                             saveStatus === 'saved'
                                                 ? 'bg-emerald-500 text-black'
@@ -3768,14 +4628,107 @@
                             </div>
                         </header>
 
-                        {/* Total Balance */}
+                        {/* Total Balance + Multi-Currency Switcher + Net PnL + Goal Progress */}
                         <div className="text-center py-3 sm:py-4 mb-7 sm:mb-8 flex flex-col items-center px-2">
                             <p className="text-[11px] text-zinc-400 font-bold tracking-[0.2em] uppercase mb-1.5">
                                 Güncel Bakiye
                             </p>
                             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-100 to-emerald-400 font-numbers break-words max-w-full">
-                                {formatMoney(grandTotal)}
+                                {formatInCurrency(grandTotal, displayCurrency, rates, privacyMode)}
                             </h2>
+
+                            {/* Multi-Currency Switcher & Overall Net P&L */}
+                            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+                                <div className="inline-flex bg-black/35 p-1 rounded-xl border border-white/10">
+                                    {[
+                                        { id: 'TRY', label: '₺ TL' },
+                                        { id: 'USD', label: '$ USD' },
+                                        { id: 'EUR', label: '€ EUR' },
+                                        { id: 'GRAM', label: 'Gr Altın' }
+                                    ].map((c) => (
+                                        <button
+                                            key={c.id}
+                                            type="button"
+                                            onClick={() => setDisplayCurrency(c.id)}
+                                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all ${
+                                                displayCurrency === c.id
+                                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35'
+                                                    : 'text-zinc-400 hover:text-white border border-transparent'
+                                            }`}
+                                        >
+                                            {c.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {overallPnL && (
+                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold font-numbers border ${
+                                        overallPnL.isProfit
+                                            ? 'bg-emerald-500/12 text-emerald-400 border-emerald-500/25'
+                                            : 'bg-red-500/12 text-red-400 border-red-500/25'
+                                    }`}>
+                                        <i className={`fa-solid ${overallPnL.isProfit ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'} text-[10px]`}></i>
+                                        <span>{overallPnL.isProfit ? '+' : ''}{fmtMoney(overallPnL.profit)}</span>
+                                        <span className="opacity-85">({overallPnL.isProfit ? '+' : ''}%{overallPnL.percentage.toFixed(1)})</span>
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Live Equivalents Strip */}
+                            {grandTotal > 0 && (
+                                <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-numbers text-zinc-400">
+                                    {displayCurrency !== 'TRY' && <span>{formatInCurrency(grandTotal, 'TRY', rates, privacyMode)}</span>}
+                                    {displayCurrency !== 'USD' && <span>{formatInCurrency(grandTotal, 'USD', rates, privacyMode)}</span>}
+                                    {displayCurrency !== 'EUR' && <span>{formatInCurrency(grandTotal, 'EUR', rates, privacyMode)}</span>}
+                                    {displayCurrency !== 'GRAM' && <span>{formatInCurrency(grandTotal, 'GRAM', rates, privacyMode)}</span>}
+                                    {!goalProgress && (
+                                        <button
+                                            type="button"
+                                            onClick={() => openSettingsModal('goal')}
+                                            className="font-sans text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1 ml-1"
+                                        >
+                                            <i className="fa-solid fa-bullseye text-[9px]"></i> Hedef Belirle
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Financial Goal Progress Bar (when configured) */}
+                            {goalProgress && (
+                                <div
+                                    onClick={() => openSettingsModal('goal')}
+                                    className="mt-4 w-full max-w-md glass-surface px-4 py-3 rounded-2xl border border-white/10 hover:border-emerald-500/35 transition-all cursor-pointer text-left"
+                                    title="Hedefi Düzenle"
+                                >
+                                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                                        <span className="text-[11px] font-bold text-zinc-200 flex items-center gap-1.5 truncate">
+                                            <i className={`fa-solid ${goalProgress.reached ? 'fa-trophy text-amber-400' : 'fa-bullseye text-emerald-400'} text-xs`}></i>
+                                            <span className="truncate">{goalProgress.title}</span>
+                                        </span>
+                                        <span className="text-[11px] font-black font-numbers text-emerald-400 shrink-0">
+                                            %{goalProgress.pct.toFixed(1)}
+                                        </span>
+                                    </div>
+                                    <div className="h-2 w-full bg-white/10 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-500 ${
+                                                goalProgress.reached
+                                                    ? 'bg-gradient-to-r from-amber-400 to-emerald-400'
+                                                    : 'bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-300'
+                                            }`}
+                                            style={{ width: `${Math.max(2, goalProgress.pct)}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-1.5 text-[10px] text-zinc-400 font-numbers">
+                                        <span>
+                                            {goalProgress.reached
+                                                ? 'Hedefe ulaşıldı!'
+                                                : `${formatInCurrency(goalProgress.remainingTry, goalProgress.currency, rates, privacyMode)} kaldı`}
+                                        </span>
+                                        <span>Hedef: {formatInCurrency(goalProgress.targetInTry, goalProgress.currency, rates, privacyMode)}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Market Rates Grid */}
@@ -3792,6 +4745,7 @@
                                     </p>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => fetchLiveRates(true)}
                                     disabled={isLoadingRates}
                                     className={`text-[10px] uppercase font-bold tracking-wider flex items-center justify-center gap-2 glass-surface px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 ${
@@ -3848,30 +4802,105 @@
                                     );
                                 })}
                             </div>
+
+                            {/* Collapsible Extra Markets Drawer (Çeyrek, Sterlin, Gümüş, Bitcoin) */}
+                            <div className="mt-4 pt-3 border-t border-white/5 relative z-10">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowExtraRates((v) => !v)}
+                                    className="w-full flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-200 transition-colors py-1"
+                                >
+                                    <span>Diğer Kurlar (Çeyrek · Sterlin · Gümüş · BTC)</span>
+                                    <i className={`fa-solid fa-chevron-down text-[9px] transition-transform duration-300 ${showExtraRates ? 'rotate-180' : ''}`}></i>
+                                </button>
+                                {showExtraRates && (
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3 animate-fade-in-up">
+                                        {['CEYREK', 'GBP', 'SILVER', 'BTC'].map((currency) => {
+                                            const icons = { CEYREK: 'fa-sun', GBP: 'fa-sterling-sign', SILVER: 'fa-gem', BTC: 'fa-bitcoin-sign' };
+                                            const colors = { CEYREK: 'text-amber-300', GBP: 'text-cyan-400', SILVER: 'text-slate-300', BTC: 'text-orange-400' };
+                                            return (
+                                                <div
+                                                    key={currency}
+                                                    className="bg-black/25 p-2.5 sm:p-3 rounded-xl flex flex-col items-center border border-white/5 hover:border-white/15 transition-all"
+                                                >
+                                                    <div className="w-full flex items-center justify-center gap-1.5 mb-1.5">
+                                                        <i className={`fa-solid ${icons[currency]} ${colors[currency]} opacity-85 text-[10px] shrink-0`}></i>
+                                                        <input
+                                                            type="text"
+                                                            value={currencyLabels[currency] ?? currency}
+                                                            onChange={(e) => setCurrencyLabels((prev) => ({ ...prev, [currency]: e.target.value }))}
+                                                            onBlur={(e) => {
+                                                                if (!e.target.value.trim()) {
+                                                                    setCurrencyLabels((prev) => ({ ...prev, [currency]: DEFAULT_LABELS[currency] || currency }));
+                                                                }
+                                                            }}
+                                                            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                                                            className="text-[10px] text-zinc-300 font-bold tracking-widest uppercase bg-transparent text-center outline-none hover:text-white transition-colors w-full max-w-[85px]"
+                                                            title="İsmi Değiştir"
+                                                        />
+                                                    </div>
+                                                    <RateInput
+                                                        value={rates[currency]}
+                                                        onCommit={(val) => handleRateCommit(currency, val)}
+                                                        className={`w-full text-sm sm:text-base font-black font-numbers outline-none bg-black/30 focus:bg-black/50 rounded-lg py-1.5 px-1 text-center border border-transparent focus:border-white/15 ${
+                                                            currency === 'BTC' ? 'text-orange-300' : currency === 'CEYREK' ? 'text-amber-300' : 'text-white'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Asset Distribution Summary */}
+                        {/* Clickable Asset Distribution Filter Pills */}
                         {distribution.length > 0 && (
-                            <div className="mb-8 sm:mb-10 max-w-3xl mx-auto flex flex-wrap justify-center gap-2.5 sm:gap-3">
-                                {distribution.map((dist) => {
-                                    const dotColor =
-                                        dist.type === 'TRY' ? 'bg-zinc-400'
-                                            : dist.type === 'USD' ? 'bg-green-400'
-                                                : dist.type === 'EUR' ? 'bg-blue-400'
-                                                    : dist.type === 'STOCK' ? 'bg-indigo-400'
-                                                        : dist.type === 'ATA' ? 'bg-amber-500'
-                                                            : 'bg-yellow-400';
+                            <div className="mb-8 sm:mb-10 max-w-3xl mx-auto flex flex-col items-center gap-2.5">
+                                <div className="flex flex-wrap justify-center gap-2 sm:gap-2.5">
+                                    {distribution.map((dist) => {
+                                        const dotColor = ASSET_DOT_COLORS[dist.type] || 'bg-emerald-400';
+                                        const isActive = activeTypeFilter === dist.type;
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={dist.type}
+                                                onClick={() => setActiveTypeFilter((prev) => (prev === dist.type ? null : dist.type))}
+                                                title={`${dist.label} varlıklarını filtrele (${fmtMoney(dist.value)})`}
+                                                className={`px-3.5 sm:px-4 py-2 rounded-2xl flex items-center gap-2 border transition-all cursor-pointer active:scale-95 ${
+                                                    isActive
+                                                        ? 'bg-emerald-500/20 border-emerald-400/50 shadow-lg shadow-emerald-500/10'
+                                                        : 'glass-surface border-white/5 hover:border-white/20'
+                                                }`}
+                                            >
+                                                <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
+                                                <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-emerald-200' : 'text-zinc-400'}`}>
+                                                    {dist.label}
+                                                </span>
+                                                <span className="text-xs font-black text-white font-numbers">%{dist.percentage}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {activeTypeFilter && (() => {
+                                    const activeDist = distribution.find((d) => d.type === activeTypeFilter);
+                                    if (!activeDist) return null;
                                     return (
-                                        <div
-                                            key={dist.type}
-                                            className="glass-surface px-3.5 sm:px-4 py-2 rounded-2xl flex items-center gap-2 border border-white/5 hover:border-white/15 transition-colors cursor-default"
-                                        >
-                                            <div className={`w-2 h-2 rounded-full ${dotColor}`}></div>
-                                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{dist.label}</span>
-                                            <span className="text-xs font-black text-white font-numbers">%{dist.percentage}</span>
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-300">
+                                            <span>
+                                                Filtre: <strong>{activeDist.label}</strong> · Toplam <strong className="font-numbers">{fmtMoney(activeDist.value)}</strong>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setActiveTypeFilter(null)}
+                                                className="ml-1 text-emerald-200 hover:text-white"
+                                                title="Filtreyi Kaldır"
+                                            >
+                                                <i className="fa-solid fa-xmark"></i>
+                                            </button>
                                         </div>
                                     );
-                                })}
+                                })()}
                             </div>
                         )}
 
@@ -3884,54 +4913,126 @@
                             calculateAssetValue={calculateAssetValue}
                             calculatePersonTotal={calculatePersonTotal}
                             calculatePnL={calculatePnL}
+                            privacyMode={privacyMode}
                         />
 
-                        {/* Global Portfolio Action Toolbar (Update All Sub-items/Stocks/Rates + Expand/Collapse All) */}
+                        {/* Global Portfolio Action Toolbar (Search, Update All, Sort, Expand/Collapse) */}
                         {portfolio.length > 0 && (
-                            <div className="mb-6 flex flex-wrap items-center justify-between gap-2.5 px-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
-                                        Portföyler ({portfolio.length})
-                                    </span>
-                                    {lastRefreshTime && (
-                                        <span className="text-[10px] font-semibold text-zinc-500 font-numbers">
-                                            · {lastRefreshTime}
+                            <div className="mb-6 flex flex-col gap-3 px-1">
+                                <div className="flex flex-wrap items-center justify-between gap-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
+                                            Portföyler ({filteredPortfolio.length}{filteredPortfolio.length !== portfolio.length ? `/${portfolio.length}` : ''})
                                         </span>
-                                    )}
+                                        {lastRefreshTime && (
+                                            <span className="text-[10px] font-semibold text-zinc-500 font-numbers">
+                                                · {lastRefreshTime}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchLiveRates(true)}
+                                            disabled={isLoadingRates}
+                                            className={`px-3.5 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all active:scale-95 border ${
+                                                isLoadingRates
+                                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 cursor-wait'
+                                                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500 hover:text-black'
+                                            }`}
+                                            title="Tüm döviz/altın kurlarını, hisse varlıklarını ve alt kalemleri canlı günceller (Alt+R)"
+                                        >
+                                            <i className={`fa-solid fa-arrows-rotate text-xs ${isLoadingRates ? 'fa-spin' : ''}`}></i>
+                                            <span>{isLoadingRates ? 'Güncelleniyor...' : 'Tüm Alt Kalem & Kurları Güncelle'}</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSortByValue((v) => !v)}
+                                            className={`px-3 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                                                sortByValue
+                                                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40'
+                                                    : 'header-btn text-zinc-300 hover:text-white'
+                                            }`}
+                                            title="Değere göre büyükten küçüğe sırala"
+                                        >
+                                            <i className="fa-solid fa-arrow-down-wide-short text-[10px]"></i>
+                                            <span className="hidden sm:inline">{sortByValue ? 'Değere Göre' : 'Sırala'}</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={toggleExpandAllAssets}
+                                            className="px-3 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 header-btn text-zinc-300 hover:text-white transition-all"
+                                            title={hasAnyExpandedAsset ? 'Tüm varlık detaylarını kapat' : 'Tüm varlık ve alt kalemleri aç'}
+                                        >
+                                            <i className={`fa-solid ${hasAnyExpandedAsset ? 'fa-compress' : 'fa-expand'} text-[10px]`}></i>
+                                            <span className="hidden sm:inline">{hasAnyExpandedAsset ? 'Tümünü Kapat' : 'Tümünü Aç'}</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <button
-                                        type="button"
-                                        onClick={() => fetchLiveRates(true)}
-                                        disabled={isLoadingRates}
-                                        className={`px-3.5 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all active:scale-95 border ${
-                                            isLoadingRates
-                                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 cursor-wait'
-                                                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500 hover:text-black'
-                                        }`}
-                                        title="Tüm döviz/altın kurlarını, hisse varlıklarını ve alt kalemleri canlı günceller"
-                                    >
-                                        <i className={`fa-solid fa-arrows-rotate text-xs ${isLoadingRates ? 'fa-spin' : ''}`}></i>
-                                        <span>{isLoadingRates ? 'Güncelleniyor...' : 'Tüm Alt Kalem & Kurları Güncelle'}</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={toggleExpandAllAssets}
-                                        className="px-3 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 header-btn text-zinc-300 hover:text-white transition-all"
-                                        title={hasAnyExpandedAsset ? 'Tüm varlık detaylarını kapat' : 'Tüm varlık ve alt kalemleri aç'}
-                                    >
-                                        <i className={`fa-solid ${hasAnyExpandedAsset ? 'fa-compress' : 'fa-expand'} text-[10px]`}></i>
-                                        <span className="hidden sm:inline">{hasAnyExpandedAsset ? 'Tümünü Kapat' : 'Tümünü Aç'}</span>
-                                    </button>
+
+                                {/* Instant Search Bar */}
+                                <div className="relative w-full sm:max-w-sm">
+                                    <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs pointer-events-none"></i>
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Varlık, hisse veya kalem ara..."
+                                        className="w-full bg-[#0d131d]/90 border border-white/10 focus:border-emerald-500/45 rounded-xl py-2.5 pl-9 pr-9 text-xs text-white placeholder:text-zinc-500 outline-none transition-colors"
+                                    />
+                                    {searchQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSearchQuery('')}
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center"
+                                            title="Aramayı Temizle"
+                                        >
+                                            <i className="fa-solid fa-xmark text-xs"></i>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {/* Portfolios Grid */}
+                        {portfolio.length === 0 ? (
+                            <div className="max-w-md mx-auto glass-card p-8 rounded-[2rem] text-center flex flex-col items-center gap-4 border border-white/10">
+                                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
+                                    <i className="fa-solid fa-wallet text-2xl text-emerald-400"></i>
+                                </div>
+                                <h3 className="text-xl font-bold text-white">Kasanız Hazır!</h3>
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                    İlk portföyünüzü oluşturup banka, döviz, altın, kripto veya BIST hisselerinizi şifreli olarak takip etmeye başlayın.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={addNewPerson}
+                                    className="w-full py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest bg-gradient-to-r from-emerald-500 to-emerald-600 text-black hover:brightness-110 transition-all shadow-lg shadow-emerald-500/20"
+                                >
+                                    + İLK PORTFÖYÜ OLUŞTUR
+                                </button>
+                            </div>
+                        ) : filteredPortfolio.length === 0 ? (
+                            <div className="max-w-md mx-auto glass-card p-7 rounded-[2rem] text-center flex flex-col items-center gap-3 border border-white/10">
+                                <i className="fa-solid fa-filter-circle-xmark text-3xl text-zinc-500"></i>
+                                <p className="text-sm font-bold text-white">Eşleşen varlık bulunamadı</p>
+                                <p className="text-xs text-zinc-400">Arama veya tür filtresini temizleyerek tüm portföyleri görebilirsiniz.</p>
+                                <button
+                                    type="button"
+                                    onClick={() => { setSearchQuery(''); setActiveTypeFilter(null); }}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500 hover:text-black transition-all"
+                                >
+                                    Filtreleri Temizle
+                                </button>
+                            </div>
+                        ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
-                            {portfolio.map((person) => {
+                            {filteredPortfolio.map((person) => {
+                                const personIndex = portfolio.findIndex((p) => p.id === person.id);
                                 const personTotal = calculatePersonTotal(person.assets);
-                                const isOpen = expandedPersons[person.id] !== false;
+                                const personPnL = calculatePersonPnL(person.assets);
+                                const isFiltering = Boolean(searchQuery.trim() || activeTypeFilter);
+                                const isOpen = isFiltering ? true : (expandedPersons[person.id] !== false);
 
                                 return (
                                     <div
@@ -3940,7 +5041,7 @@
                                             isOpen ? 'shadow-2xl border-white/10' : 'hover:border-white/10 shadow-lg'
                                         }`}
                                     >
-                                        {/* Card Header (Person Name & Total) */}
+                                        {/* Card Header (Person Name, Total & P&L) */}
                                         <div
                                             onClick={() => togglePersonAccordion(person.id)}
                                             className={`p-5 sm:p-6 flex justify-between items-center gap-3 cursor-pointer transition-colors ${
@@ -3980,13 +5081,17 @@
                                                 </button>
                                                 <div className="flex flex-col items-end">
                                                     <span className={`text-sm sm:text-base font-bold font-numbers transition-colors ${person.isHidden ? 'text-zinc-500 line-through decoration-zinc-500/50' : 'text-white'}`}>
-                                                        {formatMoney(personTotal)}
+                                                        {fmtMoney(personTotal)}
                                                     </span>
-                                                    {person.isHidden && (
+                                                    {person.isHidden ? (
                                                         <span className="text-[9px] text-red-400/80 uppercase tracking-wider font-semibold mt-0.5">
                                                             Gizlendi
                                                         </span>
-                                                    )}
+                                                    ) : personPnL ? (
+                                                        <span className={`text-[9.5px] font-bold font-numbers mt-0.5 ${personPnL.isProfit ? 'text-emerald-400/90' : 'text-red-400/90'}`}>
+                                                            {personPnL.isProfit ? '+' : ''}%{personPnL.percentage.toFixed(1)}
+                                                        </span>
+                                                    ) : null}
                                                 </div>
                                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'bg-white text-black rotate-180' : 'glass-surface text-zinc-400'}`}>
                                                     <i className="fa-solid fa-chevron-down text-xs"></i>
@@ -4001,8 +5106,12 @@
                                                     const hasSubItems = asset.subItems && asset.subItems.length > 0;
                                                     const hasStockSubItems = hasSubItems && asset.subItems.some((s) => s.type === 'STOCK' && s.name);
                                                     const assetValue = calculateAssetValue(asset);
-                                                    const isAssetOpen = Boolean(expandedAssets[asset.id]);
+                                                    const assetPnL = calculateAssetPnL(asset);
+                                                    const isAssetOpen = isFiltering ? true : Boolean(expandedAssets[asset.id]);
                                                     const isFetchingThisAsset = Boolean(fetchingStocks[asset.id]);
+                                                    const visibleSubs = hasSubItems
+                                                        ? asset.subItems.filter((s) => !activeTypeFilter || s.type === activeTypeFilter)
+                                                        : [];
 
                                                     return (
                                                         <div key={asset.id} className="glass-surface rounded-2xl border border-white/5 hover:border-white/15 transition-all flex flex-col">
@@ -4021,8 +5130,9 @@
                                                                         value={asset.name}
                                                                         onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, name: val }))}
                                                                         onClick={(e) => e.stopPropagation()}
+                                                                        isStock={!hasSubItems && asset.type === 'STOCK'}
                                                                         className="font-bold text-white text-xs sm:text-sm leading-tight placeholder:text-zinc-500"
-                                                                        placeholder="VARLIK ADI"
+                                                                        placeholder={!hasSubItems && asset.type === 'STOCK' ? 'HİSSE (ÖRN: THYAO)' : 'VARLIK ADI'}
                                                                         title={asset.name}
                                                                     />
                                                                     {((!hasSubItems && asset.type === 'STOCK') || hasStockSubItems) && (
@@ -4058,17 +5168,25 @@
 
                                                                     <div className="flex flex-col items-end">
                                                                         <span className={`text-xs sm:text-sm font-bold font-numbers transition-colors ${asset.isHidden ? 'text-zinc-500 line-through decoration-zinc-500/50' : 'text-emerald-400'}`}>
-                                                                            {formatMoney(assetValue)}
+                                                                            {fmtMoney(assetValue)}
                                                                         </span>
-                                                                        {asset.isHidden && (
+                                                                        {asset.isHidden ? (
                                                                             <span className="text-[8px] text-red-400/80 uppercase tracking-wider font-semibold">
                                                                                 Gizlendi
                                                                             </span>
-                                                                        )}
-                                                                        {hasSubItems && !isAssetOpen && !asset.isHidden && (
-                                                                            <span className="text-[9px] text-zinc-500 font-semibold tracking-widest uppercase">
-                                                                                {asset.subItems.length} Kalem
-                                                                            </span>
+                                                                        ) : (
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                {hasSubItems && !isAssetOpen && (
+                                                                                    <span className="text-[9px] text-zinc-500 font-semibold tracking-widest uppercase">
+                                                                                        {asset.subItems.length} Kalem
+                                                                                    </span>
+                                                                                )}
+                                                                                {assetPnL && !isAssetOpen && (
+                                                                                    <span className={`text-[9px] font-bold font-numbers ${assetPnL.isProfit ? 'text-emerald-400/85' : 'text-red-400/85'}`}>
+                                                                                        {assetPnL.isProfit ? '+' : ''}%{assetPnL.percentage.toFixed(1)}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
                                                                         )}
                                                                     </div>
 
@@ -4091,77 +5209,130 @@
                                                             <div className={`accordion-content ${isAssetOpen ? 'open' : ''}`}>
                                                                 <div className="p-3.5 sm:p-4 pt-3 flex flex-col gap-3.5 border-t border-white/5">
                                                                     {!hasSubItems && (
-                                                                        <div className="flex flex-col gap-1.5 w-full">
-                                                                            <div className="flex items-stretch bg-black/40 border border-white/10 rounded-xl focus-within:border-emerald-500/50 transition-colors w-full">
-                                                                                <DebouncedInput
-                                                                                    type="number"
-                                                                                    value={asset.amount}
-                                                                                    onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, amount: val }))}
-                                                                                    className="flex-[2.5] min-w-0 bg-transparent text-white font-numbers font-bold text-xs sm:text-sm py-2.5 px-1.5 text-center outline-none placeholder:text-zinc-500"
-                                                                                    placeholder={asset.type === 'STOCK' ? 'Adet' : 'Miktar'}
-                                                                                    title={asset.type === 'STOCK' ? 'Adet' : 'Miktar (Tutar)'}
-                                                                                />
-
-                                                                                {asset.type === 'STOCK' && (
-                                                                                    <>
-                                                                                        <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                        <DebouncedInput
-                                                                                            type="number"
-                                                                                            value={asset.currentPrice || ''}
-                                                                                            onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, currentPrice: val }))}
-                                                                                            className="flex-[2.2] min-w-0 bg-transparent text-blue-200 font-numbers font-bold text-xs sm:text-sm py-2.5 px-1 text-center outline-none placeholder:text-blue-400/40"
-                                                                                            placeholder="Güncel"
-                                                                                            title="Güncel Fiyat (₺)"
+                                                                        <div className="flex flex-col gap-2 w-full">
+                                                                            {asset.type === 'STOCK' ? (
+                                                                                <div className="flex flex-col sm:flex-row items-stretch bg-black/40 border border-white/10 rounded-xl focus-within:border-emerald-500/50 transition-colors w-full overflow-hidden">
+                                                                                    <div className="flex items-stretch flex-1 border-b sm:border-b-0 sm:border-r border-white/10">
+                                                                                        <div className="flex-1 flex flex-col py-1.5 px-1.5">
+                                                                                            <span className="text-[8px] uppercase tracking-widest text-zinc-500 text-center font-bold sm:hidden">Adet</span>
+                                                                                            <DebouncedInput
+                                                                                                type="number"
+                                                                                                value={asset.amount}
+                                                                                                onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, amount: val }))}
+                                                                                                className="w-full min-w-0 bg-transparent text-white font-numbers font-bold text-xs sm:text-sm py-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                placeholder="Adet"
+                                                                                                title="Adet"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <div className="w-[1px] bg-white/10 shrink-0 sm:hidden"></div>
+                                                                                        <CustomSelect
+                                                                                            value={asset.type}
+                                                                                            options={currencyLabels}
+                                                                                            onChange={(newVal) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, type: newVal }))}
+                                                                                            className="sm:hidden bg-black/30 text-zinc-200 min-w-[76px]"
                                                                                         />
-                                                                                    </>
-                                                                                )}
-
-                                                                                {asset.type !== 'TRY' && (
-                                                                                    <>
-                                                                                        <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                        <DebouncedInput
-                                                                                            type="number"
-                                                                                            value={asset.costPrice || ''}
-                                                                                            onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, costPrice: val }))}
-                                                                                            className="flex-[2.2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs sm:text-sm py-2.5 px-1 text-center outline-none placeholder:text-zinc-500"
-                                                                                            placeholder="Maliyet"
-                                                                                            title="Birim Maliyet (₺)"
-                                                                                        />
-                                                                                    </>
-                                                                                )}
-
-                                                                                <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                <CustomSelect
-                                                                                    value={asset.type}
-                                                                                    options={currencyLabels}
-                                                                                    onChange={(newVal) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, type: newVal }))}
-                                                                                    className="flex-[1.5] bg-black/30 text-zinc-200 min-w-[62px] rounded-r-xl"
-                                                                                />
-                                                                            </div>
-
-                                                                            {asset.costPrice && asset.type !== 'TRY' && (() => {
-                                                                                const pnl = calculatePnL(asset.amount, rates[asset.type], asset.costPrice, asset.type, asset.currentPrice);
-                                                                                if (!pnl) return null;
-                                                                                return (
-                                                                                    <div className="flex justify-end pr-0.5">
-                                                                                        <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md font-numbers ${
-                                                                                            pnl.isNeutral
-                                                                                                ? 'bg-zinc-500/20 text-zinc-400'
-                                                                                                : pnl.isProfit
-                                                                                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                                                                                    : 'bg-red-500/20 text-red-400'
-                                                                                        }`}>
-                                                                                            {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({formatMoney(pnl.profit)})
-                                                                                        </span>
                                                                                     </div>
-                                                                                );
-                                                                            })()}
+                                                                                    <div className="flex items-stretch flex-[2]">
+                                                                                        <div className="flex-1 flex flex-col py-1.5 px-1 border-r border-white/10">
+                                                                                            <span className="text-[8px] uppercase tracking-widest text-blue-400/70 text-center font-bold sm:hidden">Güncel ₺</span>
+                                                                                            <DebouncedInput
+                                                                                                type="number"
+                                                                                                value={asset.currentPrice || ''}
+                                                                                                onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, currentPrice: val }))}
+                                                                                                className="w-full min-w-0 bg-transparent text-blue-200 font-numbers font-bold text-xs sm:text-sm py-1 text-center outline-none placeholder:text-blue-400/40"
+                                                                                                placeholder="Güncel"
+                                                                                                title="Güncel Fiyat (₺)"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <div className="flex-1 flex flex-col py-1.5 px-1 sm:border-r border-white/10">
+                                                                                            <span className="text-[8px] uppercase tracking-widest text-emerald-400/70 text-center font-bold sm:hidden">Maliyet ₺</span>
+                                                                                            <DebouncedInput
+                                                                                                type="number"
+                                                                                                value={asset.costPrice || ''}
+                                                                                                onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, costPrice: val }))}
+                                                                                                className="w-full min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs sm:text-sm py-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                placeholder="Maliyet"
+                                                                                                title="Birim Maliyet (₺)"
+                                                                                            />
+                                                                                        </div>
+                                                                                        <CustomSelect
+                                                                                            value={asset.type}
+                                                                                            options={currencyLabels}
+                                                                                            onChange={(newVal) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, type: newVal }))}
+                                                                                            className="hidden sm:flex flex-[0.8] bg-black/30 text-zinc-200 min-w-[64px] rounded-r-xl"
+                                                                                        />
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div className="flex items-stretch bg-black/40 border border-white/10 rounded-xl focus-within:border-emerald-500/50 transition-colors w-full">
+                                                                                    <DebouncedInput
+                                                                                        type="number"
+                                                                                        value={asset.amount}
+                                                                                        onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, amount: val }))}
+                                                                                        className="flex-[2.5] min-w-0 bg-transparent text-white font-numbers font-bold text-xs sm:text-sm py-2.5 px-1.5 text-center outline-none placeholder:text-zinc-500"
+                                                                                        placeholder="Miktar"
+                                                                                        title="Miktar (Tutar)"
+                                                                                    />
+
+                                                                                    {asset.type !== 'TRY' && (
+                                                                                        <>
+                                                                                            <div className="w-[1px] bg-white/10 shrink-0"></div>
+                                                                                            <DebouncedInput
+                                                                                                type="number"
+                                                                                                value={asset.costPrice || ''}
+                                                                                                onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, costPrice: val }))}
+                                                                                                className="flex-[2.2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs sm:text-sm py-2.5 px-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                placeholder="Maliyet"
+                                                                                                title="Birim Maliyet (₺)"
+                                                                                            />
+                                                                                        </>
+                                                                                    )}
+
+                                                                                    <div className="w-[1px] bg-white/10 shrink-0"></div>
+                                                                                    <CustomSelect
+                                                                                        value={asset.type}
+                                                                                        options={currencyLabels}
+                                                                                        onChange={(newVal) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, type: newVal }))}
+                                                                                        className="flex-[1.5] bg-black/30 text-zinc-200 min-w-[66px] rounded-r-xl"
+                                                                                    />
+                                                                                </div>
+                                                                            )}
+
+                                                                            {asset.type !== 'TRY' && (
+                                                                                <div className="flex items-center justify-between gap-2 px-0.5 flex-wrap">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => openTradeModal(person.id, asset.id, asset, null)}
+                                                                                        className="text-[10px] font-bold text-indigo-300/90 hover:text-white bg-indigo-500/12 hover:bg-indigo-500/25 border border-indigo-500/25 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5"
+                                                                                        title="Alım/Satım ekleyip ortalama maliyeti otomatik hesapla"
+                                                                                    >
+                                                                                        <i className="fa-solid fa-plus-minus text-[9px]"></i>
+                                                                                        <span>Alım / Satım</span>
+                                                                                    </button>
+
+                                                                                    {asset.costPrice && (() => {
+                                                                                        const pnl = calculatePnL(asset.amount, rates[asset.type], asset.costPrice, asset.type, asset.currentPrice);
+                                                                                        if (!pnl) return null;
+                                                                                        return (
+                                                                                            <span className={`text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md font-numbers ${
+                                                                                                pnl.isNeutral
+                                                                                                    ? 'bg-zinc-500/20 text-zinc-400'
+                                                                                                    : pnl.isProfit
+                                                                                                        ? 'bg-emerald-500/20 text-emerald-400'
+                                                                                                        : 'bg-red-500/20 text-red-400'
+                                                                                            }`}>
+                                                                                                {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({fmtMoney(pnl.profit)})
+                                                                                            </span>
+                                                                                        );
+                                                                                    })()}
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     )}
 
                                                                     {hasSubItems && (
                                                                         <div className="flex flex-col gap-2.5 pl-2.5 border-l-2 border-white/10 ml-1">
-                                                                            {asset.subItems.map((sub) => {
+                                                                            {visibleSubs.map((sub) => {
                                                                                 const isFetchingSub = Boolean(fetchingStocks[sub.id]);
                                                                                 const subVal = getItemValue(sub, rates);
                                                                                 return (
@@ -4171,8 +5342,9 @@
                                                                                                 <AutoGrowText
                                                                                                     value={sub.name}
                                                                                                     onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'name', val)}
+                                                                                                    isStock={sub.type === 'STOCK'}
                                                                                                     className="text-xs font-semibold text-zinc-100 leading-snug placeholder:text-zinc-600"
-                                                                                                    placeholder="Kalem Adı"
+                                                                                                    placeholder={sub.type === 'STOCK' ? 'Hisse (Örn: THYAO)' : 'Kalem Adı'}
                                                                                                     title={sub.name}
                                                                                                 />
                                                                                                 {sub.type === 'STOCK' && (
@@ -4184,6 +5356,16 @@
                                                                                                         title="Canlı Hisse Fiyatını Çek"
                                                                                                     >
                                                                                                         <i className={`fa-solid fa-rotate-right text-[11px] ${isFetchingSub ? 'fa-spin' : ''}`}></i>
+                                                                                                    </button>
+                                                                                                )}
+                                                                                                {sub.type !== 'TRY' && (
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        onClick={(e) => { e.stopPropagation(); openTradeModal(person.id, asset.id, sub, sub.id); }}
+                                                                                                        className="p-1 rounded-md text-indigo-300/80 hover:bg-indigo-500/20 hover:text-indigo-200 transition-colors shrink-0"
+                                                                                                        title="Alım / Satım (Ortalama Maliyet Hesapla)"
+                                                                                                    >
+                                                                                                        <i className="fa-solid fa-plus-minus text-[10px]"></i>
                                                                                                     </button>
                                                                                                 )}
                                                                                             </div>
@@ -4198,57 +5380,98 @@
                                                                                         </div>
 
                                                                                         <div className="flex flex-col gap-1.5 w-full">
-                                                                                            <div className="flex items-stretch glass-surface border border-white/10 rounded-lg focus-within:border-white/30 transition-colors w-full">
-                                                                                                <DebouncedInput
-                                                                                                    type="number"
-                                                                                                    value={sub.amount}
-                                                                                                    onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'amount', val)}
-                                                                                                    className="flex-[2.5] min-w-0 bg-transparent text-white font-numbers font-bold text-xs py-2 px-1 text-center outline-none placeholder:text-zinc-500"
-                                                                                                    placeholder={sub.type === 'STOCK' ? 'Adet' : 'Miktar'}
-                                                                                                    title={sub.type === 'STOCK' ? 'Adet' : 'Miktar (Tutar)'}
-                                                                                                />
-
-                                                                                                {sub.type === 'STOCK' && (
-                                                                                                    <>
-                                                                                                        <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                                        <DebouncedInput
-                                                                                                            type="number"
-                                                                                                            value={sub.currentPrice || ''}
-                                                                                                            onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'currentPrice', val)}
-                                                                                                            className="flex-[2.2] min-w-0 bg-transparent text-blue-200 font-numbers font-bold text-xs py-2 px-1 text-center outline-none placeholder:text-blue-400/40"
-                                                                                                            placeholder="Güncel"
-                                                                                                            title="Güncel Fiyat (₺)"
+                                                                                            {sub.type === 'STOCK' ? (
+                                                                                                <div className="flex flex-col sm:flex-row items-stretch glass-surface border border-white/10 rounded-lg focus-within:border-white/30 transition-colors w-full overflow-hidden">
+                                                                                                    <div className="flex items-stretch flex-1 border-b sm:border-b-0 sm:border-r border-white/10">
+                                                                                                        <div className="flex-1 flex flex-col py-1 px-1">
+                                                                                                            <span className="text-[7.5px] uppercase tracking-widest text-zinc-500 text-center font-bold sm:hidden">Adet</span>
+                                                                                                            <DebouncedInput
+                                                                                                                type="number"
+                                                                                                                value={sub.amount}
+                                                                                                                onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'amount', val)}
+                                                                                                                className="w-full min-w-0 bg-transparent text-white font-numbers font-bold text-xs py-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                                placeholder="Adet"
+                                                                                                                title="Adet"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                        <div className="w-[1px] bg-white/10 shrink-0 sm:hidden"></div>
+                                                                                                        <CustomSelect
+                                                                                                            value={sub.type}
+                                                                                                            options={currencyLabels}
+                                                                                                            onChange={(newVal) => updateSubItem(person.id, asset.id, sub.id, 'type', newVal)}
+                                                                                                            className="sm:hidden bg-black/30 text-white min-w-[72px]"
                                                                                                         />
-                                                                                                    </>
-                                                                                                )}
-
-                                                                                                {sub.type !== 'TRY' && (
-                                                                                                    <>
-                                                                                                        <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                                        <DebouncedInput
-                                                                                                            type="number"
-                                                                                                            value={sub.costPrice || ''}
-                                                                                                            onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', val)}
-                                                                                                            className="flex-[2.2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs py-2 px-1 text-center outline-none placeholder:text-zinc-500"
-                                                                                                            placeholder="Maliyet"
-                                                                                                            title="Birim Maliyet (₺)"
+                                                                                                    </div>
+                                                                                                    <div className="flex items-stretch flex-[2]">
+                                                                                                        <div className="flex-1 flex flex-col py-1 px-1 border-r border-white/10">
+                                                                                                            <span className="text-[7.5px] uppercase tracking-widest text-blue-400/70 text-center font-bold sm:hidden">Güncel ₺</span>
+                                                                                                            <DebouncedInput
+                                                                                                                type="number"
+                                                                                                                value={sub.currentPrice || ''}
+                                                                                                                onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'currentPrice', val)}
+                                                                                                                className="w-full min-w-0 bg-transparent text-blue-200 font-numbers font-bold text-xs py-1 text-center outline-none placeholder:text-blue-400/40"
+                                                                                                                placeholder="Güncel"
+                                                                                                                title="Güncel Fiyat (₺)"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                        <div className="flex-1 flex flex-col py-1 px-1 sm:border-r border-white/10">
+                                                                                                            <span className="text-[7.5px] uppercase tracking-widest text-emerald-400/70 text-center font-bold sm:hidden">Maliyet ₺</span>
+                                                                                                            <DebouncedInput
+                                                                                                                type="number"
+                                                                                                                value={sub.costPrice || ''}
+                                                                                                                onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', val)}
+                                                                                                                className="w-full min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs py-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                                placeholder="Maliyet"
+                                                                                                                title="Birim Maliyet (₺)"
+                                                                                                            />
+                                                                                                        </div>
+                                                                                                        <CustomSelect
+                                                                                                            value={sub.type}
+                                                                                                            options={currencyLabels}
+                                                                                                            onChange={(newVal) => updateSubItem(person.id, asset.id, sub.id, 'type', newVal)}
+                                                                                                            className="hidden sm:flex flex-[0.8] bg-black/30 text-white min-w-[60px] rounded-r-lg"
                                                                                                         />
-                                                                                                    </>
-                                                                                                )}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            ) : (
+                                                                                                <div className="flex items-stretch glass-surface border border-white/10 rounded-lg focus-within:border-white/30 transition-colors w-full">
+                                                                                                    <DebouncedInput
+                                                                                                        type="number"
+                                                                                                        value={sub.amount}
+                                                                                                        onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'amount', val)}
+                                                                                                        className="flex-[2.5] min-w-0 bg-transparent text-white font-numbers font-bold text-xs py-2 px-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                        placeholder="Miktar"
+                                                                                                        title="Miktar (Tutar)"
+                                                                                                    />
 
-                                                                                                <div className="w-[1px] bg-white/10 shrink-0"></div>
-                                                                                                <CustomSelect
-                                                                                                    value={sub.type}
-                                                                                                    options={currencyLabels}
-                                                                                                    onChange={(newVal) => updateSubItem(person.id, asset.id, sub.id, 'type', newVal)}
-                                                                                                    className="flex-[1.5] bg-black/30 text-white min-w-[60px] rounded-r-lg"
-                                                                                                />
-                                                                                            </div>
+                                                                                                    {sub.type !== 'TRY' && (
+                                                                                                        <>
+                                                                                                            <div className="w-[1px] bg-white/10 shrink-0"></div>
+                                                                                                            <DebouncedInput
+                                                                                                                type="number"
+                                                                                                                value={sub.costPrice || ''}
+                                                                                                                onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', val)}
+                                                                                                                className="flex-[2.2] min-w-0 bg-transparent text-emerald-100 font-numbers font-bold text-xs py-2 px-1 text-center outline-none placeholder:text-zinc-500"
+                                                                                                                placeholder="Maliyet"
+                                                                                                                title="Birim Maliyet (₺)"
+                                                                                                            />
+                                                                                                        </>
+                                                                                                    )}
+
+                                                                                                    <div className="w-[1px] bg-white/10 shrink-0"></div>
+                                                                                                    <CustomSelect
+                                                                                                        value={sub.type}
+                                                                                                        options={currencyLabels}
+                                                                                                        onChange={(newVal) => updateSubItem(person.id, asset.id, sub.id, 'type', newVal)}
+                                                                                                        className="flex-[1.5] bg-black/30 text-white min-w-[64px] rounded-r-lg"
+                                                                                                    />
+                                                                                                </div>
+                                                                                            )}
 
                                                                                             <div className="flex justify-between items-center gap-2 px-0.5 flex-wrap">
                                                                                                 {assetValue > 0 ? (
                                                                                                     <span className="text-[10px] font-semibold text-zinc-400 tracking-wide font-numbers">
-                                                                                                        %{((subVal / assetValue) * 100).toFixed(1)} pay · {formatMoney(subVal)}
+                                                                                                        %{((subVal / assetValue) * 100).toFixed(1)} pay · {fmtMoney(subVal)}
                                                                                                     </span>
                                                                                                 ) : <span />}
 
@@ -4263,7 +5486,7 @@
                                                                                                                     ? 'bg-emerald-500/20 text-emerald-400'
                                                                                                                     : 'bg-red-500/20 text-red-400'
                                                                                                         }`}>
-                                                                                                            {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({formatMoney(pnl.profit)})
+                                                                                                            {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({fmtMoney(pnl.profit)})
                                                                                                         </span>
                                                                                                     );
                                                                                                 })()}
@@ -4288,15 +5511,39 @@
                                                     );
                                                 })}
 
-                                                {/* Footer Actions (New Asset & Delete Person) */}
-                                                <div className="flex flex-row justify-between items-center gap-3 pt-4 border-t border-white/5 mt-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => removePerson(e, person.id)}
-                                                        className="text-[10px] font-bold uppercase tracking-widest px-4 py-3 rounded-xl transition-all shrink-0 cursor-pointer flex items-center justify-center text-zinc-400 hover:text-red-400 glass-surface hover:bg-red-500/10 hover:border-red-500/30"
-                                                    >
-                                                        KİŞİYİ SİL
-                                                    </button>
+                                                {/* Footer Actions (Reorder, Delete Person & New Asset) */}
+                                                <div className="flex flex-row justify-between items-center gap-2 pt-4 border-t border-white/5 mt-1">
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        {!sortByValue && portfolio.length > 1 && (
+                                                            <>
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={personIndex <= 0}
+                                                                    onClick={() => movePerson(person.id, -1)}
+                                                                    className="w-9 h-10 rounded-xl glass-surface text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                                                    title="Öne Taşı"
+                                                                >
+                                                                    <i className="fa-solid fa-chevron-left text-[10px]"></i>
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={personIndex >= portfolio.length - 1}
+                                                                    onClick={() => movePerson(person.id, 1)}
+                                                                    className="w-9 h-10 rounded-xl glass-surface text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                                                    title="Arkaya Taşı"
+                                                                >
+                                                                    <i className="fa-solid fa-chevron-right text-[10px]"></i>
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            onClick={(e) => removePerson(e, person.id)}
+                                                            className="text-[10px] font-bold uppercase tracking-widest px-3.5 py-3 rounded-xl transition-all shrink-0 cursor-pointer flex items-center justify-center text-zinc-400 hover:text-red-400 glass-surface hover:bg-red-500/10 hover:border-red-500/30"
+                                                        >
+                                                            SİL
+                                                        </button>
+                                                    </div>
                                                     <button
                                                         type="button"
                                                         onClick={() => addAsset(person.id)}
@@ -4325,6 +5572,7 @@
                                 </button>
                             </div>
                         </div>
+                        )}
                     </div>
                 );
             };
@@ -4396,7 +5644,7 @@
                         </div>
                     </PortalModal>
 
-                    {/* Unified Account Settings Modal (Portal -> works in both App & Admin Panel) */}
+                    {/* Unified Account Settings Modal (Portal -> Password, Financial Goal, Backup/Restore) */}
                     <PortalModal isOpen={showSettingsModal} onClose={closeSettingsModal} disableBackdropClose={isChangingPassword}>
                         <button
                             type="button"
@@ -4407,37 +5655,40 @@
                             <i className="fa-solid fa-xmark text-sm"></i>
                         </button>
 
-                        <div className="flex flex-col items-center mb-5">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center mb-2.5">
+                        <div className="flex flex-col items-center mb-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center mb-2">
                                 <i className="fa-solid fa-gear text-xl text-indigo-400"></i>
                             </div>
                             <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">Hesap Ayarları</h3>
-                            <p className="text-[10px] uppercase tracking-widest text-zinc-400 mt-0.5 font-bold">{activeVaultLabel}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">{activeVaultLabel}</p>
+                                {getSessionRemainingMinutes() !== null && (
+                                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">
+                                        Oturum: ~{getSessionRemainingMinutes()} dk
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="flex gap-2 mb-5">
-                            <button
-                                type="button"
-                                onClick={() => { setSettingsTab('password'); setSettingsError(''); }}
-                                className={`flex-1 py-2.5 rounded-xl font-bold text-xs tracking-widest transition-all border ${
-                                    settingsTab === 'password'
-                                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
-                                        : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
-                                }`}
-                            >
-                                ŞİFRE
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => { setSettingsTab('export'); setSettingsError(''); }}
-                                className={`flex-1 py-2.5 rounded-xl font-bold text-xs tracking-widest transition-all border ${
-                                    settingsTab === 'export'
-                                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
-                                        : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
-                                }`}
-                            >
-                                YEDEKLE
-                            </button>
+                        <div className="flex gap-1.5 mb-5">
+                            {[
+                                { id: 'password', label: 'ŞİFRE' },
+                                { id: 'goal', label: 'HEDEF' },
+                                { id: 'export', label: 'YEDEK / AKTAR' }
+                            ].map((t) => (
+                                <button
+                                    key={t.id}
+                                    type="button"
+                                    onClick={() => { setSettingsTab(t.id); setSettingsError(''); setImportError(''); }}
+                                    className={`flex-1 py-2.5 rounded-xl font-bold text-[11px] tracking-widest transition-all border ${
+                                        settingsTab === t.id
+                                            ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
+                                            : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
+                                    }`}
+                                >
+                                    {t.label}
+                                </button>
+                            ))}
                         </div>
 
                         {settingsTab === 'password' && (
@@ -4490,28 +5741,316 @@
                                     {isChangingPassword ? 'KAYDEDİLİYOR...' : 'ŞİFREYİ DEĞİŞTİR'}
                                 </button>
                                 <p className="text-[10px] text-center text-zinc-500 font-medium">
-                                    Portföy verileriniz korunarak yeni şifrenizle şifrelenir.
+                                    Kısayollar: Ctrl+S Kaydet · Alt+R Güncelle · Alt+H Gizli Mod
                                 </p>
                             </form>
                         )}
 
-                        {settingsTab === 'export' && (
-                            <div className="flex flex-col text-center gap-3.5 py-1">
-                                <i className="fa-solid fa-file-export text-3xl text-emerald-400 opacity-85"></i>
-                                <h4 className="text-white font-bold text-sm">Verilerinizi İndirin</h4>
-                                <p className="text-xs text-zinc-400 leading-relaxed bg-black/25 p-3 rounded-xl border border-white/5">
-                                    Portföy listeniz, kur değerleriniz ve etiketleriniz JSON yedeği olarak cihazınıza indirilecek.
+                        {settingsTab === 'goal' && (
+                            <form onSubmit={handleSaveGoal} className="flex flex-col gap-3">
+                                {settingsError && (
+                                    <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs text-center font-semibold">
+                                        {settingsError}
+                                    </div>
+                                )}
+                                <p className="text-xs text-zinc-400 text-center leading-relaxed">
+                                    Ana ekranda ilerleme çubuğuyla takip etmek istediğiniz birikim hedefinizi belirleyin.
                                 </p>
+                                <input
+                                    type="text"
+                                    value={goalForm.title}
+                                    onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+                                    placeholder="Hedef Adı (Örn: Ev Peşinatı)"
+                                    className="w-full glass-surface py-3 px-4 rounded-xl text-white outline-none focus:border-emerald-500/50 text-sm font-semibold"
+                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        required
+                                        type="number"
+                                        step="any"
+                                        inputMode="decimal"
+                                        value={goalForm.target}
+                                        onChange={(e) => setGoalForm({ ...goalForm, target: e.target.value })}
+                                        placeholder="Hedef Tutar"
+                                        className="flex-1 min-w-0 glass-surface py-3 px-3 rounded-xl text-white font-numbers font-bold text-sm outline-none focus:border-emerald-500/50"
+                                    />
+                                    <select
+                                        value={goalForm.currency}
+                                        onChange={(e) => setGoalForm({ ...goalForm, currency: e.target.value })}
+                                        className="bg-zinc-900 border border-white/15 rounded-xl px-3 text-xs font-bold text-white outline-none"
+                                    >
+                                        <option value="TRY">₺ TL</option>
+                                        <option value="USD">$ USD</option>
+                                        <option value="EUR">€ EUR</option>
+                                        <option value="GRAM">Gr Altın</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2 mt-1">
+                                    {safeParseNum(vaultGoal?.target) > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleClearGoal}
+                                            className="px-4 py-3 rounded-xl font-bold text-xs bg-red-500/15 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/30 transition-all"
+                                        >
+                                            KALDIR
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="flex-1 py-3 rounded-xl font-bold text-xs bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-black border border-emerald-500/30 tracking-widest transition-all"
+                                    >
+                                        HEDEFİ KAYDET
+                                    </button>
+                                </div>
+                            </form>
+                        )}
 
-                                <button
-                                    type="button"
-                                    onClick={handleExportData}
-                                    className="w-full py-3 rounded-xl font-bold text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all border border-emerald-500/30 tracking-widest flex justify-center items-center gap-2"
-                                >
-                                    <i className="fa-solid fa-download"></i> DIŞA AKTAR
-                                </button>
+                        {settingsTab === 'export' && (
+                            <div className="flex flex-col gap-3">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 px-0.5">
+                                    Dışa Aktar (Yedekle)
+                                </div>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <button
+                                        type="button"
+                                        onClick={handleExportData}
+                                        className="py-3 px-3 rounded-xl font-bold text-[11px] bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-black transition-all border border-emerald-500/30 tracking-wider flex flex-col items-center gap-1.5"
+                                    >
+                                        <i className="fa-solid fa-file-code text-base"></i>
+                                        <span>JSON YEDEK</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleExportCsv}
+                                        className="py-3 px-3 rounded-xl font-bold text-[11px] bg-sky-500/15 text-sky-300 hover:bg-sky-500 hover:text-black transition-all border border-sky-500/30 tracking-wider flex flex-col items-center gap-1.5"
+                                    >
+                                        <i className="fa-solid fa-file-excel text-base"></i>
+                                        <span>EXCEL (CSV)</span>
+                                    </button>
+                                </div>
+
+                                <div className="h-px w-full bg-white/10 my-1"></div>
+
+                                <div className="bg-black/25 p-3.5 rounded-2xl border border-white/10 flex flex-col gap-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                                            <i className="fa-solid fa-file-import text-indigo-400"></i> İçe Aktar (Geri Yükle)
+                                        </span>
+                                        <span className="text-[9px] uppercase tracking-widest text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded font-bold">JSON / CSV</span>
+                                    </div>
+                                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                                        Daha önce aldığınız <strong>JSON</strong> yedeğini veya <strong>Excel (CSV)</strong> dosyasını seçip kasanıza aktarabilirsiniz.
+                                    </p>
+
+                                    {importError && (
+                                        <div className="p-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-[11px] font-semibold">
+                                            {importError}
+                                        </div>
+                                    )}
+
+                                    {!importPreview ? (
+                                        <label className="w-full py-3 rounded-xl font-bold text-[11px] bg-indigo-500/20 text-indigo-200 hover:bg-indigo-500 hover:text-white border border-dashed border-indigo-400/50 tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all">
+                                            <i className="fa-solid fa-upload"></i> JSON / CSV DOSYASI SEÇ
+                                            <input type="file" accept=".json,.csv,application/json,text/csv" onChange={handleImportFileChange} className="hidden" />
+                                        </label>
+                                    ) : (
+                                        <div className="flex flex-col gap-2.5 bg-indigo-500/10 border border-indigo-400/30 rounded-xl p-3">
+                                            <div className="text-[11px] text-indigo-100 font-semibold">
+                                                <strong>{importPreview.filename}</strong> ({importPreview.format}): {importPreview.personCount} portföy, {importPreview.assetCount} varlık hazır.
+                                            </div>
+                                            <div className="flex gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setImportMode('replace')}
+                                                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${
+                                                        importMode === 'replace'
+                                                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                                            : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
+                                                    }`}
+                                                >
+                                                    Üzerine Yaz
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setImportMode('merge')}
+                                                    className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${
+                                                        importMode === 'merge'
+                                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                                            : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
+                                                    }`}
+                                                >
+                                                    Mevcuta Ekle
+                                                </button>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setImportPreview(null)}
+                                                    className="flex-1 py-2 rounded-lg text-[10px] font-bold bg-white/5 text-zinc-300 hover:bg-white/10"
+                                                >
+                                                    İPTAL
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={confirmImportBackup}
+                                                    className="flex-1 py-2 rounded-lg text-[10px] font-bold bg-emerald-500 text-black hover:brightness-110 tracking-wider"
+                                                >
+                                                    İÇE AKTAR
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )}
+                    </PortalModal>
+
+                    {/* DCA Buy / Sell Average Cost Calculator Modal (Portal) */}
+                    <PortalModal isOpen={Boolean(tradeTarget)} onClose={() => setTradeTarget(null)}>
+                        {tradeTarget && (() => {
+                            const qty = safeParseNum(tradeQty);
+                            const price = safeParseNum(tradePrice);
+                            const newBuyQty = tradeTarget.currentAmount + qty;
+                            const newBuyAvg = qty > 0 && price > 0
+                                ? (tradeTarget.currentAmount > 0 && tradeTarget.currentCost > 0
+                                    ? ((tradeTarget.currentAmount * tradeTarget.currentCost) + (qty * price)) / newBuyQty
+                                    : price)
+                                : null;
+                            const sellRemain = Math.max(0, tradeTarget.currentAmount - qty);
+                            const realizedPnl = tradeMode === 'sell' && qty > 0 && price > 0 && tradeTarget.currentCost > 0
+                                ? (price - tradeTarget.currentCost) * qty
+                                : null;
+
+                            return (
+                                <form onSubmit={applyTrade} className="flex flex-col gap-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="min-w-0 pr-2">
+                                            <h3 className="text-base sm:text-lg font-bold text-white truncate">{tradeTarget.name}</h3>
+                                            <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
+                                                Mevcut: {tradeTarget.currentAmount} {tradeTarget.typeLabel} {tradeTarget.currentCost > 0 ? `· Ort: ${tradeTarget.currentCost} ₺` : ''}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeTarget(null)}
+                                            className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-white shrink-0"
+                                        >
+                                            <i className="fa-solid fa-xmark text-sm"></i>
+                                        </button>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeMode('buy')}
+                                            className={`flex-1 py-2.5 rounded-xl font-bold text-xs tracking-widest border transition-all ${
+                                                tradeMode === 'buy'
+                                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                                    : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
+                                            }`}
+                                        >
+                                            + ALIM EKLE
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeMode('sell')}
+                                            className={`flex-1 py-2.5 rounded-xl font-bold text-xs tracking-widest border transition-all ${
+                                                tradeMode === 'sell'
+                                                    ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                                                    : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
+                                            }`}
+                                        >
+                                            - SATIM YAP
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2.5">
+                                        <div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block mb-1">
+                                                {tradeTarget.type === 'STOCK' ? 'Adet' : 'Miktar'}
+                                            </label>
+                                            <input
+                                                required
+                                                autoFocus
+                                                type="number"
+                                                step="any"
+                                                inputMode="decimal"
+                                                value={tradeQty}
+                                                onChange={(e) => setTradeQty(e.target.value)}
+                                                placeholder="Örn: 50"
+                                                className="w-full glass-surface py-3 px-3 rounded-xl text-white font-numbers font-bold text-sm text-center outline-none focus:border-emerald-500/50"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 block mb-1">
+                                                Birim Fiyat (₺)
+                                            </label>
+                                            <input
+                                                required={tradeMode === 'buy'}
+                                                type="number"
+                                                step="any"
+                                                inputMode="decimal"
+                                                value={tradePrice}
+                                                onChange={(e) => setTradePrice(e.target.value)}
+                                                placeholder="Birim ₺"
+                                                className="w-full glass-surface py-3 px-3 rounded-xl text-white font-numbers font-bold text-sm text-center outline-none focus:border-emerald-500/50"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {qty > 0 && (
+                                        <div className="bg-black/30 border border-white/10 rounded-xl p-3 text-xs font-numbers flex flex-col gap-1">
+                                            {tradeMode === 'buy' ? (
+                                                <>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-zinc-400 font-sans">Yeni Toplam Miktar:</span>
+                                                        <span className="text-white font-bold">{parseFloat(newBuyQty.toFixed(4))}</span>
+                                                    </div>
+                                                    {newBuyAvg !== null && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-zinc-400 font-sans">Yeni Ort. Maliyet:</span>
+                                                            <span className="text-emerald-300 font-bold">{newBuyAvg.toFixed(2)} ₺</span>
+                                                        </div>
+                                                    )}
+                                                    {price > 0 && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-zinc-400 font-sans">İşlem Tutarı:</span>
+                                                            <span className="text-zinc-200 font-bold">{fmtMoney(qty * price)}</span>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-zinc-400 font-sans">Kalan Miktar:</span>
+                                                        <span className="text-white font-bold">{parseFloat(sellRemain.toFixed(4))}</span>
+                                                    </div>
+                                                    {realizedPnl !== null && (
+                                                        <div className="flex justify-between">
+                                                            <span className="text-zinc-400 font-sans">Gerçekleşen Kâr/Zarar:</span>
+                                                            <span className={`font-bold ${realizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                {realizedPnl >= 0 ? '+' : ''}{fmtMoney(realizedPnl)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        type="submit"
+                                        className={`w-full py-3 rounded-xl font-bold text-xs tracking-widest transition-all border ${
+                                            tradeMode === 'buy'
+                                                ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-black border-emerald-500/35'
+                                                : 'bg-red-500/20 text-red-300 hover:bg-red-500 hover:text-white border-red-500/35'
+                                        }`}
+                                    >
+                                        {tradeMode === 'buy' ? 'ALIMI UYGULA & ORTALAMAYI GÜNCELLE' : 'SATIMI UYGULA'}
+                                    </button>
+                                </form>
+                            );
+                        })()}
                     </PortalModal>
 
                     {/* Admin Action Modal (Portal) */}
