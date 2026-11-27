@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Portföy Yönetim</title>
+    <title>Portföy Yönetimi</title>
 
     <!-- PWA Metadata -->
     <link rel="manifest"
-        href="data:application/manifest+json,%7B%22name%22%3A%22Kasa%20%28Portf%C3%B6y%29%22%2C%22short_name%22%3A%22Kasa%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23040608%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%252310b981%27%20rx%3D%2720%27%2F%253E%253Cpath%20fill%3D%27%2523fff%27%20d%3D%27M50%2020a30%2030%200%201%200%200%2060%2030%2030%200%200%200%200-60zm0%2010a20%2020%200%201%201%200%2040%2020%2020%200%200%201%200-40z%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+        href="data:application/manifest+json,%7B%22name%22%3A%22Portf%C3%B6y%20Kasas%C4%B1%22%2C%22short_name%22%3A%22Kasa%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23040608%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%252310b981%27%20rx%3D%2720%27%2F%253E%253Cpath%20fill%3D%27%2523fff%27%20d%3D%27M50%2020a30%2030%200%201%200%200%2060%2030%2030%200%200%200%200-60zm0%2010a20%2020%200%201%201%200%2040%2020%2020%200%200%201%200-40z%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -281,11 +281,11 @@
 
         const BIST_POPULAR = [
             { sym: 'THYAO', name: 'Türk Hava Yolları' },
-            { sym: 'ASELS', name: 'Aselsan' },
+            { sym: 'ASELS', name: 'ASELSAN' },
             { sym: 'TUPRS', name: 'Tüpraş' },
             { sym: 'KCHOL', name: 'Koç Holding' },
             { sym: 'SAHOL', name: 'Sabancı Holding' },
-            { sym: 'BIMAS', name: 'BİM Mağazalar' },
+            { sym: 'BIMAS', name: 'BİM Birleşik Mağazalar' },
             { sym: 'GARAN', name: 'Garanti BBVA' },
             { sym: 'AKBNK', name: 'Akbank' },
             { sym: 'ISCTR', name: 'İş Bankası (C)' },
@@ -293,7 +293,7 @@
             { sym: 'SISE', name: 'Şişecam' },
             { sym: 'EREGL', name: 'Ereğli Demir Çelik' },
             { sym: 'FROTO', name: 'Ford Otosan' },
-            { sym: 'TOASO', name: 'Tofaş Oto' },
+            { sym: 'TOASO', name: 'Tofaş' },
             { sym: 'MGROS', name: 'Migros' },
             { sym: 'PGSUS', name: 'Pegasus' },
             { sym: 'TCELL', name: 'Turkcell' },
@@ -312,7 +312,7 @@
             { sym: 'GUBRF', name: 'Gübre Fabrikaları' },
             { sym: 'KRDMD', name: 'Kardemir (D)' },
             { sym: 'KOZAL', name: 'Koza Altın' },
-            { sym: 'OYAKC', name: 'Oyak Çimento' },
+            { sym: 'OYAKC', name: 'OYAK Çimento' },
             { sym: 'CIMSA', name: 'Çimsa' },
             { sym: 'AKCNS', name: 'Akçansa' },
             { sym: 'HALKB', name: 'Halkbank' },
@@ -333,11 +333,11 @@
             { sym: 'MPARK', name: 'MLP Sağlık' },
             { sym: 'TABGD', name: 'TAB Gıda' },
             { sym: 'LOGO', name: 'Logo Yazılım' },
-            { sym: 'MIATK', name: 'Mia Teknoloji' },
+            { sym: 'MIATK', name: 'MİA Teknoloji' },
             { sym: 'KONTR', name: 'Kontrolmatik' },
             { sym: 'EUPWR', name: 'Europower Enerji' },
             { sym: 'GESAN', name: 'Girişim Elektrik' },
-            { sym: 'SMRTG', name: 'Smart Güneş' },
+            { sym: 'SMRTG', name: 'Smart Güneş Enerjisi' },
             { sym: 'CWENE', name: 'CW Enerji' },
             { sym: 'YEOTK', name: 'Yeo Teknoloji' },
             { sym: 'AKSEN', name: 'Aksa Enerji' },
@@ -417,6 +417,19 @@
             return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 4 }).format(n);
         };
 
+        const formatTrDecimal = (val, digits = 1) => {
+            const n = Number.isFinite(val) ? val : safeParseNum(val);
+            return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n);
+        };
+
+        const formatSignedPct = (val, digits = 1) => {
+            const n = Number.isFinite(val) ? val : safeParseNum(val);
+            const threshold = Math.pow(10, -digits) / 2;
+            if (Math.abs(n) < threshold) return `%${formatTrDecimal(0, digits)}`;
+            const absStr = formatTrDecimal(Math.abs(n), digits);
+            return n < 0 ? `-%${absStr}` : `+%${absStr}`;
+        };
+
         const formatInCurrency = (tryValue, currency, rates, masked = false) => {
             if (masked) {
                 if (currency === 'USD') return '$•••••';
@@ -468,7 +481,7 @@
 
         const getVaultDisplayName = (filename) => {
             if (!filename) return 'Kasa';
-            if (filename === 'data.json') return 'Ana Kasa (Legacy)';
+            if (filename === 'data.json') return 'Ana Kasa';
             const stripped = filename
                 .replace(/^vault_locked_/, '')
                 .replace(/^vault_/, '')
@@ -1623,12 +1636,12 @@
                             </span>
                         </div>
                         <div className="bg-black/35 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
-                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Maliyet Bazı</span>
+                            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Toplam Maliyet</span>
                             <span className="text-xs sm:text-base font-black text-zinc-200 font-numbers mt-1 break-words">
                                 {analytics.trackedCost > 0 ? fmt(analytics.trackedCost) : '—'}
                             </span>
                             {analytics.trackedCount > 0 && (
-                                <span className="text-[9px] text-zinc-500 mt-0.5">{analytics.trackedCount} kalem takipli</span>
+                                <span className="text-[9px] text-zinc-500 mt-0.5">{analytics.trackedCount} maliyetli kalem</span>
                             )}
                         </div>
                         <div className="bg-black/35 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
@@ -1639,7 +1652,7 @@
                                         {analytics.netProfit >= 0 ? '+' : ''}{fmt(analytics.netProfit)}
                                     </span>
                                     <span className={`text-[10px] font-bold font-numbers mt-0.5 ${analytics.netProfit >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
-                                        {analytics.netProfit >= 0 ? '+' : ''}%{analytics.netPct.toFixed(1)}
+                                        {formatSignedPct(analytics.netPct, 1)}
                                     </span>
                                 </>
                             ) : (
@@ -1654,7 +1667,7 @@
                             {[
                                 { id: 'performance', label: 'Performans', icon: 'fa-arrow-trend-up' },
                                 { id: 'allocation', label: 'Dağılım', icon: 'fa-chart-pie' },
-                                { id: 'trend', label: 'Trend', icon: 'fa-wave-square' }
+                                { id: 'trend', label: 'Gelişim', icon: 'fa-wave-square' }
                             ].map((tab) => (
                                 <button
                                     key={tab.id}
@@ -1729,7 +1742,7 @@
                                                 </div>
                                                 <div className="text-right shrink-0 font-numbers">
                                                     <div className={`text-xs sm:text-sm font-black ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                        {isPos ? '+' : ''}{item.pnl.percentage.toFixed(1)}%
+                                                        {formatSignedPct(item.pnl.percentage, 1)}
                                                     </div>
                                                     <div className={`text-[10px] font-semibold ${isPos ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
                                                         {isPos ? '+' : ''}{fmt(item.pnl.profit)}
@@ -1778,7 +1791,7 @@
                                                     </div>
                                                     <div>
                                                         <span className="text-zinc-500 block font-sans">Maliyet → Güncel</span>
-                                                        <span className="text-zinc-200 font-bold">{item.costUnit} → {item.currentUnit} ₺</span>
+                                                        <span className="text-zinc-200 font-bold">{formatCompactRate(item.costUnit)} → {formatCompactRate(item.currentUnit)} ₺</span>
                                                     </div>
                                                     <div>
                                                         <span className="text-zinc-500 block font-sans">Toplam Maliyet</span>
@@ -1855,7 +1868,7 @@
                                         </span>
                                         {activeSlice && (
                                             <span className="text-[10px] font-bold font-numbers mt-0.5" style={{ color: activeSlice.color }}>
-                                                %{activeSlice.pct.toFixed(1)}
+                                                %{formatTrDecimal(activeSlice.pct, 1)}
                                             </span>
                                         )}
                                     </div>
@@ -1885,11 +1898,11 @@
                                                     <div className="flex items-center gap-2 shrink-0 font-numbers">
                                                         {slice.pnlPct !== null && (
                                                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${slice.pnlVal >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
-                                                                {slice.pnlVal >= 0 ? '+' : ''}%{slice.pnlPct.toFixed(1)}
+                                                                {formatSignedPct(slice.pnlPct, 1)}
                                                             </span>
                                                         )}
                                                         <span className="text-xs font-bold text-white">{fmt(slice.value)}</span>
-                                                        <span className="text-[10px] text-zinc-400 w-10 text-right">%{slice.pct.toFixed(1)}</span>
+                                                        <span className="text-[10px] text-zinc-400 w-10 text-right">%{formatTrDecimal(slice.pct, 1)}</span>
                                                     </div>
                                                 </div>
                                                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -1927,7 +1940,7 @@
                                         <div className="text-right font-numbers">
                                             <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-sans block">Dönem Değişimi</span>
                                             <span className={`text-xs font-bold ${trendDelta.diff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                {trendDelta.diff >= 0 ? '+' : ''}{fmt(trendDelta.diff)} ({trendDelta.diff >= 0 ? '+' : ''}%{trendDelta.pct.toFixed(1)})
+                                                {trendDelta.diff >= 0 ? '+' : ''}{fmt(trendDelta.diff)} ({formatSignedPct(trendDelta.pct, 1)})
                                             </span>
                                         </div>
                                     )}
@@ -2011,13 +2024,13 @@
                                     </div>
                                     {trendSeries.length < 2 && (
                                         <p className="text-[10px] text-zinc-500 text-center mt-2">
-                                            Günlük kayıtlar otomatik olarak şifreli kasanızda biriktikçe çok günlük trend çizgisi oluşacaktır.
+                                            Günlük kayıtlar şifreli kasanızda otomatik olarak biriktikçe zaman içindeki değişim grafiği oluşacaktır.
                                         </p>
                                     )}
                                 </div>
                             ) : (
                                 <div className="bg-black/30 border border-white/5 rounded-2xl p-6 text-center text-xs text-zinc-500">
-                                    Henüz kayıtlı trend verisi bulunmuyor.
+                                    Henüz kayıtlı geçmiş verisi bulunmuyor.
                                 </div>
                             )}
                         </div>
@@ -2317,7 +2330,7 @@
                             method: 'PUT',
                             headers: ghWriteHeaders(config),
                             body: JSON.stringify({
-                                message: isAutoSave ? '🤖 Oto-Kayıt' : `🔒 Kasa güncellendi: ${targetFile}`,
+                                message: isAutoSave ? '🤖 Otomatik kayıt' : `🔒 Kasa güncellendi: ${targetFile}`,
                                 content: contentBase64,
                                 ...(shaToUse ? { sha: shaToUse } : {})
                             })
@@ -2361,7 +2374,7 @@
                         setVaultSession(targetFile, targetPass);
                         userDirtyRef.current = false;
                         setHasUnsavedChanges(false);
-                        if (!isAutoSave) showToast('Kasa senkronize edildi', 'success');
+                        if (!isAutoSave) showToast('Kasa kaydedildi.', 'success');
                     }
 
                     setSaveStatus('saved');
@@ -2376,7 +2389,7 @@
                     if (!isAutoSave) {
                         const msg = String(error?.message || '').toLowerCase().includes('failed to fetch')
                             ? 'İnternet bağlantısı yok. Bağlantı gelince tekrar deneyin.'
-                            : 'Kayıt Hatası! İnternet bağlantınızı veya GitHub yetkinizi kontrol edin.';
+                            : 'Kayıt hatası! İnternet bağlantınızı veya GitHub erişim yetkinizi kontrol edin.';
                         showToast(msg, 'error');
                     }
                 } finally {
@@ -2470,7 +2483,7 @@
                         return;
                     }
                     if (response.status === 401 || response.status === 403) {
-                        throw new Error('GitHub Token geçersiz veya depo erişim yetkisi yok.');
+                        throw new Error('GitHub erişim anahtarı geçersiz veya depo erişim yetkisi yok.');
                     }
                     if (!response.ok) throw new Error('GitHub erişimi reddedildi.');
 
@@ -2483,7 +2496,7 @@
                         .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
                     if (fileList.some((f) => f?.name === 'data.json')) {
-                        vaults.unshift({ name: 'Ana Kasa (Legacy)', filename: 'data.json' });
+                        vaults.unshift({ name: 'Ana Kasa', filename: 'data.json' });
                     }
 
                     setAvailableVaults(vaults);
@@ -2498,7 +2511,7 @@
                 } catch (err) {
                     const msg = String(err?.message || '').toLowerCase().includes('failed to fetch')
                         ? 'Ağa bağlanılamadı. İnternet bağlantınızı kontrol edin.'
-                        : (err?.message || 'Erişim Reddedildi.');
+                        : (err?.message || 'Erişim reddedildi.');
                     setAuthError(msg);
                     setFormConfig(config);
                     setAppState('setup_github');
@@ -2549,7 +2562,7 @@
                     }
                     if (response.status === 401 || response.status === 403) {
                         clearVaultSession();
-                        setAuthError('GitHub erişim tokenı geçersiz veya süresi dolmuş.');
+                        setAuthError('GitHub erişim anahtarı geçersiz veya süresi dolmuş.');
                         setFormConfig(config);
                         setAppState('setup_github');
                         return;
@@ -2571,7 +2584,7 @@
                         if (!decryptedString) throw new Error('empty');
                         parsedData = JSON.parse(decryptedString);
                     } catch {
-                        throw new Error('Kasa Şifresi Yanlış');
+                        throw new Error('Kasa şifresi yanlış.');
                     }
 
                     const rawPortfolio = Array.isArray(parsedData) ? parsedData : (parsedData?.portfolio || []);
@@ -2643,7 +2656,7 @@
                     setAuthError(
                         isNetworkErr
                             ? 'Ağa bağlanılamadı. İnternet bağlantınızı kontrol edin.'
-                            : (errMsg || 'Erişim Reddedildi.')
+                            : (errMsg || 'Erişim reddedildi.')
                     );
                     setPasswordInput('');
                     setAppState('enter_password');
@@ -2868,7 +2881,7 @@
                     }
 
                     if (!ratesOk && updatedStockItems === 0) {
-                        throw new Error('Piyasa verileri alınamadı');
+                        throw new Error('Piyasa verileri alınamadı.');
                     }
 
                     lastRefreshTsRef.current = Date.now();
@@ -2877,20 +2890,20 @@
                     if (isManual) {
                         if (stockEntries.length > 0) {
                             const baseMsg = ratesOk
-                                ? `Kurlar ve ${updatedStockItems} hisse/alt kalem güncellendi`
-                                : `${updatedStockItems} hisse/alt kalem güncellendi`;
+                                ? `Kurlar ve ${updatedStockItems} hisse/alt kalem güncellendi.`
+                                : `${updatedStockItems} hisse/alt kalem güncellendi.`;
                             if (failedSymbols.length > 0) {
-                                showToast(`${baseMsg} (${failedSymbols.slice(0, 3).join(', ')} bulunamadı)`, 'warning');
+                                showToast(`${baseMsg} (${failedSymbols.slice(0, 3).join(', ')} bulunamadı.)`, 'warning');
                             } else {
                                 showToast(baseMsg, ratesOk ? 'success' : 'warning');
                             }
                         } else {
-                            showToast('Tüm piyasa kurları güncellendi', 'success');
+                            showToast('Tüm piyasa kurları güncellendi.', 'success');
                         }
                     }
                 } catch (err) {
                     console.error('Fiyat çekme hatası:', err);
-                    if (isManual) showToast('Kurlar güncellenemedi, mevcut değerler korunuyor', 'error');
+                    if (isManual) showToast('Kurlar güncellenemedi, mevcut değerler korunuyor.', 'error');
                 } finally {
                     setIsLoadingRates(false);
                 }
@@ -3192,30 +3205,30 @@
                 try {
                     if (type === 'delete') {
                         const fresh = await getFileRaw(target.vault.filename);
-                        await deleteFile(target.vault.filename, fresh.sha, `🗑️ Admin: Kasa silindi (${target.vault.name})`);
-                        showToast('Kasa kalıcı olarak silindi', 'success');
+                        await deleteFile(target.vault.filename, fresh.sha, `🗑️ Yönetici: Kasa silindi (${target.vault.name})`);
+                        showToast('Kasa kalıcı olarak silindi.', 'success');
                     } else if (type === 'toggle_lock') {
                         const newFilename = target.vault.isLocked
                             ? target.vault.filename.replace(/^vault_locked_/, 'vault_')
                             : target.vault.filename.replace(/^vault_/, 'vault_locked_');
 
                         const fData = await getFileRaw(target.vault.filename);
-                        await putFile(newFilename, fData.content, '🔐 Admin: Kilit durumu değiştirildi');
-                        await deleteFile(target.vault.filename, fData.sha, '🧹 Admin: Eski dosya kaldırıldı');
-                        showToast(`Kasa ${target.vault.isLocked ? 'aktif edildi' : 'donduruldu'}`, 'success');
+                        await putFile(newFilename, fData.content, '🔐 Yönetici: Kilit durumu değiştirildi');
+                        await deleteFile(target.vault.filename, fData.sha, '🧹 Yönetici: Eski dosya kaldırıldı');
+                        showToast(`Kasa ${target.vault.isLocked ? 'etkinleştirildi' : 'donduruldu'}.`, 'success');
                     } else if (type === 'rename' && validatedRename) {
                         const fData = await getFileRaw(target.vault.filename);
-                        await putFile(validatedRename.filename, fData.content, `✏️ Admin: Kasa adı değiştirildi (${validatedRename.name})`);
-                        await deleteFile(target.vault.filename, fData.sha, '🧹 Admin: Eski dosya kaldırıldı');
-                        showToast('Kasa adı güncellendi', 'success');
+                        await putFile(validatedRename.filename, fData.content, `✏️ Yönetici: Kasa adı değiştirildi (${validatedRename.name})`);
+                        await deleteFile(target.vault.filename, fData.sha, '🧹 Yönetici: Eski dosya kaldırıldı');
+                        showToast('Kasa adı güncellendi.', 'success');
                     } else if (type === 'reset_password') {
                         const fresh = await getFileRaw(target.vault.filename);
-                        const emptyData = { portfolio: [], labels: { ...DEFAULT_LABELS }, rates: { ...DEFAULT_RATES } };
+                        const emptyData = { portfolio: [], labels: { ...DEFAULT_LABELS }, rates: { ...DEFAULT_RATES }, rateOrder: [...DEFAULT_RATE_ORDER], hiddenTickerRates: [] };
                         const encrypted = CryptoJS.AES.encrypt(JSON.stringify(emptyData), adminInputVal).toString();
                         const payload = { isEncrypted: true, lastUpdate: new Date().toISOString(), payload: encrypted };
                         const contentBase64 = utf8ToBase64(JSON.stringify(payload, null, 2));
 
-                        await putFile(target.vault.filename, contentBase64, '🔑 Admin: Kasa şifresi sıfırlandı', fresh.sha);
+                        await putFile(target.vault.filename, contentBase64, '🔑 Yönetici: Kasa şifresi sıfırlandı', fresh.sha);
                         showToast('Şifre değiştirildi ve kasa içeriği sıfırlandı.', 'success');
                     }
 
@@ -3968,7 +3981,7 @@
                             label: currencyLabels[key] || key,
                             value: tryEquivalent[key],
                             rawPct,
-                            percentage: rawPct.toFixed(1)
+                            percentage: formatTrDecimal(rawPct, 1)
                         };
                     })
                     .sort((a, b) => b.rawPct - a.rawPct);
@@ -4426,8 +4439,8 @@
 
                 showToast(
                     tradeMode === 'buy'
-                        ? `${tradeTarget.name}: +${qty} eklendi (Yeni ort: ${newCost} ₺)`
-                        : `${tradeTarget.name}: -${qty} satıldı (Kalan: ${newAmount})`,
+                        ? `${tradeTarget.name}: +${formatQty(qty)} eklendi (Yeni ort. ${formatTrDecimal(newCost, 2)} ₺).`
+                        : `${tradeTarget.name}: -${formatQty(qty)} satıldı (Kalan: ${formatQty(newAmount)}).`,
                     'success'
                 );
                 setTradeTarget(null);
@@ -4501,7 +4514,7 @@
                         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
                             <i className="fa-solid fa-vault text-primary text-5xl animate-float opacity-85"></i>
                             <p className="text-emerald-300 font-semibold tracking-widest uppercase text-xs animate-pulse opacity-80">
-                                {appState === 'loading_vault' ? 'Kasa Açılıyor' : 'Bağlanıyor'}
+                                {appState === 'loading_vault' ? 'Kasa Açılıyor...' : 'Bağlanıyor...'}
                             </p>
                         </div>
                     );
@@ -4512,7 +4525,7 @@
                         <div className="min-h-screen flex flex-col items-center justify-center gap-4">
                             <i className="fa-solid fa-server text-amber-500 text-5xl animate-float opacity-85"></i>
                             <p className="text-amber-300 font-semibold tracking-widest uppercase text-xs animate-pulse opacity-80">
-                                Kasalar Taranıyor
+                                Kasalar Taranıyor...
                             </p>
                         </div>
                     );
@@ -4638,7 +4651,7 @@
                                                             type="button"
                                                             onClick={() => { setAdminModalError(''); setAdminActionTarget({ action: 'delete', vault: gv }); }}
                                                             className="w-10 h-10 rounded-xl header-btn text-zinc-300 hover:text-red-400 flex items-center justify-center"
-                                                            title="Kalıcı Sil"
+                                                            title="Kalıcı Olarak Sil"
                                                         >
                                                             <i className="fa-solid fa-trash"></i>
                                                         </button>
@@ -4667,7 +4680,7 @@
                                         <div className="text-center mb-2">
                                             <i className="fa-solid fa-database text-5xl text-emerald-400 mb-3 opacity-90"></i>
                                             <h3 className="text-2xl font-bold text-white tracking-tight">Kasa Erişimi</h3>
-                                            <p className="text-xs text-zinc-400 mt-1.5">Private Repository bilgilerini girin.</p>
+                                            <p className="text-xs text-zinc-400 mt-1.5">Özel GitHub depo bilgilerinizi girin.</p>
                                         </div>
                                         {authError && (
                                             <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs text-center font-medium">
@@ -4694,7 +4707,7 @@
                                             required
                                             value={formConfig.token}
                                             onChange={(e) => setFormConfig({ ...formConfig, token: e.target.value })}
-                                            placeholder="Erişim Token (PAT)"
+                                            placeholder="GitHub Erişim Anahtarı (PAT)"
                                             className="w-full glass-surface rounded-xl px-4 py-3 text-sm text-center text-white outline-none focus:border-primary/50"
                                         />
                                         <button
@@ -4709,7 +4722,7 @@
                                 {appState === 'select_vault' && (
                                     <div className="flex flex-col gap-4 text-center">
                                         <i className="fa-solid fa-vault text-5xl text-emerald-400 mb-1 opacity-90"></i>
-                                        <h3 className="text-2xl font-bold text-white">Kurulu Kasalar</h3>
+                                        <h3 className="text-2xl font-bold text-white">Kayıtlı Kasalar</h3>
 
                                         <div className="flex flex-col gap-2.5 max-h-64 overflow-y-auto pr-0.5">
                                             {availableVaults.map((vault) => (
@@ -4774,7 +4787,7 @@
                                             type="text"
                                             value={newVaultName}
                                             onChange={(e) => setNewVaultName(e.target.value)}
-                                            placeholder="Kasa Adı (Örn: Ortak Kasa)"
+                                            placeholder="Kasa Adı (Örn. Ortak Kasa)"
                                             className="w-full glass-surface rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary/50 text-sm font-bold tracking-wide"
                                         />
                                         <PasswordInput
@@ -4782,7 +4795,7 @@
                                             minLength={4}
                                             value={passwordInput}
                                             onChange={(e) => setPasswordInput(e.target.value)}
-                                            placeholder="Şifre (En az 4 hane)"
+                                            placeholder="Şifre (En az 4 karakter)"
                                             className="w-full glass-surface rounded-xl px-4 py-3.5 text-center text-white outline-none focus:border-primary/50 tracking-[0.2em] font-bold text-base"
                                         />
                                         <div className="flex gap-2.5 mt-2">
@@ -4864,11 +4877,10 @@
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <h1 className="text-xs font-extrabold tracking-wider text-white uppercase leading-none whitespace-nowrap">
-                                        Portföy<span className="hidden sm:inline"> Takip</span>
+                                        Portföy<span className="hidden sm:inline"> Yönetimi</span>
                                     </h1>
                                     <span className="text-[10px] font-semibold text-zinc-400 mt-0.5 truncate max-w-[125px] sm:max-w-[220px]">
-                                        <span className="sm:hidden">{currentVaultFile === 'data.json' ? 'Ana Kasa' : activeVaultLabel}</span>
-                                        <span className="hidden sm:inline">{activeVaultLabel}</span>
+                                        {activeVaultLabel}
                                     </span>
                                 </div>
                             </div>
@@ -4884,7 +4896,7 @@
                                             ? 'Kayıt başarısız — tekrar denemek için tıklayın'
                                             : hasUnsavedChanges
                                                 ? 'Değişiklikler otomatik kaydediliyor (şimdi kaydetmek için tıklayın · Ctrl+S)'
-                                                : 'Kasa otomatik senkronize edildi (Ctrl+S)'
+                                                : 'Kasa otomatik olarak kaydedildi (Ctrl+S)'
                                     }
                                     className={`h-9 px-2.5 sm:px-3 rounded-xl font-bold text-[11px] flex items-center gap-1.5 transition-colors shrink-0 border ${
                                         saveStatus === 'error'
@@ -4977,9 +4989,9 @@
                                 <div className="inline-flex bg-[#0e1521] p-1 rounded-xl border border-white/10">
                                     {[
                                         { id: 'TRY', label: '₺ TL' },
-                                        { id: 'USD', label: '$ USD' },
-                                        { id: 'EUR', label: '€ EUR' },
-                                        { id: 'GRAM', label: 'Gr' }
+                                        { id: 'USD', label: '$ Dolar' },
+                                        { id: 'EUR', label: '€ Euro' },
+                                        { id: 'GRAM', label: 'Gram' }
                                     ].map((c) => (
                                         <button
                                             key={c.id}
@@ -5004,7 +5016,7 @@
                                     }`}>
                                         <i className={`fa-solid ${overallPnL.isProfit ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'} text-[10px]`}></i>
                                         <span>{overallPnL.isProfit ? '+' : ''}{fmtMoney(overallPnL.profit)}</span>
-                                        <span className="opacity-85">({overallPnL.isProfit ? '+' : ''}%{overallPnL.percentage.toFixed(1)})</span>
+                                        <span className="opacity-85">({formatSignedPct(overallPnL.percentage, 1)})</span>
                                     </span>
                                 )}
                             </div>
@@ -5040,7 +5052,7 @@
                                             <span className="truncate">{goalProgress.title}</span>
                                         </span>
                                         <span className="text-[11px] font-black font-numbers text-emerald-400 shrink-0">
-                                            %{goalProgress.pct.toFixed(1)}
+                                            %{formatTrDecimal(goalProgress.pct, 1)}
                                         </span>
                                     </div>
                                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
@@ -5146,7 +5158,7 @@
                                 }`}
                             >
                                 <i className="fa-solid fa-chart-column text-xs"></i>
-                                <span>Analiz & Grafik</span>
+                                <span>Analiz ve Grafik</span>
                             </button>
                         </div>
 
@@ -5302,7 +5314,7 @@
                                 ) : filteredPortfolio.length === 0 ? (
                                     <div className="max-w-md mx-auto glass-card p-7 rounded-[2rem] text-center flex flex-col items-center gap-3">
                                         <i className="fa-solid fa-filter-circle-xmark text-3xl text-zinc-500"></i>
-                                        <p className="text-sm font-bold text-white">Eşleşen varlık bulunamadı</p>
+                                        <p className="text-sm font-bold text-white">Eşleşen varlık bulunamadı.</p>
                                         <button
                                             type="button"
                                             onClick={() => { setSearchQuery(''); setActiveTypeFilter(null); }}
@@ -5356,7 +5368,7 @@
                                                                             type="button"
                                                                             onClick={(e) => { e.stopPropagation(); togglePersonVisibility(person.id); }}
                                                                             className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-500/20 text-red-300 border border-red-500/30"
-                                                                            title="Hesaplamaya tekrar dahil et"
+                                                                            title="Toplama tekrar dâhil et"
                                                                         >
                                                                             Hariç
                                                                         </button>
@@ -5378,7 +5390,7 @@
                                                                 </span>
                                                                 {!person.isHidden && personPnL && (
                                                                     <span className={`text-[10px] font-bold font-numbers ${personPnL.isProfit ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                                        {personPnL.isProfit ? '+' : ''}%{personPnL.percentage.toFixed(1)}
+                                                                        {formatSignedPct(personPnL.percentage, 1)}
                                                                     </span>
                                                                 )}
                                                             </div>
@@ -5416,7 +5428,7 @@
                                                                             className="w-full px-3.5 py-2.5 text-left text-xs font-semibold text-zinc-200 hover:bg-white/10 flex items-center gap-2.5"
                                                                         >
                                                                             <i className={`fa-solid ${person.isHidden ? 'fa-circle-check text-emerald-400' : 'fa-ban text-amber-400'} text-[11px] w-4 text-center`}></i>
-                                                                            <span>{person.isHidden ? 'Toplama Dahil Et' : 'Toplamdan Hariç Tut'}</span>
+                                                                            <span>{person.isHidden ? 'Toplama Dâhil Et' : 'Toplamdan Hariç Tut'}</span>
                                                                         </button>
                                                                         {!sortByValue && !isFiltering && portfolio.length > 1 && (
                                                                             <>
@@ -5512,7 +5524,7 @@
                                                                                     </span>
                                                                                     {!asset.isHidden && assetPnL && (
                                                                                         <span className={`text-[10px] font-bold font-numbers ${assetPnL.isProfit ? 'text-emerald-400/90' : 'text-red-400/90'}`}>
-                                                                                            {assetPnL.isProfit ? '+' : ''}%{assetPnL.percentage.toFixed(1)}
+                                                                                            {formatSignedPct(assetPnL.percentage, 1)}
                                                                                         </span>
                                                                                     )}
                                                                                 </div>
@@ -5536,7 +5548,7 @@
                                                                                         isStock={!hasSubItems && asset.type === 'STOCK'}
                                                                                         showStockHints={!hasSubItems && asset.type === 'TRY'}
                                                                                         className="font-bold text-white text-sm leading-snug placeholder:text-zinc-500"
-                                                                                        placeholder={!hasSubItems && asset.type === 'STOCK' ? 'Örn: THYAO, ASELS, TUPRS' : 'Örn: Yapı Kredi, THYAO, Dolar'}
+                                                                                        placeholder={!hasSubItems && asset.type === 'STOCK' ? 'Örn. THYAO, ASELS, TUPRS' : 'Örn. Yapı Kredi, THYAO, Dolar'}
                                                                                     />
                                                                                 </div>
 
@@ -5595,7 +5607,7 @@
                                                                                                         value={asset.costPrice || ''}
                                                                                                         onChange={(val) => updatePortfolioAsset(person.id, asset.id, (a) => ({ ...a, costPrice: val }))}
                                                                                                         className="w-full bg-transparent text-emerald-100 font-numbers font-bold text-sm py-0.5 outline-none placeholder:text-zinc-600"
-                                                                                                        placeholder="Opsiyonel"
+                                                                                                        placeholder="İsteğe bağlı"
                                                                                                     />
                                                                                                 </div>
                                                                                             </div>
@@ -5625,7 +5637,7 @@
                                                                                                                     ? 'bg-emerald-500/20 text-emerald-400'
                                                                                                                     : 'bg-red-500/20 text-red-400'
                                                                                                         }`}>
-                                                                                                            {pnl.isNeutral ? '' : pnl.isProfit ? '+' : ''}{pnl.percentage.toFixed(1)}% ({fmtMoney(pnl.profit)})
+                                                                                                            {formatSignedPct(pnl.percentage, 1)} ({fmtMoney(pnl.profit)})
                                                                                                         </span>
                                                                                                     );
                                                                                                 })()}
@@ -5652,7 +5664,7 @@
                                                                                                             isStock={sub.type === 'STOCK'}
                                                                                                             showStockHints={sub.type === 'TRY'}
                                                                                                             className="text-xs sm:text-sm font-bold text-zinc-100 leading-snug placeholder:text-zinc-500"
-                                                                                                            placeholder={sub.type === 'STOCK' ? 'Hisse (Örn: THYAO)' : 'Kalem Adı'}
+                                                                                                            placeholder={sub.type === 'STOCK' ? 'Hisse (Örn. THYAO)' : 'Kalem Adı'}
                                                                                                         />
                                                                                                         <div className="flex items-center gap-1 shrink-0">
                                                                                                             {sub.type !== 'TRY' && safeParseNum(sub.amount) > 0 && (
@@ -5711,7 +5723,7 @@
                                                                                                         <div className={`grid gap-1.5 ${sub.type === 'STOCK' ? 'grid-cols-2' : 'grid-cols-1'}`}>
                                                                                                             {sub.type === 'STOCK' && (
                                                                                                                 <div className="bg-black/40 border border-white/10 rounded-lg px-2 py-1">
-                                                                                                                    <span className="text-[8px] uppercase tracking-widest text-blue-400/80 font-bold block">Güncel ₺</span>
+                                                                                                                    <span className="text-[8px] uppercase tracking-widest text-blue-400/80 font-bold block">Güncel (₺)</span>
                                                                                                                     <DebouncedInput
                                                                                                                         type="number"
                                                                                                                         value={sub.currentPrice || ''}
@@ -5722,13 +5734,13 @@
                                                                                                                 </div>
                                                                                                             )}
                                                                                                             <div className="bg-black/40 border border-white/10 rounded-lg px-2 py-1">
-                                                                                                                <span className="text-[8px] uppercase tracking-widest text-emerald-400/80 font-bold block">Maliyet ₺</span>
+                                                                                                                <span className="text-[8px] uppercase tracking-widest text-emerald-400/80 font-bold block">Maliyet (₺)</span>
                                                                                                                 <DebouncedInput
                                                                                                                     type="number"
                                                                                                                     value={sub.costPrice || ''}
                                                                                                                     onChange={(val) => updateSubItem(person.id, asset.id, sub.id, 'costPrice', val)}
                                                                                                                     className="w-full bg-transparent text-emerald-100 font-numbers font-bold text-xs py-0.5 outline-none placeholder:text-zinc-600"
-                                                                                                                    placeholder="Opsiyonel"
+                                                                                                                    placeholder="İsteğe bağlı"
                                                                                                                 />
                                                                                                             </div>
                                                                                                         </div>
@@ -5737,7 +5749,7 @@
                                                                                                     <div className="flex justify-between items-center gap-2 pt-0.5 flex-wrap">
                                                                                                         {assetValue > 0 ? (
                                                                                                             <span className="text-[10px] font-semibold text-zinc-400 font-numbers">
-                                                                                                                %{((subVal / assetValue) * 100).toFixed(1)} pay · {fmtMoney(subVal)}
+                                                                                                                %{formatTrDecimal((subVal / assetValue) * 100, 1)} pay · {fmtMoney(subVal)}
                                                                                                             </span>
                                                                                                         ) : <span />}
 
@@ -5749,7 +5761,7 @@
                                                                                                                         ? 'bg-emerald-500/20 text-emerald-400'
                                                                                                                         : 'bg-red-500/20 text-red-400'
                                                                                                             }`}>
-                                                                                                                {subPnl.isNeutral ? '' : subPnl.isProfit ? '+' : ''}{subPnl.percentage.toFixed(1)}% ({fmtMoney(subPnl.profit)})
+                                                                                                                {formatSignedPct(subPnl.percentage, 1)} ({fmtMoney(subPnl.profit)})
                                                                                                             </span>
                                                                                                         )}
                                                                                                     </div>
@@ -5776,9 +5788,9 @@
                                                                                                 ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/35'
                                                                                                 : 'bg-white/5 text-zinc-400 hover:text-amber-300 border-white/10'
                                                                                         }`}
-                                                                                        title={asset.isHidden ? 'Toplama Dahil Et' : 'Toplamdan Hariç Tut'}
+                                                                                        title={asset.isHidden ? 'Toplama Dâhil Et' : 'Toplamdan Hariç Tut'}
                                                                                     >
-                                                                                        {asset.isHidden ? 'Dahil Et' : 'Hariç Tut'}
+                                                                                        {asset.isHidden ? 'Dâhil Et' : 'Hariç Tut'}
                                                                                     </button>
                                                                                     <button
                                                                                         type="button"
@@ -5968,7 +5980,7 @@
                                                     onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                                                     className="w-full bg-black/40 border border-white/10 focus:border-emerald-500/50 rounded-xl pl-8 pr-2.5 py-2 text-xs font-bold text-white outline-none transition-colors"
                                                     placeholder="Birim Adı"
-                                                    aria-label={`${m.key} görünen adı`}
+                                                    aria-label={`${currencyLabels[m.key] || DEFAULT_LABELS[m.key] || m.key} görünen adı`}
                                                     title="İsmi Düzenle"
                                                 />
                                             </div>
@@ -6047,7 +6059,7 @@
                                     className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-emerald-400/50 text-xs font-bold text-zinc-300 hover:text-emerald-300 bg-white/[0.02] hover:bg-emerald-500/10 flex items-center justify-center gap-2 transition-colors"
                                 >
                                     <i className="fa-solid fa-plus text-[10px]"></i>
-                                    <span>Yeni Özel Kur / Birim Ekle (Örn: 22 Ayar, Yarım Altın, CHF)</span>
+                                    <span>Yeni Özel Kur / Birim Ekle (Örn. 22 Ayar, Yarım Altın, CHF)</span>
                                 </button>
                             ) : (
                                 <form onSubmit={handleAddCustomRate} className="glass-surface p-3 rounded-2xl border border-emerald-500/35 flex flex-col gap-2.5">
@@ -6072,7 +6084,7 @@
                                             autoFocus
                                             value={newRateName}
                                             onChange={(e) => { setNewRateName(e.target.value); setNewRateError(''); }}
-                                            placeholder="Birim Adı (Örn: Yarım Altın)"
+                                            placeholder="Birim Adı (Örn. Yarım Altın)"
                                             className="w-full bg-black/45 border border-white/10 focus:border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
                                         />
                                         <input
@@ -6081,7 +6093,7 @@
                                             inputMode="decimal"
                                             value={newRateValue}
                                             onChange={(e) => { setNewRateValue(e.target.value); setNewRateError(''); }}
-                                            placeholder="TL Birim Fiyatı (Örn: 19800)"
+                                            placeholder="TL Birim Fiyatı (Örn. 19800)"
                                             className="w-full bg-black/45 border border-white/10 focus:border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-black font-numbers text-emerald-300 outline-none"
                                         />
                                     </div>
@@ -6118,7 +6130,7 @@
                                             }}
                                             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                                             className="w-full bg-black/40 border border-white/10 focus:border-emerald-500/50 rounded-xl pl-6 pr-2.5 py-1.5 text-xs font-bold text-white outline-none"
-                                            aria-label={`${baseKey} etiketi`}
+                                            aria-label={`${DEFAULT_LABELS[baseKey] || baseKey} etiketi`}
                                         />
                                     </div>
                                 ))}
@@ -6173,7 +6185,7 @@
                                     onClick={handleConfirmDelete}
                                     className="flex-1 py-3 rounded-xl font-bold text-xs bg-red-500/20 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/35 tracking-widest"
                                 >
-                                    SİL GİTSİN
+                                    EVET, SİL
                                 </button>
                             </div>
                         </div>
@@ -6187,7 +6199,7 @@
                             </div>
                             <h3 className="text-lg font-bold text-white">Bağlantıyı Kes</h3>
                             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-                                Cihaz kayıtlı GitHub erişimini ve aktif oturumu unutacak. Tekrar erişmek için bilgilerinizi yeniden girmelisiniz.
+                                Bu cihazdaki kayıtlı GitHub bağlantısı ve aktif oturum silinecektir. Tekrar erişmek için bilgilerinizi yeniden girmeniz gerekir.
                             </p>
                             <div className="flex w-full gap-3 mt-1">
                                 <button
@@ -6303,7 +6315,7 @@
                                     {isChangingPassword ? 'KAYDEDİLİYOR...' : 'ŞİFREYİ DEĞİŞTİR'}
                                 </button>
                                 <p className="text-[10px] text-center text-zinc-500 font-medium">
-                                    Kısayollar: Ctrl+S Kaydet · Alt+R Güncelle · Alt+H Gizli Mod
+                                    Kısayollar: Ctrl+S Kaydet · Alt+R Güncelle · Alt+H Gizlilik Modu
                                 </p>
                             </form>
                         )}
@@ -6322,7 +6334,7 @@
                                     type="text"
                                     value={goalForm.title}
                                     onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                                    placeholder="Hedef Adı (Örn: Ev Peşinatı)"
+                                    placeholder="Hedef Adı (Örn. Ev Peşinatı)"
                                     className="w-full glass-surface py-3 px-4 rounded-xl text-white outline-none focus:border-emerald-500/50 text-sm font-semibold"
                                 />
                                 <div className="flex gap-2">
@@ -6342,9 +6354,9 @@
                                         className="bg-zinc-900 border border-white/15 rounded-xl px-3 text-xs font-bold text-white outline-none"
                                     >
                                         <option value="TRY">₺ TL</option>
-                                        <option value="USD">$ USD</option>
-                                        <option value="EUR">€ EUR</option>
-                                        <option value="GRAM">Gr Altın</option>
+                                        <option value="USD">$ Dolar</option>
+                                        <option value="EUR">€ Euro</option>
+                                        <option value="GRAM">Gram Altın</option>
                                     </select>
                                 </div>
                                 <div className="flex gap-2 mt-1">
@@ -6441,7 +6453,7 @@
                                                             : 'bg-white/5 text-zinc-400 border-transparent hover:bg-white/10'
                                                     }`}
                                                 >
-                                                    Mevcuta Ekle
+                                                    Birleştir (Ekle)
                                                 </button>
                                             </div>
                                             <div className="flex gap-2">
@@ -6501,7 +6513,7 @@
                                         <div className="min-w-0 pr-2">
                                             <h3 className="text-base font-bold text-white break-words">{tradeTarget.name}</h3>
                                             <p className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
-                                                Mevcut: {formatQty(tradeTarget.currentAmount)} {tradeTarget.typeLabel} {tradeTarget.currentCost > 0 ? `· Ort: ${tradeTarget.currentCost} ₺` : ''}
+                                                Mevcut: {formatQty(tradeTarget.currentAmount)} {tradeTarget.typeLabel} {tradeTarget.currentCost > 0 ? `· Ort. ${formatCompactRate(tradeTarget.currentCost)} ₺` : ''}
                                             </p>
                                         </div>
                                         <button
@@ -6551,7 +6563,7 @@
                                                 inputMode="decimal"
                                                 value={tradeQty}
                                                 onChange={(e) => setTradeQty(e.target.value)}
-                                                placeholder="Örn: 50"
+                                                placeholder="Örn. 50"
                                                 className="w-full glass-surface py-3 px-3 rounded-xl text-white font-numbers font-bold text-sm text-center outline-none focus:border-emerald-500/50"
                                             />
                                         </div>
@@ -6566,7 +6578,7 @@
                                                 inputMode="decimal"
                                                 value={tradePrice}
                                                 onChange={(e) => setTradePrice(e.target.value)}
-                                                placeholder="Birim ₺"
+                                                placeholder="Birim fiyat (₺)"
                                                 className="w-full glass-surface py-3 px-3 rounded-xl text-white font-numbers font-bold text-sm text-center outline-none focus:border-emerald-500/50"
                                             />
                                         </div>
@@ -6583,7 +6595,7 @@
                                                     {newBuyAvg !== null && (
                                                         <div className="flex justify-between">
                                                             <span className="text-zinc-400 font-sans">Yeni Ort. Maliyet:</span>
-                                                            <span className="text-emerald-300 font-bold">{newBuyAvg.toFixed(2)} ₺</span>
+                                                            <span className="text-emerald-300 font-bold">{formatTrDecimal(newBuyAvg, 2)} ₺</span>
                                                         </div>
                                                     )}
                                                     {price > 0 && (
@@ -6601,7 +6613,7 @@
                                                     </div>
                                                     {realizedPnl !== null && (
                                                         <div className="flex justify-between">
-                                                            <span className="text-zinc-400 font-sans">Gerçekleşen Kâr/Zarar:</span>
+                                                            <span className="text-zinc-400 font-sans">Gerçekleşen Kâr / Zarar:</span>
                                                             <span className={`font-bold ${realizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                                                 {realizedPnl >= 0 ? '+' : ''}{fmtMoney(realizedPnl)}
                                                             </span>
@@ -6620,7 +6632,7 @@
                                                 : 'bg-red-500/20 text-red-300 hover:bg-red-500 hover:text-white border-red-500/35'
                                         }`}
                                     >
-                                        {tradeMode === 'buy' ? 'ALIMI UYGULA & ORTALAMAYI GÜNCELLE' : 'SATIMI UYGULA'}
+                                        {tradeMode === 'buy' ? 'ALIMI UYGULA VE ORTALAMAYI GÜNCELLE' : 'SATIMI UYGULA'}
                                     </button>
                                 </form>
                             );
@@ -6651,7 +6663,7 @@
                                 <i className={`fa-solid ${adminActionTarget.vault.isLocked ? 'fa-lock-open text-emerald-400' : 'fa-lock text-red-400'} text-4xl mb-1`}></i>
                                 <h3 className="text-xl font-bold text-white">{adminActionTarget.vault.isLocked ? 'Kilidi Aç' : 'Kasayı Dondur'}</h3>
                                 <p className="text-sm text-zinc-400">
-                                    "<span className="text-white font-bold">{adminActionTarget.vault.name}</span>" {adminActionTarget.vault.isLocked ? 'artık giriş yapabilecek.' : 'sahibi artık giriş yapamayacak.'}
+                                    "<span className="text-white font-bold">{adminActionTarget.vault.name}</span>" kasasının sahibi {adminActionTarget.vault.isLocked ? 'artık giriş yapabilecek.' : 'artık giriş yapamayacak.'}
                                 </p>
                                 <div className="flex gap-3 mt-1">
                                     <button type="button" onClick={() => setAdminActionTarget(null)} className="flex-1 py-3 rounded-xl font-bold text-xs bg-white/5 text-white hover:bg-white/10 tracking-widest border border-white/10">İPTAL</button>
@@ -6700,7 +6712,7 @@
                                 <i className="fa-solid fa-key text-4xl text-amber-500 mb-1"></i>
                                 <h3 className="text-xl font-bold text-white">Zorla Sıfırla</h3>
                                 <p className="text-xs text-red-300 font-bold bg-red-500/15 p-2.5 rounded-xl border border-red-500/30 leading-relaxed">
-                                    DİKKAT: Şifreyi zorla sıfırlamak bu kasanın içerisindeki tüm verileri kalıcı olarak SİLER!
+                                    DİKKAT: Şifreyi zorla sıfırlamak bu kasadaki tüm verileri kalıcı olarak siler!
                                 </p>
                                 {adminModalError && (
                                     <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold">
@@ -6713,7 +6725,7 @@
                                     value={adminInputVal}
                                     onChange={(e) => { setAdminInputVal(e.target.value); setAdminModalError(''); }}
                                     className="w-full glass-surface py-3 px-4 rounded-xl text-center text-white font-bold text-base tracking-[0.2em] outline-none focus:border-white/30"
-                                    placeholder="Yeni Şifre (En az 4 hane)"
+                                    placeholder="Yeni Şifre (En az 4 karakter)"
                                 />
                                 <div className="flex gap-3 mt-1">
                                     <button type="button" onClick={() => { setAdminActionTarget(null); setAdminModalError(''); }} className="flex-1 py-3 rounded-xl font-bold text-xs bg-white/5 text-white hover:bg-white/10 tracking-widest border border-white/10">İPTAL</button>
