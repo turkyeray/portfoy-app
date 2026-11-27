@@ -222,16 +222,62 @@
             BTC: 'bg-orange-400',
             STOCK: 'bg-indigo-400'
         };
-        const RATE_META = [
-            { key: 'USD', short: '$', icon: 'fa-dollar-sign', color: 'text-green-400', valueColor: 'text-white' },
-            { key: 'EUR', short: '€', icon: 'fa-euro-sign', color: 'text-blue-400', valueColor: 'text-white' },
-            { key: 'GRAM', short: 'Gr', icon: 'fa-coins', color: 'text-amber-400', valueColor: 'text-amber-400' },
-            { key: 'ATA', short: 'Ata', icon: 'fa-medal', color: 'text-amber-500', valueColor: 'text-amber-400' },
-            { key: 'CEYREK', short: 'Çeyrek', icon: 'fa-sun', color: 'text-amber-300', valueColor: 'text-amber-300' },
-            { key: 'GBP', short: '£', icon: 'fa-sterling-sign', color: 'text-cyan-400', valueColor: 'text-white' },
-            { key: 'SILVER', short: 'Gümüş', icon: 'fa-gem', color: 'text-slate-300', valueColor: 'text-slate-200' },
-            { key: 'BTC', short: 'BTC', icon: 'fa-bitcoin-sign', color: 'text-orange-400', valueColor: 'text-orange-300' }
-        ];
+        const DEFAULT_RATE_ORDER = ['USD', 'EUR', 'GRAM', 'ATA', 'CEYREK', 'GBP', 'SILVER', 'BTC'];
+        const BUILTIN_RATE_SET = new Set(DEFAULT_RATE_ORDER);
+        const RATE_META_MAP = {
+            USD: { key: 'USD', icon: 'fa-dollar-sign', color: 'text-green-400', valueColor: 'text-white' },
+            EUR: { key: 'EUR', icon: 'fa-euro-sign', color: 'text-blue-400', valueColor: 'text-white' },
+            GRAM: { key: 'GRAM', icon: 'fa-coins', color: 'text-amber-400', valueColor: 'text-amber-400' },
+            ATA: { key: 'ATA', icon: 'fa-medal', color: 'text-amber-500', valueColor: 'text-amber-400' },
+            CEYREK: { key: 'CEYREK', icon: 'fa-sun', color: 'text-amber-300', valueColor: 'text-amber-300' },
+            GBP: { key: 'GBP', icon: 'fa-sterling-sign', color: 'text-cyan-400', valueColor: 'text-white' },
+            SILVER: { key: 'SILVER', icon: 'fa-gem', color: 'text-slate-300', valueColor: 'text-slate-200' },
+            BTC: { key: 'BTC', icon: 'fa-bitcoin-sign', color: 'text-orange-400', valueColor: 'text-orange-300' }
+        };
+        const getRateMeta = (key) => RATE_META_MAP[key] || {
+            key,
+            icon: 'fa-tag',
+            color: 'text-emerald-400',
+            valueColor: 'text-emerald-300'
+        };
+        const sanitizeRateOrder = (rawOrder, loadedRates = {}, loadedLabels = {}) => {
+            const seen = new Set();
+            const result = [];
+            const validPool = new Set([
+                ...DEFAULT_RATE_ORDER,
+                ...Object.keys(loadedRates || {}),
+                ...Object.keys(loadedLabels || {})
+            ]);
+            validPool.delete('TRY');
+            validPool.delete('STOCK');
+
+            if (Array.isArray(rawOrder)) {
+                rawOrder.forEach((k) => {
+                    if (typeof k === 'string' && validPool.has(k) && !seen.has(k)) {
+                        seen.add(k);
+                        result.push(k);
+                    }
+                });
+            }
+            DEFAULT_RATE_ORDER.forEach((k) => {
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    result.push(k);
+                }
+            });
+            validPool.forEach((k) => {
+                if (!seen.has(k)) {
+                    seen.add(k);
+                    result.push(k);
+                }
+            });
+            return result;
+        };
+        const sanitizeHiddenTickerRates = (rawHidden, validOrder) => {
+            if (!Array.isArray(rawHidden)) return [];
+            const validSet = new Set(validOrder || DEFAULT_RATE_ORDER);
+            return [...new Set(rawHidden.filter((k) => typeof k === 'string' && validSet.has(k)))];
+        };
 
         const BIST_POPULAR = [
             { sym: 'THYAO', name: 'Türk Hava Yolları' },
@@ -409,11 +455,13 @@
 
         const formatTitleCase = (str) => {
             if (!str) return 'TL';
-            return String(str).trim().split(/[\s_-]+/).map((word) => {
+            const trimmed = String(str).trim();
+            if (!trimmed) return 'TL';
+            if (/[A-ZÇĞİÖŞÜ]/.test(trimmed)) return trimmed;
+            return trimmed.split(/[\s_-]+/).map((word) => {
                 if (!word) return '';
                 const upper = word.toUpperCase();
                 if (upper === 'TL' || upper === 'USD' || upper === 'EUR' || upper === 'GBP' || upper === 'BTC' || upper === 'BIST') return upper;
-                if (word.length <= 4 && word === upper && /[A-Z]/.test(word)) return word;
                 return word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR');
             }).filter(Boolean).join(' ');
         };
@@ -2004,6 +2052,8 @@
 
             const [rates, setRates] = useState(() => ({ ...DEFAULT_RATES }));
             const [currencyLabels, setCurrencyLabels] = useState(() => ({ ...DEFAULT_LABELS }));
+            const [rateOrder, setRateOrder] = useState(() => [...DEFAULT_RATE_ORDER]);
+            const [hiddenTickerRates, setHiddenTickerRates] = useState([]);
             const [portfolio, setPortfolio] = useState([]);
             const [vaultHistory, setVaultHistory] = useState([]);
             const [vaultGoal, setVaultGoal] = useState({ title: '', target: '', currency: 'TRY' });
@@ -2044,6 +2094,12 @@
 
             // Modals state
             const [showRatesModal, setShowRatesModal] = useState(false);
+            const [dragRateKey, setDragRateKey] = useState(null);
+            const [dragOverRateKey, setDragOverRateKey] = useState(null);
+            const [showAddRateForm, setShowAddRateForm] = useState(false);
+            const [newRateName, setNewRateName] = useState('');
+            const [newRateValue, setNewRateValue] = useState('');
+            const [newRateError, setNewRateError] = useState('');
             const [deleteTarget, setDeleteTarget] = useState(null);
             const [showDisconnectModal, setShowDisconnectModal] = useState(false);
             const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -2086,6 +2142,8 @@
                 portfolio,
                 currencyLabels,
                 rates,
+                rateOrder,
+                hiddenTickerRates,
                 vaultHistory,
                 vaultGoal,
                 vaultPassword,
@@ -2152,6 +2210,12 @@
                 setShowDisconnectModal(false);
                 setShowSettingsModal(false);
                 setShowRatesModal(false);
+                setDragRateKey(null);
+                setDragOverRateKey(null);
+                setShowAddRateForm(false);
+                setNewRateName('');
+                setNewRateValue('');
+                setNewRateError('');
                 setAdminActionTarget(null);
                 setAdminModalError('');
                 setTradeTarget(null);
@@ -2234,6 +2298,8 @@
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
                         rates: snap.rates,
+                        rateOrder: snap.rateOrder,
+                        hiddenTickerRates: snap.hiddenTickerRates,
                         history: updatedHistory,
                         goal: snap.vaultGoal
                     });
@@ -2364,7 +2430,7 @@
                         autoSaveTimerRef.current = null;
                     }
                 };
-            }, [portfolio, currencyLabels, rates, vaultGoal]);
+            }, [portfolio, currencyLabels, rates, rateOrder, hiddenTickerRates, vaultGoal]);
 
             // Flush unsaved edits immediately when user backgrounds tab / locks iPhone
             useEffect(() => {
@@ -2525,6 +2591,16 @@
                         });
                     }
 
+                    const loadedRateOrder = sanitizeRateOrder(
+                        parsedData && !Array.isArray(parsedData) ? parsedData.rateOrder : null,
+                        mergedRates,
+                        mergedLabels
+                    );
+                    const loadedHiddenTicker = sanitizeHiddenTickerRates(
+                        parsedData && !Array.isArray(parsedData) ? parsedData.hiddenTickerRates : null,
+                        loadedRateOrder
+                    );
+
                     const expandedInit = {};
                     finalPortfolio.forEach((p) => { expandedInit[p.id] = true; });
                     const loadedHistory = (parsedData && !Array.isArray(parsedData) && Array.isArray(parsedData.history))
@@ -2549,6 +2625,8 @@
                     setActiveTypeFilter(null);
                     setCurrencyLabels(mergedLabels);
                     setRates(mergedRates);
+                    setRateOrder(loadedRateOrder);
+                    setHiddenTickerRates(loadedHiddenTicker);
                     setExpandedPersons(expandedInit);
                     setExpandedAssets({});
                     setVaultPassword(pass);
@@ -2594,6 +2672,8 @@
                 setAdminVaults([]);
                 setCurrencyLabels({ ...DEFAULT_LABELS });
                 setRates({ ...DEFAULT_RATES });
+                setRateOrder([...DEFAULT_RATE_ORDER]);
+                setHiddenTickerRates([]);
                 setExpandedPersons({});
                 setExpandedAssets({});
                 updateFileSha(null);
@@ -3161,6 +3241,8 @@
                         portfolio: snap.portfolio,
                         rates: snap.rates,
                         currencyLabels: snap.currencyLabels,
+                        rateOrder: snap.rateOrder,
+                        hiddenTickerRates: snap.hiddenTickerRates,
                         history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates),
                         goal: snap.vaultGoal
                     };
@@ -3379,6 +3461,8 @@
                             portfolio: sanitized,
                             rates: (parsed && !Array.isArray(parsed) && parsed.rates && typeof parsed.rates === 'object') ? parsed.rates : null,
                             labels: (parsed && !Array.isArray(parsed) && (parsed.currencyLabels || parsed.labels)) || null,
+                            rateOrder: (parsed && !Array.isArray(parsed) && Array.isArray(parsed.rateOrder)) ? parsed.rateOrder : null,
+                            hiddenTickerRates: (parsed && !Array.isArray(parsed) && Array.isArray(parsed.hiddenTickerRates)) ? parsed.hiddenTickerRates : null,
                             history: (parsed && !Array.isArray(parsed) && Array.isArray(parsed.history)) ? parsed.history : null,
                             goal: (parsed && !Array.isArray(parsed) && parsed.goal && typeof parsed.goal === 'object') ? parsed.goal : null,
                             personCount: sanitized.length,
@@ -3414,18 +3498,26 @@
                     });
                 } else {
                     setPortfolio(importPreview.portfolio);
+                    const nextRatesObj = { ...latestStateRef.current.rates };
                     if (importPreview.rates) {
-                        setRates((prev) => {
-                            const next = { ...prev };
-                            Object.entries(importPreview.rates).forEach(([k, v]) => {
-                                const n = safeParseNum(v);
-                                if (n > 0) next[k] = n;
-                            });
-                            return next;
+                        Object.entries(importPreview.rates).forEach(([k, v]) => {
+                            const n = safeParseNum(v);
+                            if (n > 0) nextRatesObj[k] = n;
                         });
+                        setRates(nextRatesObj);
                     }
+                    const nextLabelsObj = importPreview.labels
+                        ? { ...DEFAULT_LABELS, ...latestStateRef.current.currencyLabels, ...importPreview.labels }
+                        : latestStateRef.current.currencyLabels;
                     if (importPreview.labels) {
-                        setCurrencyLabels((prev) => ({ ...DEFAULT_LABELS, ...prev, ...importPreview.labels }));
+                        setCurrencyLabels(nextLabelsObj);
+                    }
+                    if (importPreview.rateOrder || importPreview.rates || importPreview.labels) {
+                        const nextOrder = sanitizeRateOrder(importPreview.rateOrder || latestStateRef.current.rateOrder, nextRatesObj, nextLabelsObj);
+                        setRateOrder(nextOrder);
+                        if (importPreview.hiddenTickerRates) {
+                            setHiddenTickerRates(sanitizeHiddenTickerRates(importPreview.hiddenTickerRates, nextOrder));
+                        }
                     }
                     if (importPreview.history) setVaultHistory(importPreview.history);
                     if (importPreview.goal) {
@@ -3510,6 +3602,8 @@
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
                         rates: snap.rates,
+                        rateOrder: snap.rateOrder,
+                        hiddenTickerRates: snap.hiddenTickerRates,
                         history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates),
                         goal: snap.vaultGoal
                     });
@@ -3607,7 +3701,8 @@
                 try {
                     const freshLabels = { ...DEFAULT_LABELS };
                     const freshRates = { ...DEFAULT_RATES };
-                    const emptyData = { portfolio: [], labels: freshLabels, rates: freshRates };
+                    const freshOrder = [...DEFAULT_RATE_ORDER];
+                    const emptyData = { portfolio: [], labels: freshLabels, rates: freshRates, rateOrder: freshOrder, hiddenTickerRates: [] };
                     const encrypted = CryptoJS.AES.encrypt(JSON.stringify(emptyData), newPass).toString();
                     const payload = { isEncrypted: true, lastUpdate: new Date().toISOString(), payload: encrypted };
                     const contentBase64 = utf8ToBase64(JSON.stringify(payload, null, 2));
@@ -3634,6 +3729,8 @@
                     updateFileSha(data?.content?.sha || null);
                     setCurrencyLabels(freshLabels);
                     setRates(freshRates);
+                    setRateOrder(freshOrder);
+                    setHiddenTickerRates([]);
                     setPortfolio([]);
                     setVaultHistory([]);
                     setVaultGoal({ title: '', target: '', currency: 'TRY' });
@@ -3970,6 +4067,135 @@
             const handleRateCommit = useCallback((currency, numVal) => {
                 setRates((prev) => (prev[currency] === numVal ? prev : { ...prev, [currency]: numVal }));
             }, []);
+
+            const closeRatesModal = useCallback(() => {
+                setShowRatesModal(false);
+                setDragRateKey(null);
+                setDragOverRateKey(null);
+                setShowAddRateForm(false);
+                setNewRateName('');
+                setNewRateValue('');
+                setNewRateError('');
+            }, []);
+
+            const orderedRateItems = useMemo(
+                () => rateOrder.map((key) => getRateMeta(key)),
+                [rateOrder]
+            );
+
+            const visibleTickerRates = useMemo(
+                () => orderedRateItems.filter((m) => !hiddenTickerRates.includes(m.key)),
+                [orderedRateItems, hiddenTickerRates]
+            );
+
+            const orderedAssetOptions = useMemo(() => {
+                const opts = {
+                    TRY: currencyLabels.TRY || DEFAULT_LABELS.TRY,
+                    STOCK: currencyLabels.STOCK || DEFAULT_LABELS.STOCK
+                };
+                rateOrder.forEach((key) => {
+                    opts[key] = currencyLabels[key] || DEFAULT_LABELS[key] || key;
+                });
+                Object.keys(currencyLabels).forEach((key) => {
+                    if (!(key in opts)) opts[key] = currencyLabels[key];
+                });
+                return opts;
+            }, [rateOrder, currencyLabels]);
+
+            const moveRate = useCallback((key, direction) => {
+                setRateOrder((prev) => {
+                    const idx = prev.indexOf(key);
+                    const target = idx + direction;
+                    if (idx === -1 || target < 0 || target >= prev.length) return prev;
+                    const next = [...prev];
+                    [next[idx], next[target]] = [next[target], next[idx]];
+                    return next;
+                });
+            }, []);
+
+            const reorderRate = useCallback((fromKey, toKey) => {
+                if (!fromKey || !toKey || fromKey === toKey) return;
+                setRateOrder((prev) => {
+                    const fromIdx = prev.indexOf(fromKey);
+                    const toIdx = prev.indexOf(toKey);
+                    if (fromIdx === -1 || toIdx === -1) return prev;
+                    const next = [...prev];
+                    const [moved] = next.splice(fromIdx, 1);
+                    next.splice(toIdx, 0, moved);
+                    return next;
+                });
+            }, []);
+
+            const toggleTickerRateVisibility = useCallback((key) => {
+                setHiddenTickerRates((prev) =>
+                    prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+                );
+            }, []);
+
+            const handleAddCustomRate = useCallback((e) => {
+                e.preventDefault();
+                const cleanName = String(newRateName || '').trim().replace(/\s+/g, ' ');
+                const parsedVal = safeParseNum(newRateValue);
+                if (!cleanName) {
+                    setNewRateError('Birim adı boş olamaz.');
+                    return;
+                }
+                if (cleanName.length > 24) {
+                    setNewRateError('Birim adı en fazla 24 karakter olabilir.');
+                    return;
+                }
+                if (parsedVal <= 0) {
+                    setNewRateError('Birim fiyat 0’dan büyük olmalıdır.');
+                    return;
+                }
+                const newKey = `CUSTOM_${Date.now().toString(36).toUpperCase()}`;
+                setCurrencyLabels((prev) => ({ ...prev, [newKey]: cleanName }));
+                setRates((prev) => ({ ...prev, [newKey]: parsedVal }));
+                setRateOrder((prev) => [...prev, newKey]);
+                setNewRateName('');
+                setNewRateValue('');
+                setNewRateError('');
+                setShowAddRateForm(false);
+                showToast(`"${cleanName}" birimi eklendi.`, 'success');
+            }, [newRateName, newRateValue, showToast]);
+
+            const handleDeleteCustomRate = useCallback((key) => {
+                if (BUILTIN_RATE_SET.has(key)) return;
+                const snapPortfolio = latestStateRef.current.portfolio || [];
+                const inUse = snapPortfolio.some((p) =>
+                    (p.assets || []).some((a) =>
+                        a.type === key || (a.subItems || []).some((s) => s.type === key)
+                    )
+                );
+                if (inUse) {
+                    showToast('Bu birim portföydeki varlıklarda kullanılıyor. Silmeden önce varlık türünü değiştirin.', 'warning');
+                    return;
+                }
+                const removedName = latestStateRef.current.currencyLabels[key] || key;
+                setRateOrder((prev) => prev.filter((k) => k !== key));
+                setHiddenTickerRates((prev) => prev.filter((k) => k !== key));
+                setCurrencyLabels((prev) => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+                setRates((prev) => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                });
+                showToast(`"${removedName}" birimi silindi.`, 'success');
+            }, [showToast]);
+
+            const handleResetRatesDefaults = useCallback(() => {
+                setRateOrder((prev) => {
+                    const customKeys = prev.filter((k) => !BUILTIN_RATE_SET.has(k));
+                    return [...DEFAULT_RATE_ORDER, ...customKeys];
+                });
+                setHiddenTickerRates([]);
+                setCurrencyLabels((prev) => ({ ...prev, ...DEFAULT_LABELS }));
+                showToast('Kur sırası ve varsayılan isimler sıfırlandı.', 'success');
+            }, [showToast]);
 
             const togglePersonAccordion = (personId) => {
                 if (isFiltering) return;
@@ -4857,18 +5083,33 @@
                             </button>
 
                             <div className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
-                                {RATE_META.map((m) => (
+                                {visibleTickerRates.length === 0 ? (
                                     <button
-                                        key={m.key}
                                         type="button"
                                         onClick={() => setShowRatesModal(true)}
-                                        title={`${currencyLabels[m.key] || m.key} kurunu düzenle`}
-                                        className="h-10 px-2.5 rounded-xl glass-surface hover:border-white/20 flex items-center gap-1.5 shrink-0 transition-colors"
+                                        className="h-10 px-3 rounded-xl glass-surface hover:border-white/20 text-xs font-bold text-zinc-400 hover:text-white flex items-center gap-1.5 shrink-0 transition-colors"
                                     >
-                                        <span className={`text-[10px] font-bold ${m.color}`}>{m.short}</span>
-                                        <span className={`text-xs font-black font-numbers ${m.valueColor}`}>{formatCompactRate(rates[m.key])}</span>
+                                        <i className="fa-solid fa-sliders text-[10px]"></i>
+                                        <span>Şeritte kur göster</span>
                                     </button>
-                                ))}
+                                ) : (
+                                    visibleTickerRates.map((m) => {
+                                        const labelText = currencyLabels[m.key] || DEFAULT_LABELS[m.key] || m.key;
+                                        return (
+                                            <button
+                                                key={m.key}
+                                                type="button"
+                                                onClick={() => setShowRatesModal(true)}
+                                                title={`${labelText} kurunu düzenle veya sırala`}
+                                                className="h-10 px-2.5 rounded-xl glass-surface hover:border-white/20 flex items-center gap-1.5 shrink-0 transition-colors"
+                                            >
+                                                <i className={`fa-solid ${m.icon} ${m.color} text-[10px] shrink-0`}></i>
+                                                <span className={`text-[11px] font-bold ${m.color} whitespace-nowrap`}>{labelText}</span>
+                                                <span className={`text-xs font-black font-numbers ${m.valueColor}`}>{formatCompactRate(rates[m.key])}</span>
+                                            </button>
+                                        );
+                                    })
+                                )}
                             </div>
 
                             <button
@@ -5319,7 +5560,7 @@
                                                                                                 <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold block px-1">Tür</span>
                                                                                                 <CustomSelect
                                                                                                     value={asset.type}
-                                                                                                    options={currencyLabels}
+                                                                                                    options={orderedAssetOptions}
                                                                                                     onChange={(newVal) => {
                                                                                                         if (newVal === 'STOCK') {
                                                                                                             for (const key of attemptedStocksRef.current) {
@@ -5452,7 +5693,7 @@
                                                                                                             <span className="text-[8px] uppercase tracking-widest text-zinc-500 font-bold block px-1">Tür</span>
                                                                                                             <CustomSelect
                                                                                                                 value={sub.type}
-                                                                                                                options={currencyLabels}
+                                                                                                                options={orderedAssetOptions}
                                                                                                                 onChange={(newVal) => {
                                                                                                                     if (newVal === 'STOCK') {
                                                                                                                         for (const key of attemptedStocksRef.current) {
@@ -5594,65 +5835,317 @@
                     {/* Global Centered Toast Banner */}
                     <ToastBanner toast={toast} />
 
-                    {/* Live Market Rates Editor Modal (Opens on tap from compact 1-line ticker) */}
-                    <PortalModal isOpen={showRatesModal} onClose={() => setShowRatesModal(false)} maxWidth="max-w-lg">
-                        <div className="flex items-center justify-between gap-2 mb-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
-                                    <i className="fa-solid fa-chart-line text-emerald-400 text-sm"></i>
+                    {/* Dynamic Market Rates, Labels & Ordering Modal */}
+                    <PortalModal isOpen={showRatesModal} onClose={closeRatesModal} maxWidth="max-w-xl">
+                        <div className="flex items-center justify-between gap-2 mb-3.5">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                                    <i className="fa-solid fa-sliders text-emerald-400 text-sm"></i>
                                 </div>
-                                <div>
-                                    <h3 className="text-base font-bold text-white leading-tight">Canlı Piyasa Kurları</h3>
-                                    <p className="text-[10px] text-zinc-400">Otomatik güncellenir · İsterseniz manuel düzenleyin</p>
+                                <div className="min-w-0">
+                                    <h3 className="text-base font-bold text-white leading-tight">Piyasa Kurları ve İsimler</h3>
+                                    <p className="text-[10px] text-zinc-400">Sırala, yeniden adlandır, şeride sabitle veya yeni birim ekle</p>
                                 </div>
                             </div>
                             <button
                                 type="button"
-                                onClick={() => setShowRatesModal(false)}
-                                className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-zinc-400 hover:text-white"
+                                onClick={closeRatesModal}
+                                className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center text-zinc-400 hover:text-white shrink-0"
                                 title="Kapat"
                             >
                                 <i className="fa-solid fa-xmark text-sm"></i>
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2.5 mb-4">
-                            {RATE_META.map((m) => (
-                                <div key={m.key} className="glass-surface p-3 rounded-2xl border border-white/10 flex flex-col gap-1.5">
-                                    <div className="flex items-center gap-1.5">
-                                        <i className={`fa-solid ${m.icon} ${m.color} text-[10px] shrink-0`}></i>
+                        {/* Dynamic Reorderable & Editable Rate Rows */}
+                        <div className="flex flex-col gap-2 mb-3.5">
+                            {orderedRateItems.map((m, idx) => {
+                                const isFirst = idx === 0;
+                                const isLast = idx === orderedRateItems.length - 1;
+                                const isPinned = !hiddenTickerRates.includes(m.key);
+                                const isCustom = !BUILTIN_RATE_SET.has(m.key);
+                                const isDragging = dragRateKey === m.key;
+                                const isDragOver = dragOverRateKey === m.key && dragRateKey && dragRateKey !== m.key;
+
+                                return (
+                                    <div
+                                        key={m.key}
+                                        draggable
+                                        onDragStart={(e) => {
+                                            if (e.target && typeof e.target.closest === 'function' && e.target.closest('input, button')) {
+                                                e.preventDefault();
+                                                return;
+                                            }
+                                            setDragRateKey(m.key);
+                                            e.dataTransfer.effectAllowed = 'move';
+                                            try { e.dataTransfer.setData('text/plain', m.key); } catch { }
+                                        }}
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                            if (dragOverRateKey !== m.key) setDragOverRateKey(m.key);
+                                        }}
+                                        onDragLeave={() => {
+                                            if (dragOverRateKey === m.key) setDragOverRateKey(null);
+                                        }}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            const sourceKey = dragRateKey || (() => { try { return e.dataTransfer.getData('text/plain'); } catch { return ''; } })();
+                                            if (sourceKey && sourceKey !== m.key) {
+                                                reorderRate(sourceKey, m.key);
+                                            }
+                                            setDragRateKey(null);
+                                            setDragOverRateKey(null);
+                                        }}
+                                        onDragEnd={() => {
+                                            setDragRateKey(null);
+                                            setDragOverRateKey(null);
+                                        }}
+                                        className={`glass-surface p-2.5 rounded-2xl border transition-colors flex flex-col sm:flex-row sm:items-center gap-2 ${
+                                            isDragOver
+                                                ? 'border-emerald-400 bg-emerald-500/10'
+                                                : isDragging
+                                                    ? 'opacity-50 border-white/25'
+                                                    : 'border-white/10 hover:border-white/20'
+                                        }`}
+                                    >
+                                        {/* Row Top (Mobile) / Left (Desktop): Drag Handle + Up/Down + Editable Name + Pin/Delete on Mobile */}
+                                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                            <span
+                                                className="hidden sm:flex w-5 h-8 items-center justify-center text-zinc-500 hover:text-zinc-300 cursor-grab active:cursor-grabbing shrink-0"
+                                                title="Sürükleyerek sırala"
+                                            >
+                                                <i className="fa-solid fa-grip-vertical text-xs"></i>
+                                            </span>
+
+                                            <div className="flex sm:flex-col items-center gap-1 shrink-0">
+                                                <button
+                                                    type="button"
+                                                    disabled={isFirst}
+                                                    onClick={() => moveRate(m.key, -1)}
+                                                    title="Yukarı Taşı"
+                                                    aria-label={`${currencyLabels[m.key] || m.key} yukarı taşı`}
+                                                    className={`w-7 h-7 sm:w-6 sm:h-5 rounded-lg flex items-center justify-center border transition-colors ${
+                                                        isFirst
+                                                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-600'
+                                                            : 'bg-white/5 hover:bg-white/15 border-white/10 text-zinc-300 hover:text-white'
+                                                    }`}
+                                                >
+                                                    <i className="fa-solid fa-chevron-up text-[9px]"></i>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={isLast}
+                                                    onClick={() => moveRate(m.key, 1)}
+                                                    title="Aşağı Taşı"
+                                                    aria-label={`${currencyLabels[m.key] || m.key} aşağı taşı`}
+                                                    className={`w-7 h-7 sm:w-6 sm:h-5 rounded-lg flex items-center justify-center border transition-colors ${
+                                                        isLast
+                                                            ? 'opacity-25 cursor-not-allowed bg-white/[0.02] border-white/5 text-zinc-600'
+                                                            : 'bg-white/5 hover:bg-white/15 border-white/10 text-zinc-300 hover:text-white'
+                                                    }`}
+                                                >
+                                                    <i className="fa-solid fa-chevron-down text-[9px]"></i>
+                                                </button>
+                                            </div>
+
+                                            <div className="relative flex items-center flex-1 min-w-0">
+                                                <i className={`fa-solid ${m.icon} ${m.color} text-xs absolute left-2.5 pointer-events-none`}></i>
+                                                <input
+                                                    type="text"
+                                                    value={currencyLabels[m.key] ?? m.key}
+                                                    onChange={(e) => setCurrencyLabels((prev) => ({ ...prev, [m.key]: e.target.value }))}
+                                                    onBlur={(e) => {
+                                                        const trimmed = e.target.value.trim();
+                                                        if (!trimmed) {
+                                                            setCurrencyLabels((prev) => ({
+                                                                ...prev,
+                                                                [m.key]: DEFAULT_LABELS[m.key] || 'Özel Birim'
+                                                            }));
+                                                        } else if (trimmed !== e.target.value) {
+                                                            setCurrencyLabels((prev) => ({ ...prev, [m.key]: trimmed }));
+                                                        }
+                                                    }}
+                                                    onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                                                    className="w-full bg-black/40 border border-white/10 focus:border-emerald-500/50 rounded-xl pl-8 pr-2.5 py-2 text-xs font-bold text-white outline-none transition-colors"
+                                                    placeholder="Birim Adı"
+                                                    aria-label={`${m.key} görünen adı`}
+                                                    title="İsmi Düzenle"
+                                                />
+                                            </div>
+
+                                            {/* Mobile-only right controls so RateInput gets clean bottom row */}
+                                            <div className="flex sm:hidden items-center gap-1 shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleTickerRateVisibility(m.key)}
+                                                    title={isPinned ? 'Üst şeritten gizle' : 'Üst şeritte göster'}
+                                                    className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-colors ${
+                                                        isPinned
+                                                            ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300'
+                                                            : 'bg-white/5 border-white/10 text-zinc-500'
+                                                    }`}
+                                                >
+                                                    <i className="fa-solid fa-thumbtack text-[10px]"></i>
+                                                </button>
+                                                {isCustom && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteCustomRate(m.key)}
+                                                        title="Özel birimi sil"
+                                                        className="w-8 h-8 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors"
+                                                    >
+                                                        <i className="fa-solid fa-trash-can text-[10px]"></i>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Row Bottom (Mobile) / Right (Desktop): Rate Input + Desktop Pin/Delete */}
+                                        <div className="flex items-center justify-between sm:justify-end gap-1.5 pl-1 sm:pl-0 shrink-0">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 sm:hidden">
+                                                {isCustom ? 'Özel Birim (₺)' : 'Birim Fiyat (₺)'}
+                                            </span>
+                                            <RateInput
+                                                value={rates[m.key]}
+                                                onCommit={(val) => handleRateCommit(m.key, val)}
+                                                className={`w-32 sm:w-28 text-sm font-black font-numbers outline-none bg-black/40 focus:bg-black/60 rounded-xl py-2 px-2.5 text-right border border-white/10 focus:border-emerald-500/50 ${m.valueColor}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleTickerRateVisibility(m.key)}
+                                                title={isPinned ? 'Üst şeritten gizle' : 'Üst şeritte göster'}
+                                                className={`hidden sm:flex w-8 h-9 rounded-xl border items-center justify-center transition-colors shrink-0 ${
+                                                    isPinned
+                                                        ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300 hover:bg-emerald-500/25'
+                                                        : 'bg-white/5 border-white/10 text-zinc-500 hover:text-zinc-200'
+                                                }`}
+                                            >
+                                                <i className="fa-solid fa-thumbtack text-[11px]"></i>
+                                            </button>
+                                            {isCustom && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDeleteCustomRate(m.key)}
+                                                    title="Özel birimi sil"
+                                                    className="hidden sm:flex w-8 h-9 rounded-xl border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white items-center justify-center transition-colors shrink-0"
+                                                >
+                                                    <i className="fa-solid fa-trash-can text-[11px]"></i>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Add Custom Currency / Unit Inline Form */}
+                        <div className="mb-3.5">
+                            {!showAddRateForm ? (
+                                <button
+                                    type="button"
+                                    onClick={() => { setShowAddRateForm(true); setNewRateError(''); }}
+                                    className="w-full py-2.5 rounded-xl border border-dashed border-white/20 hover:border-emerald-400/50 text-xs font-bold text-zinc-300 hover:text-emerald-300 bg-white/[0.02] hover:bg-emerald-500/10 flex items-center justify-center gap-2 transition-colors"
+                                >
+                                    <i className="fa-solid fa-plus text-[10px]"></i>
+                                    <span>Yeni Özel Kur / Birim Ekle (Örn: 22 Ayar, Yarım Altın, CHF)</span>
+                                </button>
+                            ) : (
+                                <form onSubmit={handleAddCustomRate} className="glass-surface p-3 rounded-2xl border border-emerald-500/35 flex flex-col gap-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">Yeni Özel Birim</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setShowAddRateForm(false); setNewRateError(''); }}
+                                            className="text-[11px] text-zinc-400 hover:text-white font-bold"
+                                        >
+                                            Vazgeç
+                                        </button>
+                                    </div>
+                                    {newRateError && (
+                                        <div className="p-2 rounded-lg bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold">
+                                            {newRateError}
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         <input
                                             type="text"
-                                            value={currencyLabels[m.key] ?? m.key}
-                                            onChange={(e) => setCurrencyLabels((prev) => ({ ...prev, [m.key]: e.target.value }))}
+                                            autoFocus
+                                            value={newRateName}
+                                            onChange={(e) => { setNewRateName(e.target.value); setNewRateError(''); }}
+                                            placeholder="Birim Adı (Örn: Yarım Altın)"
+                                            className="w-full bg-black/45 border border-white/10 focus:border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
+                                        />
+                                        <input
+                                            type="number"
+                                            step="any"
+                                            inputMode="decimal"
+                                            value={newRateValue}
+                                            onChange={(e) => { setNewRateValue(e.target.value); setNewRateError(''); }}
+                                            placeholder="TL Birim Fiyatı (Örn: 19800)"
+                                            className="w-full bg-black/45 border border-white/10 focus:border-emerald-500/50 rounded-xl px-3 py-2 text-xs font-black font-numbers text-emerald-300 outline-none"
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs uppercase tracking-widest transition-colors"
+                                    >
+                                        BİRİMİ EKLE
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+
+                        {/* Base Labels (TL & Hisse) */}
+                        <div className="glass-surface p-2.5 rounded-2xl border border-white/10 mb-3.5">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 block mb-2 px-1">
+                                Temel Varlık İsimleri
+                            </span>
+                            <div className="grid grid-cols-2 gap-2">
+                                {(['TRY', 'STOCK']).map((baseKey) => (
+                                    <div key={baseKey} className="relative flex items-center">
+                                        <span className={`w-2 h-2 rounded-full absolute left-2.5 ${ASSET_DOT_COLORS[baseKey] || 'bg-zinc-400'}`}></span>
+                                        <input
+                                            type="text"
+                                            value={currencyLabels[baseKey] ?? DEFAULT_LABELS[baseKey]}
+                                            onChange={(e) => setCurrencyLabels((prev) => ({ ...prev, [baseKey]: e.target.value }))}
                                             onBlur={(e) => {
-                                                if (!e.target.value.trim()) {
-                                                    setCurrencyLabels((prev) => ({ ...prev, [m.key]: DEFAULT_LABELS[m.key] || m.key }));
+                                                const trimmed = e.target.value.trim();
+                                                if (!trimmed) {
+                                                    setCurrencyLabels((prev) => ({ ...prev, [baseKey]: DEFAULT_LABELS[baseKey] }));
+                                                } else if (trimmed !== e.target.value) {
+                                                    setCurrencyLabels((prev) => ({ ...prev, [baseKey]: trimmed }));
                                                 }
                                             }}
                                             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-                                            className="text-xs font-bold uppercase tracking-wider text-zinc-300 bg-transparent outline-none focus:text-white w-full"
-                                            title="Etiket Adını Değiştir"
+                                            className="w-full bg-black/40 border border-white/10 focus:border-emerald-500/50 rounded-xl pl-6 pr-2.5 py-1.5 text-xs font-bold text-white outline-none"
+                                            aria-label={`${baseKey} etiketi`}
                                         />
                                     </div>
-                                    <RateInput
-                                        value={rates[m.key]}
-                                        onCommit={(val) => handleRateCommit(m.key, val)}
-                                        className={`w-full text-base font-black font-numbers outline-none bg-black/35 focus:bg-black/55 rounded-xl py-2 px-2 text-center border border-white/5 focus:border-emerald-500/45 ${m.valueColor}`}
-                                    />
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
 
-                        <button
-                            type="button"
-                            disabled={isLoadingRates}
-                            onClick={() => fetchLiveRates(true)}
-                            className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-black border border-emerald-500/35 flex items-center justify-center gap-2 transition-colors"
-                        >
-                            <i className={`fa-solid fa-arrows-rotate ${isLoadingRates ? 'fa-spin' : ''}`}></i>
-                            <span>{isLoadingRates ? 'Güncelleniyor...' : 'Tüm Kurları ve Hisseleri Şimdi Güncelle'}</span>
-                        </button>
+                        {/* Footer Actions */}
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <button
+                                type="button"
+                                disabled={isLoadingRates}
+                                onClick={() => fetchLiveRates(true)}
+                                className="flex-1 py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-black border border-emerald-500/35 flex items-center justify-center gap-2 transition-colors"
+                            >
+                                <i className={`fa-solid fa-arrows-rotate ${isLoadingRates ? 'fa-spin' : ''}`}></i>
+                                <span>{isLoadingRates ? 'Güncelleniyor...' : 'Canlı Kurları Güncelle'}</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleResetRatesDefaults}
+                                className="sm:w-auto px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+                                title="Sıralamayı, şerit görünürlüğünü ve varsayılan isimleri geri yükle"
+                            >
+                                <i className="fa-solid fa-rotate-left text-[11px]"></i>
+                                <span>Sıfırla</span>
+                            </button>
+                        </div>
                     </PortalModal>
 
                     {/* Delete Target Confirmation Modal */}
