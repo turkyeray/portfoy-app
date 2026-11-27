@@ -11,7 +11,7 @@
         href="data:application/manifest+json,%7B%22name%22%3A%22Kasa%20%28Portf%C3%B6y%29%22%2C%22short_name%22%3A%22Kasa%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23040608%22%2C%22theme_color%22%3A%22%2310b981%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%253E%253Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%252310b981%27%20rx%3D%2720%27%2F%253E%253Cpath%20fill%3D%27%2523fff%27%20d%3D%27M50%2020a30%2030%200%201%200%200%2060%2030%2030%200%200%200%200-60zm0%2010a20%2020%200%201%201%200%2040%2020%2020%200%200%201%200-40z%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="theme-color" content="#040608">
     <link rel="apple-touch-icon"
         href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2310b981' rx='20'/%3E%3Cpath fill='%23fff' d='M50 20a30 30 0 1 0 0 60 30 30 0 0 0 0-60zm0 10a20 20 0 1 1 0 40 20 20 0 0 1 0-40z'/%3E%3C/svg%3E">
@@ -196,6 +196,21 @@
         .font-numbers {
             font-family: 'JetBrains Mono', monospace;
             font-variant-numeric: tabular-nums;
+        }
+
+        .safe-top {
+            padding-top: max(1rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+        }
+
+        .header-btn {
+            background-color: rgba(20, 27, 39, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header-btn:hover {
+            background-color: rgba(31, 41, 58, 0.98);
         }
     </style>
 </head>
@@ -382,6 +397,57 @@
             return safeParseNum(item?.amount) * getItemUnitRate(item, rates);
         };
 
+        const getTodayDateKey = () => {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        const calcPersonValuePure = (person, rates) => {
+            return (person?.assets || [])
+                .filter((a) => !a.isHidden)
+                .reduce((sum, asset) => {
+                    if (asset.subItems && asset.subItems.length > 0) {
+                        return sum + asset.subItems.reduce((s, sub) => s + getItemValue(sub, rates), 0);
+                    }
+                    return sum + getItemValue(asset, rates);
+                }, 0);
+        };
+
+        const mergeTodayHistorySnapshot = (prevHistory, portfolio, rates) => {
+            const base = Array.isArray(prevHistory)
+                ? prevHistory.filter((h) => h && typeof h.date === 'string' && Number.isFinite(h.total))
+                : [];
+            const today = getTodayDateKey();
+            const byPerson = {};
+            let total = 0;
+
+            (portfolio || []).forEach((person) => {
+                const pVal = Math.round(calcPersonValuePure(person, rates));
+                byPerson[person.id] = pVal;
+                if (!person.isHidden) total += pVal;
+            });
+
+            const todaySnap = { date: today, total: Math.round(total), byPerson };
+            const filtered = base.filter((h) => h.date !== today);
+            if (total > 0 || filtered.length > 0) {
+                filtered.push(todaySnap);
+            }
+            filtered.sort((a, b) => a.date.localeCompare(b.date));
+            return filtered.slice(-365);
+        };
+
+        const formatShortDateTr = (isoDate) => {
+            if (!isoDate || typeof isoDate !== 'string') return '';
+            const parts = isoDate.split('-');
+            if (parts.length !== 3) return isoDate;
+            const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+            const mIdx = parseInt(parts[1], 10) - 1;
+            return `${parseInt(parts[2], 10)} ${months[mIdx] || parts[1]}`;
+        };
+
         const sanitizePortfolioData = (raw) => {
             if (!Array.isArray(raw)) return [];
             return raw.map((p) => ({
@@ -520,16 +586,16 @@
         };
 
         const ToastBanner = ({ toast }) => {
+            if (!toast.show) return null;
             return ReactDOM.createPortal(
                 <div
-                    className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100000] transition-all duration-300 ease-out flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-xl max-w-[92vw] ${
-                        toast.show ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-6 pointer-events-none'
-                    } ${
+                    style={{ top: 'max(1rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))' }}
+                    className={`fixed left-1/2 -translate-x-1/2 z-[100000] animate-fade-in-up flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border max-w-[92vw] ${
                         toast.type === 'error'
-                            ? 'bg-red-950/85 border-red-500/40'
+                            ? 'bg-[#2a0c10]/95 border-red-500/45'
                             : toast.type === 'warning'
-                                ? 'bg-amber-950/85 border-amber-500/40'
-                                : 'bg-emerald-950/85 border-emerald-500/40'
+                                ? 'bg-[#2a1c08]/95 border-amber-500/45'
+                                : 'bg-[#07261c]/95 border-emerald-500/45'
                     }`}
                 >
                     <div
@@ -935,6 +1001,710 @@
         };
 
         // =========================================================================
+        // PORTFOLIO PERFORMANCE & ANALYTICS CHART CARD
+        // =========================================================================
+        const CHART_PALETTE = ['#10b981', '#38bdf8', '#f59e0b', '#818cf8', '#f43f5e', '#14b8a6', '#a855f7', '#fb923c'];
+
+        const PerformanceChartCard = ({
+            portfolio,
+            rates,
+            currencyLabels,
+            liveHistory,
+            calculateAssetValue,
+            calculatePersonTotal,
+            calculatePnL
+        }) => {
+            const [isOpen, setIsOpen] = useState(true);
+            const [selectedPersonId, setSelectedPersonId] = useState('all');
+            const [chartTab, setChartTab] = useState('performance'); // 'performance' | 'allocation' | 'trend'
+            const [perfMetric, setPerfMetric] = useState('pct'); // 'pct' | 'try'
+            const [selectedBarKey, setSelectedBarKey] = useState(null);
+            const [selectedSliceIdx, setSelectedSliceIdx] = useState(null);
+            const [selectedPointIdx, setSelectedPointIdx] = useState(null);
+
+            useEffect(() => {
+                if (selectedPersonId !== 'all' && !portfolio.some((p) => p.id === selectedPersonId)) {
+                    setSelectedPersonId('all');
+                }
+            }, [portfolio, selectedPersonId]);
+
+            useEffect(() => {
+                setSelectedBarKey(null);
+                setSelectedSliceIdx(null);
+                setSelectedPointIdx(null);
+            }, [selectedPersonId, chartTab]);
+
+            const analytics = useMemo(() => {
+                const targetPersons = selectedPersonId === 'all'
+                    ? portfolio.filter((p) => !p.isHidden)
+                    : portfolio.filter((p) => p.id === selectedPersonId);
+
+                let totalValue = 0;
+                let trackedCost = 0;
+                let trackedCurrent = 0;
+                const flatItems = [];
+
+                targetPersons.forEach((person) => {
+                    const personLabel = (person.person || 'İsimsiz Portföy').trim();
+                    (person.assets || []).filter((a) => !a.isHidden).forEach((asset) => {
+                        const hasSubs = asset.subItems && asset.subItems.length > 0;
+                        if (hasSubs) {
+                            asset.subItems.forEach((sub) => {
+                                const val = getItemValue(sub, rates);
+                                totalValue += val;
+                                const pnl = calculatePnL(sub.amount, rates[sub.type], sub.costPrice, sub.type, sub.currentPrice);
+                                const qty = safeParseNum(sub.amount);
+                                const costUnit = safeParseNum(sub.costPrice);
+                                const currentUnit = getItemUnitRate(sub, rates);
+                                if (pnl) {
+                                    trackedCost += qty * costUnit;
+                                    trackedCurrent += val;
+                                }
+                                flatItems.push({
+                                    key: `${person.id}-${asset.id}-${sub.id}`,
+                                    name: (sub.name || 'İsimsiz Kalem').trim(),
+                                    subtitle: [asset.name?.trim(), selectedPersonId === 'all' && targetPersons.length > 1 ? personLabel : ''].filter(Boolean).join(' · '),
+                                    type: sub.type,
+                                    typeLabel: currencyLabels[sub.type] || sub.type,
+                                    qty,
+                                    costUnit,
+                                    currentUnit,
+                                    costTotal: qty * costUnit,
+                                    currentTotal: val,
+                                    pnl
+                                });
+                            });
+                        } else {
+                            const val = getItemValue(asset, rates);
+                            totalValue += val;
+                            const pnl = calculatePnL(asset.amount, rates[asset.type], asset.costPrice, asset.type, asset.currentPrice);
+                            const qty = safeParseNum(asset.amount);
+                            const costUnit = safeParseNum(asset.costPrice);
+                            const currentUnit = getItemUnitRate(asset, rates);
+                            if (pnl) {
+                                trackedCost += qty * costUnit;
+                                trackedCurrent += val;
+                            }
+                            flatItems.push({
+                                key: `${person.id}-${asset.id}`,
+                                name: (asset.name || 'İsimsiz Varlık').trim(),
+                                subtitle: selectedPersonId === 'all' && targetPersons.length > 1 ? personLabel : '',
+                                type: asset.type,
+                                typeLabel: currencyLabels[asset.type] || asset.type,
+                                qty,
+                                costUnit,
+                                currentUnit,
+                                costTotal: qty * costUnit,
+                                currentTotal: val,
+                                pnl
+                            });
+                        }
+                    });
+                });
+
+                const perfItems = flatItems
+                    .filter((item) => item.pnl !== null)
+                    .sort((a, b) =>
+                        perfMetric === 'pct'
+                            ? b.pnl.percentage - a.pnl.percentage
+                            : b.pnl.profit - a.pnl.profit
+                    );
+
+                // Allocation slices: portfolio-by-portfolio when "all" & multiple persons, else asset-by-asset
+                let allocationSlices = [];
+                if (selectedPersonId === 'all' && targetPersons.length > 1) {
+                    allocationSlices = targetPersons
+                        .map((p) => {
+                            const val = calculatePersonTotal(p.assets);
+                            let pCost = 0;
+                            let pCurr = 0;
+                            (p.assets || []).filter((a) => !a.isHidden).forEach((a) => {
+                                const list = a.subItems && a.subItems.length > 0 ? a.subItems : [a];
+                                list.forEach((it) => {
+                                    const pnl = calculatePnL(it.amount, rates[it.type], it.costPrice, it.type, it.currentPrice);
+                                    if (pnl) {
+                                        pCost += safeParseNum(it.amount) * safeParseNum(it.costPrice);
+                                        pCurr += getItemValue(it, rates);
+                                    }
+                                });
+                            });
+                            return {
+                                id: p.id,
+                                label: (p.person || 'İsimsiz Portföy').trim(),
+                                subLabel: `${(p.assets || []).filter((a) => !a.isHidden).length} Varlık`,
+                                value: val,
+                                pnlPct: pCost > 0 ? ((pCurr - pCost) / pCost) * 100 : null,
+                                pnlVal: pCost > 0 ? (pCurr - pCost) : null
+                            };
+                        })
+                        .filter((s) => s.value > 0)
+                        .sort((a, b) => b.value - a.value);
+                } else if (targetPersons.length > 0) {
+                    const p = targetPersons[0];
+                    allocationSlices = (p.assets || [])
+                        .filter((a) => !a.isHidden)
+                        .map((a) => {
+                            const val = calculateAssetValue(a);
+                            const list = a.subItems && a.subItems.length > 0 ? a.subItems : [a];
+                            let aCost = 0;
+                            let aCurr = 0;
+                            list.forEach((it) => {
+                                const pnl = calculatePnL(it.amount, rates[it.type], it.costPrice, it.type, it.currentPrice);
+                                if (pnl) {
+                                    aCost += safeParseNum(it.amount) * safeParseNum(it.costPrice);
+                                    aCurr += getItemValue(it, rates);
+                                }
+                            });
+                            return {
+                                id: a.id,
+                                label: (a.name || 'İsimsiz Varlık').trim(),
+                                subLabel: a.subItems?.length > 0 ? `${a.subItems.length} Kalem` : (currencyLabels[a.type] || a.type),
+                                value: val,
+                                pnlPct: aCost > 0 ? ((aCurr - aCost) / aCost) * 100 : null,
+                                pnlVal: aCost > 0 ? (aCurr - aCost) : null
+                            };
+                        })
+                        .filter((s) => s.value > 0)
+                        .sort((a, b) => b.value - a.value);
+                }
+
+                const sliceSum = allocationSlices.reduce((acc, s) => acc + s.value, 0);
+                allocationSlices = allocationSlices.map((s, idx) => ({
+                    ...s,
+                    color: CHART_PALETTE[idx % CHART_PALETTE.length],
+                    pct: sliceSum > 0 ? (s.value / sliceSum) * 100 : 0
+                }));
+
+                const netProfit = trackedCurrent - trackedCost;
+                const netPct = trackedCost > 0 ? (netProfit / trackedCost) * 100 : null;
+
+                return {
+                    totalValue,
+                    trackedCost,
+                    trackedCurrent,
+                    netProfit,
+                    netPct,
+                    trackedCount: perfItems.length,
+                    perfItems,
+                    allocationSlices
+                };
+            }, [portfolio, selectedPersonId, rates, currencyLabels, perfMetric, calculateAssetValue, calculatePersonTotal, calculatePnL]);
+
+            const trendSeries = useMemo(() => {
+                const raw = (liveHistory || []).map((pt) => ({
+                    date: pt.date,
+                    value: selectedPersonId === 'all'
+                        ? safeParseNum(pt.total)
+                        : safeParseNum(pt.byPerson?.[selectedPersonId])
+                }));
+                return raw.filter((pt, idx) => pt.value > 0 || idx === raw.length - 1);
+            }, [liveHistory, selectedPersonId]);
+
+            if (!portfolio || portfolio.length === 0) return null;
+
+            const maxAbsMetric = analytics.perfItems.reduce((max, item) => {
+                const v = Math.abs(perfMetric === 'pct' ? item.pnl.percentage : item.pnl.profit);
+                return v > max ? v : max;
+            }, 0) || 1;
+            const hasMixedSigns =
+                analytics.perfItems.some((i) => i.pnl.profit > 0) &&
+                analytics.perfItems.some((i) => i.pnl.profit < 0);
+
+            const activeSlice = selectedSliceIdx !== null ? analytics.allocationSlices[selectedSliceIdx] : null;
+            const activeTrendPoint = selectedPointIdx !== null
+                ? trendSeries[selectedPointIdx]
+                : (trendSeries.length > 0 ? trendSeries[trendSeries.length - 1] : null);
+            const trendFirst = trendSeries.length > 1 ? trendSeries[0] : null;
+            const trendDelta = (trendFirst && activeTrendPoint && trendFirst.value > 0)
+                ? {
+                    diff: activeTrendPoint.value - trendFirst.value,
+                    pct: ((activeTrendPoint.value - trendFirst.value) / trendFirst.value) * 100
+                }
+                : null;
+
+            return (
+                <div className="mb-8 sm:mb-10 glass-card rounded-[2rem] max-w-4xl mx-auto border border-white/10 shadow-2xl overflow-hidden">
+                    {/* Card Header */}
+                    <div
+                        onClick={() => setIsOpen((v) => !v)}
+                        className="p-4 sm:p-6 flex justify-between items-center gap-3 cursor-pointer hover:bg-white/[0.02] transition-colors"
+                    >
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                                <i className="fa-solid fa-chart-column text-indigo-400 text-sm"></i>
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-widest truncate">
+                                    Portföy Performans Grafiği
+                                </h3>
+                                <p className="text-[10px] text-zinc-400 font-medium truncate">
+                                    Portföy bazlı kâr/zarar, dağılım ve değer trendi
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {analytics.netPct !== null && (
+                                <span className={`hidden sm:inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold font-numbers ${
+                                    analytics.netProfit >= 0
+                                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                                        : 'bg-red-500/15 text-red-400 border border-red-500/25'
+                                }`}>
+                                    {analytics.netProfit >= 0 ? '+' : ''}{analytics.netPct.toFixed(1)}%
+                                </span>
+                            )}
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 ${isOpen ? 'bg-white/15 text-white rotate-180' : 'bg-white/5 text-zinc-400'}`}>
+                                <i className="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    {isOpen && (
+                        <div className="px-4 sm:px-6 pb-6 pt-1 border-t border-white/5 flex flex-col gap-5">
+                            {/* Portfolio Selector Pills */}
+                            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pt-3 pb-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setSelectedPersonId('all')}
+                                    className={`px-3.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide whitespace-nowrap transition-all border shrink-0 ${
+                                        selectedPersonId === 'all'
+                                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
+                                            : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10 hover:text-white'
+                                    }`}
+                                >
+                                    Tüm Portföyler
+                                </button>
+                                {portfolio.map((p) => (
+                                    <button
+                                        key={p.id}
+                                        type="button"
+                                        onClick={() => setSelectedPersonId(p.id)}
+                                        className={`px-3.5 py-1.5 rounded-xl text-[11px] font-bold tracking-wide whitespace-nowrap transition-all border shrink-0 flex items-center gap-1.5 ${
+                                            selectedPersonId === p.id
+                                                ? 'bg-indigo-500/25 text-indigo-200 border-indigo-400/45 shadow-sm'
+                                                : 'bg-white/5 text-zinc-400 border-white/5 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                        <span>{(p.person || 'İsimsiz Portföy').trim()}</span>
+                                        {p.isHidden && <i className="fa-solid fa-eye-slash text-[9px] text-red-400/80"></i>}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* KPI Summary Strip */}
+                            <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+                                <div className="bg-black/30 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
+                                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Güncel Değer</span>
+                                    <span className="text-xs sm:text-base font-black text-white font-numbers mt-1 break-words">
+                                        {formatMoney(analytics.totalValue)}
+                                    </span>
+                                </div>
+                                <div className="bg-black/30 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
+                                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Maliyet Bazı</span>
+                                    <span className="text-xs sm:text-base font-black text-zinc-200 font-numbers mt-1 break-words">
+                                        {analytics.trackedCost > 0 ? formatMoney(analytics.trackedCost) : '—'}
+                                    </span>
+                                    {analytics.trackedCount > 0 && (
+                                        <span className="text-[9px] text-zinc-500 mt-0.5">{analytics.trackedCount} kalem takipli</span>
+                                    )}
+                                </div>
+                                <div className="bg-black/30 border border-white/5 rounded-2xl p-3 sm:p-3.5 flex flex-col">
+                                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-zinc-500">Net Kâr / Zarar</span>
+                                    {analytics.netPct !== null ? (
+                                        <>
+                                            <span className={`text-xs sm:text-base font-black font-numbers mt-1 break-words ${analytics.netProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                {analytics.netProfit >= 0 ? '+' : ''}{formatMoney(analytics.netProfit)}
+                                            </span>
+                                            <span className={`text-[10px] font-bold font-numbers mt-0.5 ${analytics.netProfit >= 0 ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
+                                                {analytics.netProfit >= 0 ? '+' : ''}%{analytics.netPct.toFixed(1)}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="text-xs sm:text-sm font-bold text-zinc-500 mt-1">Maliyet yok</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Chart Mode Switcher */}
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="inline-flex bg-black/35 p-1 rounded-xl border border-white/10">
+                                    {[
+                                        { id: 'performance', label: 'Performans', icon: 'fa-arrow-trend-up' },
+                                        { id: 'allocation', label: 'Dağılım', icon: 'fa-chart-pie' },
+                                        { id: 'trend', label: 'Trend', icon: 'fa-wave-square' }
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            type="button"
+                                            onClick={() => setChartTab(tab.id)}
+                                            className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                                                chartTab === tab.id
+                                                    ? 'bg-white/15 text-white shadow-sm'
+                                                    : 'text-zinc-400 hover:text-zinc-200'
+                                            }`}
+                                        >
+                                            <i className={`fa-solid ${tab.icon} text-[10px]`}></i>
+                                            <span>{tab.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {chartTab === 'performance' && analytics.perfItems.length > 0 && (
+                                    <div className="inline-flex bg-black/35 p-1 rounded-xl border border-white/10">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPerfMetric('pct')}
+                                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${perfMetric === 'pct' ? 'bg-emerald-500/25 text-emerald-300' : 'text-zinc-400 hover:text-white'}`}
+                                        >
+                                            % Getiri
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPerfMetric('try')}
+                                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${perfMetric === 'try' ? 'bg-emerald-500/25 text-emerald-300' : 'text-zinc-400 hover:text-white'}`}
+                                        >
+                                            ₺ Tutar
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* TAB 1: ASSET P&L PERFORMANCE BAR CHART */}
+                            {chartTab === 'performance' && (
+                                analytics.perfItems.length > 0 ? (
+                                    <div className="flex flex-col gap-2.5">
+                                        {analytics.perfItems.map((item) => {
+                                            const rawVal = perfMetric === 'pct' ? item.pnl.percentage : item.pnl.profit;
+                                            const ratio = Math.min(100, Math.max(4, (Math.abs(rawVal) / maxAbsMetric) * 100));
+                                            const isPos = item.pnl.profit >= 0;
+                                            const isSelected = selectedBarKey === item.key;
+
+                                            return (
+                                                <div
+                                                    key={item.key}
+                                                    onClick={() => setSelectedBarKey(isSelected ? null : item.key)}
+                                                    className={`p-3 rounded-2xl border transition-all cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-white/[0.06] border-white/20'
+                                                            : 'bg-black/25 border-white/5 hover:border-white/15'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                                <span className="text-xs sm:text-sm font-bold text-white break-words">{item.name}</span>
+                                                                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-zinc-300">
+                                                                    {formatTitleCase(item.typeLabel)}
+                                                                </span>
+                                                            </div>
+                                                            {item.subtitle && (
+                                                                <p className="text-[10px] text-zinc-500 mt-0.5 truncate">{item.subtitle}</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-right shrink-0 font-numbers">
+                                                            <div className={`text-xs sm:text-sm font-black ${isPos ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                                {isPos ? '+' : ''}{item.pnl.percentage.toFixed(1)}%
+                                                            </div>
+                                                            <div className={`text-[10px] font-semibold ${isPos ? 'text-emerald-400/80' : 'text-red-400/80'}`}>
+                                                                {isPos ? '+' : ''}{formatMoney(item.pnl.profit)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Bar track */}
+                                                    {hasMixedSigns ? (
+                                                        <div className="relative h-2.5 w-full bg-white/5 rounded-full overflow-hidden flex items-center">
+                                                            <div className="w-1/2 h-full flex justify-end pr-[1px]">
+                                                                {!isPos && (
+                                                                    <div
+                                                                        className="h-full rounded-l-full bg-gradient-to-l from-red-500 to-rose-400 transition-all duration-500"
+                                                                        style={{ width: `${ratio}%` }}
+                                                                    ></div>
+                                                                )}
+                                                            </div>
+                                                            <div className="w-[2px] h-full bg-white/25 shrink-0"></div>
+                                                            <div className="w-1/2 h-full flex justify-start pl-[1px]">
+                                                                {isPos && (
+                                                                    <div
+                                                                        className="h-full rounded-r-full bg-gradient-to-r from-emerald-500 to-teal-300 transition-all duration-500"
+                                                                        style={{ width: `${ratio}%` }}
+                                                                    ></div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="relative h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                                            <div
+                                                                className={`h-full rounded-full transition-all duration-500 ${
+                                                                    isPos
+                                                                        ? 'bg-gradient-to-r from-emerald-600 via-emerald-400 to-teal-300'
+                                                                        : 'bg-gradient-to-r from-rose-600 to-red-400'
+                                                                }`}
+                                                                style={{ width: `${ratio}%` }}
+                                                            ></div>
+                                                        </div>
+                                                    )}
+
+                                                    {isSelected && (
+                                                        <div className="mt-2.5 pt-2.5 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-numbers">
+                                                            <div>
+                                                                <span className="text-zinc-500 block font-sans">Miktar / Adet</span>
+                                                                <span className="text-white font-bold">{item.qty}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-zinc-500 block font-sans">Birim Maliyet → Güncel</span>
+                                                                <span className="text-zinc-200 font-bold">{item.costUnit} → {item.currentUnit} ₺</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-zinc-500 block font-sans">Toplam Maliyet</span>
+                                                                <span className="text-zinc-200 font-bold">{formatMoney(item.costTotal)}</span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-zinc-500 block font-sans">Güncel Değer</span>
+                                                                <span className="text-emerald-300 font-bold">{formatMoney(item.currentTotal)}</span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="bg-black/25 border border-white/5 rounded-2xl p-6 text-center flex flex-col items-center gap-3">
+                                        <i className="fa-solid fa-sliders text-2xl text-zinc-500"></i>
+                                        <p className="text-xs text-zinc-400 max-w-xs leading-relaxed">
+                                            Bu portföyde kâr/zarar hesaplanacak maliyet girişi bulunmuyor. Döviz, altın veya hisse varlıklarına <strong>Maliyet</strong> girdiğinizde performans grafiği otomatik oluşur.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setChartTab('allocation')}
+                                            className="px-4 py-2 rounded-xl text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500 hover:text-white transition-all"
+                                        >
+                                            Dağılım Grafiğine Geç
+                                        </button>
+                                    </div>
+                                )
+                            )}
+
+                            {/* TAB 2: SVG DONUT + RANKED ALLOCATION */}
+                            {chartTab === 'allocation' && (
+                                analytics.allocationSlices.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-5 items-center">
+                                        <div className="relative w-44 h-44 mx-auto shrink-0">
+                                            <svg viewBox="0 0 120 120" className="w-full h-full -rotate-90">
+                                                <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="14" />
+                                                {(() => {
+                                                    const circumference = 2 * Math.PI * 46;
+                                                    let offset = 0;
+                                                    return analytics.allocationSlices.map((slice, idx) => {
+                                                        const dash = (slice.pct / 100) * circumference;
+                                                        const segOffset = offset;
+                                                        offset += dash;
+                                                        const isHighlighted = selectedSliceIdx === idx;
+                                                        return (
+                                                            <circle
+                                                                key={slice.id}
+                                                                cx="60"
+                                                                cy="60"
+                                                                r="46"
+                                                                fill="none"
+                                                                stroke={slice.color}
+                                                                strokeWidth={isHighlighted ? '17' : '14'}
+                                                                strokeDasharray={`${Math.max(0, dash - 1.2)} ${circumference}`}
+                                                                strokeDashoffset={-segOffset}
+                                                                strokeLinecap="butt"
+                                                                className="transition-all duration-300 cursor-pointer"
+                                                                opacity={selectedSliceIdx === null || isHighlighted ? 1 : 0.35}
+                                                                onClick={() => setSelectedSliceIdx(isHighlighted ? null : idx)}
+                                                            />
+                                                        );
+                                                    });
+                                                })()}
+                                            </svg>
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pointer-events-none">
+                                                <span className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold truncate max-w-full">
+                                                    {activeSlice ? activeSlice.label : 'Toplam'}
+                                                </span>
+                                                <span className="text-xs font-black text-white font-numbers mt-0.5">
+                                                    {formatMoney(activeSlice ? activeSlice.value : analytics.totalValue)}
+                                                </span>
+                                                {activeSlice && (
+                                                    <span className="text-[10px] font-bold font-numbers mt-0.5" style={{ color: activeSlice.color }}>
+                                                        %{activeSlice.pct.toFixed(1)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            {analytics.allocationSlices.map((slice, idx) => {
+                                                const isHighlighted = selectedSliceIdx === idx;
+                                                return (
+                                                    <div
+                                                        key={slice.id}
+                                                        onClick={() => setSelectedSliceIdx(isHighlighted ? null : idx)}
+                                                        className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                                                            isHighlighted
+                                                                ? 'bg-white/10 border-white/25'
+                                                                : 'bg-black/25 border-white/5 hover:border-white/15'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-center justify-between gap-2 mb-1.5">
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }}></span>
+                                                                <span className="text-xs font-bold text-white truncate">{slice.label}</span>
+                                                                <span className="text-[9px] text-zinc-500 hidden sm:inline">{slice.subLabel}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 shrink-0 font-numbers">
+                                                                {slice.pnlPct !== null && (
+                                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${slice.pnlVal >= 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                                                                        {slice.pnlVal >= 0 ? '+' : ''}%{slice.pnlPct.toFixed(1)}
+                                                                    </span>
+                                                                )}
+                                                                <span className="text-xs font-bold text-white">{formatMoney(slice.value)}</span>
+                                                                <span className="text-[10px] text-zinc-400 w-10 text-right">%{slice.pct.toFixed(1)}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                                            <div
+                                                                className="h-full rounded-full transition-all duration-500"
+                                                                style={{ width: `${Math.max(2, slice.pct)}%`, backgroundColor: slice.color }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-black/25 border border-white/5 rounded-2xl p-6 text-center text-xs text-zinc-500">
+                                        Bu portföyde görüntülenecek aktif varlık değeri bulunmuyor.
+                                    </div>
+                                )
+                            )}
+
+                            {/* TAB 3: HISTORICAL VALUE TREND SVG LINE CHART */}
+                            {chartTab === 'trend' && (
+                                <div className="flex flex-col gap-3">
+                                    {activeTrendPoint && (
+                                        <div className="flex items-center justify-between gap-2 bg-black/25 border border-white/5 rounded-xl px-3.5 py-2.5">
+                                            <div>
+                                                <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+                                                    {formatShortDateTr(activeTrendPoint.date)}
+                                                </span>
+                                                <div className="text-sm sm:text-base font-black text-white font-numbers">
+                                                    {formatMoney(activeTrendPoint.value)}
+                                                </div>
+                                            </div>
+                                            {trendDelta && (
+                                                <div className="text-right font-numbers">
+                                                    <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-sans block">Dönem Değişimi</span>
+                                                    <span className={`text-xs font-bold ${trendDelta.diff >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                        {trendDelta.diff >= 0 ? '+' : ''}{formatMoney(trendDelta.diff)} ({trendDelta.diff >= 0 ? '+' : ''}%{trendDelta.pct.toFixed(1)})
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {trendSeries.length > 0 ? (
+                                        <div className="bg-black/25 border border-white/5 rounded-2xl p-3 sm:p-4">
+                                            {(() => {
+                                                const W = 560;
+                                                const H = 175;
+                                                const padX = 24;
+                                                const padY = 22;
+                                                const vals = trendSeries.map((p) => p.value);
+                                                const minV = Math.min(...vals);
+                                                const maxV = Math.max(...vals);
+                                                const span = maxV - minV || Math.max(1, maxV * 0.1);
+                                                const low = Math.max(0, minV - span * 0.15);
+                                                const high = maxV + span * 0.15;
+                                                const range = high - low || 1;
+
+                                                const pts = trendSeries.map((p, idx) => {
+                                                    const x = trendSeries.length === 1
+                                                        ? W / 2
+                                                        : padX + (idx / (trendSeries.length - 1)) * (W - padX * 2);
+                                                    const y = padY + (1 - (p.value - low) / range) * (H - padY * 2);
+                                                    return { ...p, x, y, idx };
+                                                });
+
+                                                const lineD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+                                                const areaD = pts.length > 1
+                                                    ? `${lineD} L ${pts[pts.length - 1].x.toFixed(1)} ${(H - padY).toFixed(1)} L ${pts[0].x.toFixed(1)} ${(H - padY).toFixed(1)} Z`
+                                                    : '';
+
+                                                return (
+                                                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-40 sm:h-48 overflow-visible">
+                                                        <defs>
+                                                            <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                                                                <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+                                                                <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                                                            </linearGradient>
+                                                        </defs>
+                                                        {[0.2, 0.5, 0.8].map((t) => (
+                                                            <line
+                                                                key={t}
+                                                                x1={padX}
+                                                                x2={W - padX}
+                                                                y1={padY + t * (H - padY * 2)}
+                                                                y2={padY + t * (H - padY * 2)}
+                                                                stroke="rgba(255,255,255,0.06)"
+                                                                strokeDasharray="4 4"
+                                                            />
+                                                        ))}
+                                                        {areaD && <path d={areaD} fill="url(#trendGrad)" />}
+                                                        {pts.length > 1 && (
+                                                            <path d={lineD} fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                                        )}
+                                                        {pts.map((p) => {
+                                                            const isActive = (selectedPointIdx ?? pts.length - 1) === p.idx;
+                                                            return (
+                                                                <g
+                                                                    key={p.date}
+                                                                    className="cursor-pointer"
+                                                                    onClick={() => setSelectedPointIdx(p.idx)}
+                                                                >
+                                                                    <circle cx={p.x} cy={p.y} r="14" fill="transparent" />
+                                                                    <circle
+                                                                        cx={p.x}
+                                                                        cy={p.y}
+                                                                        r={isActive ? '6' : '4'}
+                                                                        fill={isActive ? '#34d399' : '#040608'}
+                                                                        stroke="#10b981"
+                                                                        strokeWidth="2.5"
+                                                                    />
+                                                                </g>
+                                                            );
+                                                        })}
+                                                    </svg>
+                                                );
+                                            })()}
+
+                                            <div className="flex justify-between text-[10px] text-zinc-500 font-semibold mt-1 px-1">
+                                                <span>{formatShortDateTr(trendSeries[0].date)}</span>
+                                                {trendSeries.length > 1 && <span>{formatShortDateTr(trendSeries[trendSeries.length - 1].date)}</span>}
+                                            </div>
+                                            {trendSeries.length < 2 && (
+                                                <p className="text-[10px] text-zinc-500 text-center mt-2">
+                                                    Günlük kayıtlar otomatik olarak şifreli kasanızda biriktikçe çok günlük trend çizgisi oluşacaktır.
+                                                </p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-black/25 border border-white/5 rounded-2xl p-6 text-center text-xs text-zinc-500">
+                                            Henüz kayıtlı trend verisi bulunmuyor.
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // =========================================================================
         // MAIN APPLICATION
         // =========================================================================
         const PortfolioApp = () => {
@@ -962,8 +1732,10 @@
             const [rates, setRates] = useState(() => ({ ...DEFAULT_RATES }));
             const [currencyLabels, setCurrencyLabels] = useState(() => ({ ...DEFAULT_LABELS }));
             const [portfolio, setPortfolio] = useState([]);
+            const [vaultHistory, setVaultHistory] = useState([]);
 
             const [isLoadingRates, setIsLoadingRates] = useState(false);
+            const [lastRefreshTime, setLastRefreshTime] = useState('');
             const [fetchingStocks, setFetchingStocks] = useState({});
             const [saveStatus, setSaveStatus] = useState('idle'); // 'idle' | 'saving' | 'saved'
             const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -1011,6 +1783,7 @@
                 portfolio,
                 currencyLabels,
                 rates,
+                vaultHistory,
                 vaultPassword,
                 currentVaultFile
             };
@@ -1110,10 +1883,12 @@
                 const config = snap.githubConfig;
 
                 const doPut = async (shaToUse) => {
+                    const updatedHistory = mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates);
                     const jsonString = JSON.stringify({
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
-                        rates: snap.rates
+                        rates: snap.rates,
+                        history: updatedHistory
                     });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, targetPass).toString();
                     const vaultPackage = {
@@ -1123,19 +1898,23 @@
                     };
                     const contentBase64 = utf8ToBase64(JSON.stringify(vaultPackage, null, 2));
 
-                    return fetch(ghContentsUrl(config, targetFile), {
-                        method: 'PUT',
-                        headers: ghWriteHeaders(config),
-                        body: JSON.stringify({
-                            message: isAutoSave ? '🤖 Oto-Kayıt' : `🔒 Kasa güncellendi: ${targetFile}`,
-                            content: contentBase64,
-                            ...(shaToUse ? { sha: shaToUse } : {})
+                    return {
+                        updatedHistory,
+                        response: await fetch(ghContentsUrl(config, targetFile), {
+                            method: 'PUT',
+                            headers: ghWriteHeaders(config),
+                            body: JSON.stringify({
+                                message: isAutoSave ? '🤖 Oto-Kayıt' : `🔒 Kasa güncellendi: ${targetFile}`,
+                                content: contentBase64,
+                                ...(shaToUse ? { sha: shaToUse } : {})
+                            })
                         })
-                    });
+                    };
                 };
 
                 try {
-                    let response = await doPut(fileShaRef.current);
+                    let putResult = await doPut(fileShaRef.current);
+                    let response = putResult.response;
 
                     // Handle 409 SHA conflict gracefully
                     if (response.status === 409) {
@@ -1149,7 +1928,8 @@
                                 const freshData = await freshRes.json();
                                 if (freshData?.sha) {
                                     updateFileSha(freshData.sha);
-                                    response = await doPut(freshData.sha);
+                                    putResult = await doPut(freshData.sha);
+                                    response = putResult.response;
                                 }
                             }
                         } else {
@@ -1172,6 +1952,7 @@
 
                     if (stillSameVault) {
                         if (data?.content?.sha) updateFileSha(data.content.sha);
+                        setVaultHistory(putResult.updatedHistory);
                         setVaultSession(targetFile, targetPass);
                         setHasUnsavedChanges(false);
                         if (!isAutoSave) showToast('Kasa başarıyla senkronize edildi', 'success');
@@ -1367,11 +2148,15 @@
 
                     const expandedInit = {};
                     finalPortfolio.forEach((p) => { expandedInit[p.id] = true; });
+                    const loadedHistory = (parsedData && !Array.isArray(parsedData) && Array.isArray(parsedData.history))
+                        ? parsedData.history
+                        : [];
 
                     // Prevent initial hydration from triggering a redundant auto-save
                     skipNextSaveRef.current = true;
                     updateFileSha(data.sha);
                     setPortfolio(finalPortfolio);
+                    setVaultHistory(loadedHistory);
                     setCurrencyLabels(mergedLabels);
                     setRates(mergedRates);
                     setExpandedPersons(expandedInit);
@@ -1405,6 +2190,8 @@
                 setVaultPassword('');
                 setPasswordInput('');
                 setPortfolio([]);
+                setVaultHistory([]);
+                setLastRefreshTime('');
                 setAdminVaults([]);
                 setCurrencyLabels({ ...DEFAULT_LABELS });
                 setRates({ ...DEFAULT_RATES });
@@ -1549,89 +2336,155 @@
 
             const fetchLiveRates = useCallback(async (isManual = false) => {
                 setIsLoadingRates(true);
+
+                // Collect every BIST stock (both top-level assets AND all sub-items)
+                const currentPortfolio = latestStateRef.current.portfolio || [];
+                const stockEntries = [];
+                currentPortfolio.forEach((p) => {
+                    (p.assets || []).forEach((a) => {
+                        const hasSubs = a.subItems && a.subItems.length > 0;
+                        if (!hasSubs && a.type === 'STOCK' && a.name) {
+                            const sym = normalizeBistTicker(a.name);
+                            if (sym) stockEntries.push({ id: a.id, sym });
+                        }
+                        if (hasSubs) {
+                            a.subItems.forEach((s) => {
+                                if (s.type === 'STOCK' && s.name) {
+                                    const sym = normalizeBistTicker(s.name);
+                                    if (sym) stockEntries.push({ id: s.id, sym });
+                                }
+                            });
+                        }
+                    });
+                });
+
+                if (isManual) {
+                    attemptedStocksRef.current.clear();
+                }
+
+                // Mark all stock items as refreshing so their icons spin
+                if (stockEntries.length > 0) {
+                    setFetchingStocks((prev) => {
+                        const next = { ...prev };
+                        stockEntries.forEach((e) => { next[e.id] = true; });
+                        return next;
+                    });
+                }
+
+                let ratesOk = false;
+                let updatedStockItems = 0;
+                let failedSymbols = [];
+
                 try {
                     const endpoints = [
                         'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
                         'https://latest.currency-api.pages.dev/v1/currencies/usd.json'
                     ];
-                    let data = null;
-                    for (const url of endpoints) {
-                        try {
-                            const res = await fetch(url);
-                            if (res.ok) {
-                                data = await res.json();
-                                if (data?.usd?.try) break;
-                            }
-                        } catch { }
-                    }
 
-                    if (!data?.usd?.try || !Number.isFinite(data.usd.try) || data.usd.try <= 0) {
-                        throw new Error('Kur API cevap vermedi');
-                    }
-
-                    const usdTry = data.usd.try;
-                    const eurPerUsd = data.usd.eur;
-                    const xauPerUsd = data.usd.xau;
-
-                    const nextUsd = parseFloat(usdTry.toFixed(2));
-                    const nextEur = (Number.isFinite(eurPerUsd) && eurPerUsd > 0)
-                        ? parseFloat((usdTry / eurPerUsd).toFixed(2))
-                        : null;
-
-                    let nextGram = null;
-                    let nextAta = null;
-                    if (Number.isFinite(xauPerUsd) && xauPerUsd > 0) {
-                        const xauUsd = 1 / xauPerUsd;
-                        const spotGramGoldUsd = xauUsd / 31.1034768;
-                        const spotGramGoldTry = spotGramGoldUsd * usdTry;
-                        const physicalPremium = 1.045;
-                        nextGram = parseFloat((spotGramGoldTry * physicalPremium).toFixed(2));
-                        nextAta = parseFloat((nextGram * 6.88).toFixed(2));
-                    }
-
-                    setRates((prev) => {
-                        const updated = {
-                            ...prev,
-                            USD: nextUsd,
-                            EUR: nextEur ?? prev.EUR,
-                            GRAM: nextGram ?? prev.GRAM,
-                            ATA: nextAta ?? prev.ATA
-                        };
-                        if (
-                            updated.USD === prev.USD &&
-                            updated.EUR === prev.EUR &&
-                            updated.GRAM === prev.GRAM &&
-                            updated.ATA === prev.ATA
-                        ) {
-                            return prev;
+                    const fetchFxPromise = (async () => {
+                        let data = null;
+                        for (const url of endpoints) {
+                            try {
+                                const res = await fetch(url);
+                                if (res.ok) {
+                                    data = await res.json();
+                                    if (data?.usd?.try) break;
+                                }
+                            } catch { }
                         }
-                        return updated;
-                    });
+                        return data;
+                    })();
 
-                    // Also refresh all BIST stocks in portfolio in a single batch call
-                    const currentPortfolio = latestStateRef.current.portfolio || [];
-                    const allStockTickers = [];
-                    currentPortfolio.forEach((p) => {
-                        (p.assets || []).forEach((a) => {
-                            if ((!a.subItems || a.subItems.length === 0) && a.type === 'STOCK' && a.name) {
-                                allStockTickers.push(a.name);
+                    const fetchStocksPromise = stockEntries.length > 0
+                        ? fetchTurkishStockPricesBatch(stockEntries.map((e) => e.sym))
+                        : Promise.resolve({});
+
+                    const [data, stockPrices] = await Promise.all([fetchFxPromise, fetchStocksPromise]);
+
+                    if (data?.usd?.try && Number.isFinite(data.usd.try) && data.usd.try > 0) {
+                        ratesOk = true;
+                        const usdTry = data.usd.try;
+                        const eurPerUsd = data.usd.eur;
+                        const xauPerUsd = data.usd.xau;
+
+                        const nextUsd = parseFloat(usdTry.toFixed(2));
+                        const nextEur = (Number.isFinite(eurPerUsd) && eurPerUsd > 0)
+                            ? parseFloat((usdTry / eurPerUsd).toFixed(2))
+                            : null;
+
+                        let nextGram = null;
+                        let nextAta = null;
+                        if (Number.isFinite(xauPerUsd) && xauPerUsd > 0) {
+                            const xauUsd = 1 / xauPerUsd;
+                            const spotGramGoldUsd = xauUsd / 31.1034768;
+                            const spotGramGoldTry = spotGramGoldUsd * usdTry;
+                            const physicalPremium = 1.045;
+                            nextGram = parseFloat((spotGramGoldTry * physicalPremium).toFixed(2));
+                            nextAta = parseFloat((nextGram * 6.88).toFixed(2));
+                        }
+
+                        setRates((prev) => {
+                            const updated = {
+                                ...prev,
+                                USD: nextUsd,
+                                EUR: nextEur ?? prev.EUR,
+                                GRAM: nextGram ?? prev.GRAM,
+                                ATA: nextAta ?? prev.ATA
+                            };
+                            if (
+                                updated.USD === prev.USD &&
+                                updated.EUR === prev.EUR &&
+                                updated.GRAM === prev.GRAM &&
+                                updated.ATA === prev.ATA
+                            ) {
+                                return prev;
                             }
-                            (a.subItems || []).forEach((s) => {
-                                if (s.type === 'STOCK' && s.name) allStockTickers.push(s.name);
-                            });
+                            return updated;
                         });
-                    });
-                    if (allStockTickers.length > 0) {
-                        const stockPrices = await fetchTurkishStockPricesBatch(allStockTickers);
-                        applyBatchStockPricesToPortfolio(stockPrices);
                     }
 
-                    if (isManual) showToast('Piyasa kurları güncellendi', 'success');
+                    if (stockEntries.length > 0) {
+                        const uniqueSyms = [...new Set(stockEntries.map((e) => e.sym))];
+                        failedSymbols = uniqueSyms.filter((sym) => stockPrices[sym] === undefined);
+                        updatedStockItems = stockEntries.filter((e) => stockPrices[e.sym] !== undefined).length;
+                        if (Object.keys(stockPrices).length > 0) {
+                            applyBatchStockPricesToPortfolio(stockPrices);
+                        }
+                    }
+
+                    if (!ratesOk && updatedStockItems === 0) {
+                        throw new Error('Piyasa verileri alınamadı');
+                    }
+
+                    const nowStr = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                    setLastRefreshTime(nowStr);
+
+                    if (isManual) {
+                        if (stockEntries.length > 0) {
+                            const baseMsg = ratesOk
+                                ? `Kurlar ve ${updatedStockItems} hisse/alt kalem güncellendi`
+                                : `${updatedStockItems} hisse/alt kalem güncellendi (kurlar alınamadı)`;
+                            if (failedSymbols.length > 0) {
+                                showToast(`${baseMsg} (${failedSymbols.slice(0, 3).join(', ')} bulunamadı)`, 'warning');
+                            } else {
+                                showToast(baseMsg, ratesOk ? 'success' : 'warning');
+                            }
+                        } else {
+                            showToast('Tüm piyasa kurları ve alt kalem değerleri güncellendi', 'success');
+                        }
+                    }
                 } catch (err) {
                     console.error('Fiyat çekme hatası:', err);
                     showToast('Kurlar güncellenemedi, mevcut değerler korunuyor', 'error');
                 } finally {
                     setIsLoadingRates(false);
+                    if (stockEntries.length > 0) {
+                        setFetchingStocks((prev) => {
+                            const next = { ...prev };
+                            stockEntries.forEach((e) => { delete next[e.id]; });
+                            return next;
+                        });
+                    }
                 }
             }, [applyBatchStockPricesToPortfolio, showToast]);
 
@@ -1742,6 +2595,45 @@
                     });
                 }
             }, [showToast]);
+
+            const forceFetchAssetSubStocks = useCallback(async (personId, assetId) => {
+                const currentPortfolio = latestStateRef.current.portfolio || [];
+                const person = currentPortfolio.find((p) => p.id === personId);
+                const asset = person?.assets?.find((a) => a.id === assetId);
+                const stockSubs = (asset?.subItems || [])
+                    .filter((s) => s.type === 'STOCK' && s.name)
+                    .map((s) => ({ id: s.id, sym: normalizeBistTicker(s.name) }))
+                    .filter((x) => x.sym);
+
+                if (stockSubs.length === 0) {
+                    showToast('Bu varlıkta güncellenecek geçerli hisse alt kalemi yok.', 'warning');
+                    return;
+                }
+
+                setFetchingStocks((prev) => {
+                    const next = { ...prev, [assetId]: true };
+                    stockSubs.forEach((s) => { next[s.id] = true; });
+                    return next;
+                });
+
+                try {
+                    const priceMap = await fetchTurkishStockPricesBatch(stockSubs.map((s) => s.sym));
+                    const updatedCount = stockSubs.filter((s) => priceMap[s.sym] !== undefined).length;
+                    if (updatedCount > 0) {
+                        applyBatchStockPricesToPortfolio(priceMap);
+                        showToast(`${asset.name || 'Varlık'}: ${updatedCount} alt kalem güncellendi`, 'success');
+                    } else {
+                        showToast('Alt kalemler için hisse fiyatı çekilemedi.', 'error');
+                    }
+                } finally {
+                    setFetchingStocks((prev) => {
+                        const next = { ...prev };
+                        delete next[assetId];
+                        stockSubs.forEach((s) => { delete next[s.id]; });
+                        return next;
+                    });
+                }
+            }, [applyBatchStockPricesToPortfolio, showToast]);
 
             // =========================================================================
             // ADMIN PANEL ACTIONS (LEGACY MAIN VAULT ONLY)
@@ -1944,7 +2836,8 @@
                         vaultFile: snap.currentVaultFile,
                         portfolio: snap.portfolio,
                         rates: snap.rates,
-                        currencyLabels: snap.currencyLabels
+                        currencyLabels: snap.currencyLabels,
+                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates)
                     };
                     const jsonStr = JSON.stringify(exportData, null, 2);
                     const blob = new Blob([jsonStr], { type: 'application/json' });
@@ -2003,7 +2896,8 @@
                     const jsonString = JSON.stringify({
                         portfolio: snap.portfolio,
                         labels: snap.currencyLabels,
-                        rates: snap.rates
+                        rates: snap.rates,
+                        history: mergeTodayHistorySnapshot(snap.vaultHistory, snap.portfolio, snap.rates)
                     });
                     const encryptedPayload = CryptoJS.AES.encrypt(jsonString, settingsNewPass).toString();
                     const vaultPackage = {
@@ -2131,6 +3025,8 @@
                     setCurrencyLabels(freshLabels);
                     setRates(freshRates);
                     setPortfolio([]);
+                    setVaultHistory([]);
+                    setLastRefreshTime('');
                     setExpandedPersons({});
                     setExpandedAssets({});
                     setCurrentVaultFile(targetFile);
@@ -2177,6 +3073,8 @@
                 setVaultPassword('');
                 setPasswordInput('');
                 setPortfolio([]);
+                setVaultHistory([]);
+                setLastRefreshTime('');
                 setAvailableVaults([]);
                 setAdminVaults([]);
                 setCurrentVaultFile('');
@@ -2229,6 +3127,29 @@
                 () => visiblePortfolio.reduce((acc, person) => acc + calculatePersonTotal(person.assets), 0),
                 [visiblePortfolio, calculatePersonTotal]
             );
+
+            const liveHistory = useMemo(
+                () => mergeTodayHistorySnapshot(vaultHistory, portfolio, rates),
+                [vaultHistory, portfolio, rates]
+            );
+
+            const hasAnyExpandedAsset = useMemo(() => {
+                return portfolio.some((p) => (p.assets || []).some((a) => Boolean(expandedAssets[a.id])));
+            }, [portfolio, expandedAssets]);
+
+            const toggleExpandAllAssets = useCallback(() => {
+                const nextExpand = !hasAnyExpandedAsset;
+                const nextPersons = {};
+                const nextAssets = {};
+                portfolio.forEach((p) => {
+                    nextPersons[p.id] = true;
+                    (p.assets || []).forEach((a) => {
+                        nextAssets[a.id] = nextExpand;
+                    });
+                });
+                setExpandedPersons(nextPersons);
+                setExpandedAssets(nextAssets);
+            }, [portfolio, hasAnyExpandedAsset]);
 
             const distribution = useMemo(() => {
                 if (grandTotal <= 0) return [];
@@ -2432,11 +3353,11 @@
 
                 if (appState === 'admin_panel') {
                     return (
-                        <div className="min-h-screen p-4 sm:p-8 flex flex-col items-center animate-fade-in-up">
-                            <div className="w-full max-w-4xl relative z-10">
+                        <div className="min-h-screen safe-top px-4 pb-10 sm:p-8 flex flex-col items-center">
+                            <div className="w-full max-w-4xl relative z-20">
                                 <div className="flex justify-between items-center gap-3 mb-8">
                                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500/15 border border-amber-500/35 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                                             <i className="fa-solid fa-crown text-amber-400 text-lg sm:text-xl"></i>
                                         </div>
                                         <div className="min-w-0">
@@ -2448,20 +3369,20 @@
                                         <button
                                             onClick={fetchAdminVaults}
                                             title="Listeyi Yenile"
-                                            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all border border-white/10 flex items-center justify-center"
+                                            className="w-10 h-10 rounded-xl header-btn text-zinc-200 hover:text-white transition-all flex items-center justify-center"
                                         >
                                             <i className="fa-solid fa-rotate-right text-sm"></i>
                                         </button>
                                         <button
                                             onClick={openSettingsModal}
                                             title="Hesap Ayarları"
-                                            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all border border-white/10 flex items-center justify-center"
+                                            className="w-10 h-10 rounded-xl header-btn text-zinc-200 hover:text-white transition-all flex items-center justify-center"
                                         >
                                             <i className="fa-solid fa-gear text-sm"></i>
                                         </button>
                                         <button
                                             onClick={() => setAppState('app')}
-                                            className="px-4 sm:px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest transition-all border border-white/10 flex items-center gap-2"
+                                            className="px-3.5 sm:px-5 py-2.5 rounded-xl header-btn text-white font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-2"
                                         >
                                             <i className="fa-solid fa-arrow-left"></i> <span className="hidden sm:inline">KASAMA DÖN</span>
                                         </button>
@@ -2755,80 +3676,95 @@
 
                 // MAIN PORTFOLIO DASHBOARD ('app')
                 return (
-                    <div className="mx-auto w-full max-w-[95%] xl:max-w-6xl pt-5 sm:pt-6 pb-20 relative z-10 animate-fade-in-up">
-                        {/* Header */}
-                        <header className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 pb-5 mb-6 sm:mb-8 border-b border-white/5">
-                            <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="mx-auto w-full max-w-[95%] xl:max-w-6xl safe-top pb-20 relative z-20">
+                        {/* Header: Solid high-contrast surfaces (zero backdrop-filter blur trap on mobile) + balanced mobile/desktop layout */}
+                        <header className="relative z-30 pb-4 sm:pb-5 mb-6 sm:mb-8 border-b border-white/10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            {/* Desktop Left / Mobile Row 2: Action Buttons */}
+                            <div className="order-2 sm:order-1 flex items-center justify-between sm:justify-start gap-2 bg-[#0d131d]/95 sm:bg-transparent p-1.5 sm:p-0 rounded-2xl border border-white/10 sm:border-0">
                                 <button
+                                    type="button"
                                     onClick={() => lockVault()}
                                     title="Kasayı Kilitle / Kasa Değiştir"
-                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors border border-white/5 hover:border-amber-500/30 shrink-0"
+                                    className="flex-1 sm:flex-none h-9 sm:w-10 sm:h-10 px-2.5 sm:px-0 rounded-xl sm:rounded-full header-btn flex items-center justify-center gap-1.5 text-zinc-200 hover:text-amber-400 hover:border-amber-500/40 transition-colors shrink-0"
                                 >
                                     <i className="fa-solid fa-lock text-xs sm:text-sm"></i>
+                                    <span className="text-[10px] font-bold tracking-wide sm:hidden">Kilitle</span>
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={openSettingsModal}
                                     title="Hesap Ayarları"
-                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors border border-white/5 hover:border-indigo-500/30 shrink-0"
+                                    className="flex-1 sm:flex-none h-9 sm:w-10 sm:h-10 px-2.5 sm:px-0 rounded-xl sm:rounded-full header-btn flex items-center justify-center gap-1.5 text-zinc-200 hover:text-indigo-400 hover:border-indigo-500/40 transition-colors shrink-0"
                                 >
                                     <i className="fa-solid fa-gear text-xs sm:text-sm"></i>
-                                </button>
-                                <button
-                                    onClick={() => setShowDisconnectModal(true)}
-                                    title="GitHub Bağlantısını Kes"
-                                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass-surface flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors border border-white/5 hover:border-red-500/30 shrink-0"
-                                >
-                                    <i className="fa-solid fa-power-off text-xs sm:text-sm"></i>
+                                    <span className="text-[10px] font-bold tracking-wide sm:hidden">Ayarlar</span>
                                 </button>
                                 {currentVaultFile === 'data.json' && (
                                     <button
+                                        type="button"
                                         onClick={fetchAdminVaults}
                                         title="Yönetim Paneli"
-                                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_10px_rgba(245,158,11,0.2)] flex items-center justify-center shrink-0"
+                                        className="flex-1 sm:flex-none h-9 sm:w-10 sm:h-10 px-2.5 sm:px-0 rounded-xl sm:rounded-full border border-amber-500/40 bg-amber-500/15 text-amber-300 hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_12px_rgba(245,158,11,0.2)] flex items-center justify-center gap-1.5 shrink-0"
                                     >
                                         <i className="fa-solid fa-crown text-xs sm:text-[13px]"></i>
+                                        <span className="text-[10px] font-bold tracking-wide sm:hidden">Yönetim</span>
                                     </button>
                                 )}
-                            </div>
-
-                            <div className="flex flex-col items-center text-center px-1">
-                                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                                    <i className="fa-solid fa-shield-halved text-black text-base sm:text-lg"></i>
-                                </div>
-                                <h1 className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase leading-none">
-                                    Portföy Takip
-                                </h1>
-                                <span className="text-[9px] font-semibold text-zinc-500 mt-1 max-w-[110px] sm:max-w-[180px] truncate">
-                                    {activeVaultLabel}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-end gap-2">
                                 <button
-                                    onClick={() => handleSaveToGithub(false)}
-                                    disabled={saveStatus === 'saving'}
-                                    className={`relative flex items-center gap-2 font-bold text-[10px] sm:text-xs px-3.5 sm:px-4 py-2.5 rounded-xl transition-all shrink-0 ${
-                                        saveStatus === 'saved'
-                                            ? 'bg-emerald-500 text-black'
-                                            : saveStatus === 'saving'
-                                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-wait'
-                                                : 'glass-surface text-primary border border-primary/30 hover:bg-primary/10'
-                                    }`}
+                                    type="button"
+                                    onClick={() => setShowDisconnectModal(true)}
+                                    title="GitHub Bağlantısını Kes"
+                                    className="flex-1 sm:flex-none h-9 sm:w-10 sm:h-10 px-2.5 sm:px-0 rounded-xl sm:rounded-full header-btn flex items-center justify-center gap-1.5 text-zinc-200 hover:text-red-400 hover:border-red-500/40 transition-colors shrink-0"
                                 >
-                                    {hasUnsavedChanges && saveStatus === 'idle' && (
-                                        <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Kaydedilmemiş değişiklik var"></span>
-                                    )}
-                                    <i className={`fa-solid text-sm ${
-                                        saveStatus === 'saving'
-                                            ? 'fa-circle-notch fa-spin'
-                                            : saveStatus === 'saved'
-                                                ? 'fa-check'
-                                                : 'fa-cloud-arrow-up'
-                                    }`}></i>
-                                    <span className="hidden sm:inline">
-                                        {saveStatus === 'saving' ? 'KAYDEDİLİYOR' : saveStatus === 'saved' ? 'KAYDEDİLDİ' : 'KAYDET'}
-                                    </span>
+                                    <i className="fa-solid fa-power-off text-xs sm:text-sm"></i>
+                                    <span className="text-[10px] font-bold tracking-wide sm:hidden">Çıkış</span>
                                 </button>
+                            </div>
+
+                            {/* Mobile Row 1 (Brand + Save) / Desktop Center Brand + Right Save */}
+                            <div className="order-1 sm:order-2 flex items-center justify-between sm:contents gap-3">
+                                <div className="flex items-center sm:flex-col gap-2.5 sm:gap-0 sm:items-center sm:text-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 min-w-0">
+                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center sm:mb-1.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] shrink-0">
+                                        <i className="fa-solid fa-shield-halved text-black text-base sm:text-lg"></i>
+                                    </div>
+                                    <div className="flex flex-col sm:items-center min-w-0">
+                                        <h1 className="text-xs sm:text-[10px] font-bold tracking-widest text-zinc-100 sm:text-zinc-300 uppercase leading-none">
+                                            Portföy Takip
+                                        </h1>
+                                        <span className="text-[10px] sm:text-[9px] font-semibold text-zinc-400 sm:text-zinc-500 mt-1 max-w-[155px] sm:max-w-[200px] truncate">
+                                            {activeVaultLabel}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="sm:order-3 flex items-center justify-end gap-2 shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleSaveToGithub(false)}
+                                        disabled={saveStatus === 'saving'}
+                                        className={`relative flex items-center gap-2 font-bold text-[11px] sm:text-xs px-3.5 sm:px-4 py-2.5 rounded-xl transition-all shrink-0 ${
+                                            saveStatus === 'saved'
+                                                ? 'bg-emerald-500 text-black'
+                                                : saveStatus === 'saving'
+                                                    ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-500/45 cursor-wait'
+                                                    : 'header-btn text-emerald-400 border-emerald-500/35 hover:bg-emerald-500/15'
+                                        }`}
+                                    >
+                                        {hasUnsavedChanges && saveStatus === 'idle' && (
+                                            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" title="Kaydedilmemiş değişiklik var"></span>
+                                        )}
+                                        <i className={`fa-solid text-sm ${
+                                            saveStatus === 'saving'
+                                                ? 'fa-circle-notch fa-spin'
+                                                : saveStatus === 'saved'
+                                                    ? 'fa-check'
+                                                    : 'fa-cloud-arrow-up'
+                                        }`}></i>
+                                        <span>
+                                            {saveStatus === 'saving' ? 'KAYDEDİLİYOR' : saveStatus === 'saved' ? 'KAYDEDİLDİ' : 'KAYDET'}
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
                         </header>
 
@@ -2916,7 +3852,7 @@
 
                         {/* Asset Distribution Summary */}
                         {distribution.length > 0 && (
-                            <div className="mb-8 sm:mb-10 max-w-3xl mx-auto flex flex-wrap justify-center gap-2.5 sm:gap-3 animate-fade-in-up">
+                            <div className="mb-8 sm:mb-10 max-w-3xl mx-auto flex flex-wrap justify-center gap-2.5 sm:gap-3">
                                 {distribution.map((dist) => {
                                     const dotColor =
                                         dist.type === 'TRY' ? 'bg-zinc-400'
@@ -2936,6 +3872,58 @@
                                         </div>
                                     );
                                 })}
+                            </div>
+                        )}
+
+                        {/* Portfolio Performance Analytics Chart */}
+                        <PerformanceChartCard
+                            portfolio={portfolio}
+                            rates={rates}
+                            currencyLabels={currencyLabels}
+                            liveHistory={liveHistory}
+                            calculateAssetValue={calculateAssetValue}
+                            calculatePersonTotal={calculatePersonTotal}
+                            calculatePnL={calculatePnL}
+                        />
+
+                        {/* Global Portfolio Action Toolbar (Update All Sub-items/Stocks/Rates + Expand/Collapse All) */}
+                        {portfolio.length > 0 && (
+                            <div className="mb-6 flex flex-wrap items-center justify-between gap-2.5 px-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
+                                        Portföyler ({portfolio.length})
+                                    </span>
+                                    {lastRefreshTime && (
+                                        <span className="text-[10px] font-semibold text-zinc-500 font-numbers">
+                                            · {lastRefreshTime}
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <button
+                                        type="button"
+                                        onClick={() => fetchLiveRates(true)}
+                                        disabled={isLoadingRates}
+                                        className={`px-3.5 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-2 transition-all active:scale-95 border ${
+                                            isLoadingRates
+                                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 cursor-wait'
+                                                : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500 hover:text-black'
+                                        }`}
+                                        title="Tüm döviz/altın kurlarını, hisse varlıklarını ve alt kalemleri canlı günceller"
+                                    >
+                                        <i className={`fa-solid fa-arrows-rotate text-xs ${isLoadingRates ? 'fa-spin' : ''}`}></i>
+                                        <span>{isLoadingRates ? 'Güncelleniyor...' : 'Tüm Alt Kalem & Kurları Güncelle'}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={toggleExpandAllAssets}
+                                        className="px-3 py-2 rounded-xl text-[10px] sm:text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 header-btn text-zinc-300 hover:text-white transition-all"
+                                        title={hasAnyExpandedAsset ? 'Tüm varlık detaylarını kapat' : 'Tüm varlık ve alt kalemleri aç'}
+                                    >
+                                        <i className={`fa-solid ${hasAnyExpandedAsset ? 'fa-compress' : 'fa-expand'} text-[10px]`}></i>
+                                        <span className="hidden sm:inline">{hasAnyExpandedAsset ? 'Tümünü Kapat' : 'Tümünü Aç'}</span>
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -3011,6 +3999,7 @@
                                             <div className="px-4 sm:px-5 pb-6 pt-3 flex flex-col gap-3.5 border-t border-white/5">
                                                 {person.assets.map((asset) => {
                                                     const hasSubItems = asset.subItems && asset.subItems.length > 0;
+                                                    const hasStockSubItems = hasSubItems && asset.subItems.some((s) => s.type === 'STOCK' && s.name);
                                                     const assetValue = calculateAssetValue(asset);
                                                     const isAssetOpen = Boolean(expandedAssets[asset.id]);
                                                     const isFetchingThisAsset = Boolean(fetchingStocks[asset.id]);
@@ -3036,13 +4025,17 @@
                                                                         placeholder="VARLIK ADI"
                                                                         title={asset.name}
                                                                     />
-                                                                    {!hasSubItems && asset.type === 'STOCK' && (
+                                                                    {((!hasSubItems && asset.type === 'STOCK') || hasStockSubItems) && (
                                                                         <button
                                                                             type="button"
                                                                             disabled={isFetchingThisAsset}
-                                                                            onClick={(e) => { e.stopPropagation(); forceFetchStockPrice(person.id, asset.id); }}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                if (hasStockSubItems) forceFetchAssetSubStocks(person.id, asset.id);
+                                                                                else forceFetchStockPrice(person.id, asset.id);
+                                                                            }}
                                                                             className="p-1.5 rounded-lg text-emerald-400/80 hover:bg-emerald-500/20 hover:text-emerald-300 transition-colors shrink-0"
-                                                                            title="Canlı Hisse Fiyatını Çek"
+                                                                            title={hasStockSubItems ? 'Tüm Hisse Alt Kalemlerini Güncelle' : 'Canlı Hisse Fiyatını Çek'}
                                                                         >
                                                                             <i className={`fa-solid fa-rotate-right text-[11px] ${isFetchingThisAsset ? 'fa-spin' : ''}`}></i>
                                                                         </button>
